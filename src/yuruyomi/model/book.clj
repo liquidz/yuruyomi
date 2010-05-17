@@ -1,4 +1,4 @@
-(ns yuruyomi.book
+(ns yuruyomi.model.book
   (:use
      simply
      simply.date
@@ -10,7 +10,11 @@
 
 (def *book-entity-name* "book")
 
-(defnk find-books [:user "" :title "" :author "" :date "" :flag ""]
+(defn- entity->book [e]
+  (-> e entity->map (assoc :id (-> e get-key get-id)))
+  )
+
+(defnk- find-books [:user "" :title "" :author "" :date "" :flag ""]
   (let [q (query *book-entity-name*)]
     (when (! = "" user) (add-filter q "user" = user))
     (when (! = "" title) (add-filter q "title" = title))
@@ -21,7 +25,8 @@
     )
   )
 
-(defn get-user-books [user-name] (find-books :user user-name))
+(defn get-user-books [user-name] (map entity->book (find-books :user user-name)))
+(defn get-all-books [] (map entity->book (find-books)))
 
 (defn save-book [name title author flag]
   (let [date (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)]
@@ -29,7 +34,7 @@
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
     (if (and (or (= flag "fin") (zero? (count (find-books :title title :author author :flag flag))))
                (or (! = flag "wnt") (zero? (count (find-books :title title :author author :flag "ing")))))
-      (let [books (group #(get-prop % :flag) (get-user-books name))
+      (let [books (group :flag (get-user-books name))
             update-target (case flag
                             ; ing <= wnt or has
                             "ing" (concat (:wnt books) (:has books))

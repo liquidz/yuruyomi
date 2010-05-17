@@ -6,7 +6,12 @@
   )
 
 ; =entity->map
-(def entity->map entity-map)
+(defn entity->map [e]
+  (fold
+    (fn [x res] (assoc res (-> x first keyword) (second x)))
+    {} (-> e entity-map seq)
+    )
+  )
 
 ; =params
 (defn params [req & key-names]

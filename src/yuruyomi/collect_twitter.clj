@@ -3,7 +3,8 @@
      simply
      twitter
      ;am.ik.clj-gae-ds.core
-     [yuruyomi book seq entity]
+     [yuruyomi seq]
+     [yuruyomi.model book setting]
      )
   (:require
      [clojure.contrib.str-utils2 :as su2]

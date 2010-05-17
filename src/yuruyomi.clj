@@ -8,7 +8,8 @@
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper book seq html collect-twitter entity]
+     [yuruyomi clj-gae-ds-wrapper seq html collect-twitter]
+     [yuruyomi.model book setting]
      )
   (:require [clojure.contrib.seq-utils :as se])
   )
@@ -53,7 +54,7 @@
 
 (defroutes app
   (GET "/" _ (show-html))
-  (GET "/user/:name" _ (show-user-html _))
+  (GET "/user/:name" _ (show-user-html (first (params _ "name"))))
   (GET "/save" _ (save-user-data _))
   (GET "/del" req (delete-data req))
   ;(GET "/cron/collect" _ (collect-twitter-data))
