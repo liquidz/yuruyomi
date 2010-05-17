@@ -9,14 +9,27 @@
      )
   )
 
+(defn- make-html-fn [tag base target]
+  (fn [x]
+    [tag
+     (cond
+       (vector? x) (apply assoc (concat (list base target (first x)) (rest x)))
+       :else (assoc base target (str x))
+       )
+     ]
+    )
+  )
+
+
 (defn meta->html [key value] [:meta {:http-equiv key :content value}])
 (defn map->meta-html [m] (map #(apply meta->html %) (seq m)))
-(defn js->html [srcs] (map (fn [src] [:script {:type "text/javascript" :src src}]) srcs))
-; media
-(defn css->html [hrefs] (map (fn [href] [:link {:rel "stylesheet" :type "text/css" :href href}]) hrefs))
-; rss -> rsses
-(defnk rss->html [href :title ""]
-  [:link {:rel "alternate" :type "application/rss+xml" :title title :href href}]
+;(defn js->html [srcs] (map (fn [src] [:script {:type "text/javascript" :src src}]) srcs))
+(defn js->html [srcs] (map (make-html-fn :script {:type "text/javascript"} :src) srcs))
+(defn css->html [& hrefs]
+  (map (make-html-fn :link {:rel "stylesheet" :type "text/css"} :href) hrefs)
+  )
+(defn rss->html [& hrefs]
+  (map (make-html-fn :link {:rel "alternate" :type "application/rss+xml" :title "no-title"} :href) hrefs)
   )
 
 (defnk layout [title :head [] :js [] :css []
