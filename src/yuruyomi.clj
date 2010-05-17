@@ -8,7 +8,7 @@
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper book seq html collect-twitter]
+     [yuruyomi clj-gae-ds-wrapper book seq html collect-twitter entity]
      )
   (:require [clojure.contrib.seq-utils :as se])
   )
@@ -58,7 +58,7 @@
   (GET "/del" req (delete-data req))
   ;(GET "/cron/collect" _ (collect-twitter-data))
   (GET "/collect" _ (do (collect-tweets) (redirect "/")))
-  (GET "/clear" _ (do (clear-yuruyomi-max-id) (redirect "/")))
+  (GET "/clear" _ (do (clear-max-id) (redirect "/")))
   )
 
 (defservice app)
