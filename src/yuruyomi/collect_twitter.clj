@@ -18,13 +18,13 @@
 (def *having-words* (list "買った" "持ってる"))
 (def *words-list* (list *reading-words* *want-words* *finish-words* *having-words*))
 
-(def *yuruyomi-tag* "#yuruyomi")
+(def *yuruyomi-tag* "#yuruyomi_test")
 ; }}}
 
 (defn- string->long [s] (Long/parseLong s))
 (defn has-word? [s col] (some #(! = -1 (.indexOf s %)) col))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
-(defn delete-hash-tag [s] (su2/replace s #"\s*#yuruyomi\s*" ""))
+(defn delete-hash-tag [s] (su2/replace s #"\s*#yuruyomi_test\s*" ""))
 (defn delete-words [s] (su2/join " " (remove has-word-all? (su2/split s #"\s+"))))
 
 ; "hello RT @hoge ddd / o-sa- xxx #tag"

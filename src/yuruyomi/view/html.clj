@@ -77,30 +77,39 @@
    ]
   )
 
-(defn book->html [e]
+(def flag->text
+  {"ing" "読中" "fin" "読了" "wnt" "欲しい" "has" "所持"})
+
+(defnk book->html [e :show-user? false :show-flag? false]
 ;  (let [[title author date user flag] (get-props e :title :author :date :user :flag)
 ;        ]
-    [:p (:title e) "/" (:author e) " (" (:date e) ", " (:user e) ", " (:flag e) ")"
-     ; �������ǧ�ڤ򤤤�Ƥ���
-     ;[:a {:href (str "/del?id=" (-> e get-key get-id))} "del"]
-     [:a {:href (str "/del?id=" (:id e))} "del"]
+    [:p "title: " (:title e) " / author: " (:author e)
+     (if show-user?
+       (list " by " [:a {:href (str "/user/" (:user e))} (:user e)])
+       )
+     " (" (:date e)
+     (if show-flag?
+       (list ", " (get flag->text (:flag e)) ")")
+       ")"
+       )
+     ; ↓削除は認証をいれてから
+     ;[:a {:href (str "/del?id=" (:id e))} "del"]
      ]
 ;    )
   )
 
 (defn get-user-data-html [name]
-  (println "x = " (get-user-books name))
   ;(let [ls (group #(get-prop % :flag) (get-user-books name))
   (let [ls (group :flag (get-user-books name))
         ]
     (concat
-      (list [:h4 "ing"])
+      (list [:h2 (get flag->text "ing")])
       (map book->html (:ing ls))
-      (list [:h4 "wnt"])
+      (list [:h2 (get flag->text "wnt")])
       (map book->html (:wnt ls))
-      (list [:h4 "fin"])
+      (list [:h2 (get flag->text "fin")])
       (map book->html (:fin ls))
-      (list [:h4 "has"])
+      (list [:h2 (get flag->text "has")])
       (map book->html (:has ls))
       )
     )
@@ -108,23 +117,23 @@
 
 (defn show-user-html [name]
   (layout
-    "show-user"
-    [:h3 name]
+    (str "yuruyomi alpha - " name)
+    [:h1 (str name "'s books")]
     (get-user-data-html name)
-    [:hr]
-    (save-form-html name)
+    ;[:hr]
+    ;(save-form-html name)
     )
   )
 
 (defn show-html []
   (layout
-    "top"
-    [:p "max id = " (get-max-id)]
-    [:hr]
-    (map book->html (get-all-books))
-    [:hr]
-    [:p [:a {:href "/collect"} "collect twitter data"]]
-    [:p [:a {:href "/clear"} "clear max id"]]
+    "yuruyomi alpha"
+    ;[:p "max id = " (get-max-id)]
+    ;[:hr]
+    (map #(book->html % :show-user? true :show-flag? true) (get-all-books))
+    ;[:hr]
+    ;[:p [:a {:href "/collect"} "collect twitter data"]]
+    ;[:p [:a {:href "/clear"} "clear max id"]]
     )
   )
 

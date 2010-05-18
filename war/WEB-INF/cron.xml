@@ -2,7 +2,7 @@
 <cronentries>
 	<cron>
 		<url>/cron/collect</url>
-		<description>Repopulate the cache every 2 minutes</description>
-		<schedule>every 2 minutes</schedule>
+		<description>Repopulate the cache every 5 minutes</description>
+		<schedule>every 5 minutes</schedule>
 	</cron>
 </cronentries>

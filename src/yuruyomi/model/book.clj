@@ -5,7 +5,10 @@
      am.ik.clj-gae-ds.core
      [yuruyomi clj-gae-ds-wrapper seq]
      )
-  (:require [clojure.contrib.seq-utils :as se])
+  (:require
+     [clojure.contrib.seq-utils :as se]
+     [clojure.contrib.str-utils2 :as su2]
+     )
   )
 
 (def *book-entity-name* "book")
@@ -34,7 +37,7 @@
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
     (if (and (or (= flag "fin") (zero? (count (find-books :title title :author author :flag flag))))
                (or (! = flag "wnt") (zero? (count (find-books :title title :author author :flag "ing")))))
-      (let [books (group :flag (get-user-books name))
+      (let [books (group #(get-prop % :flag) (find-books :user name))
             update-target (case flag
                             ; ing <= wnt or has
                             "ing" (concat (:wnt books) (:has books))
@@ -45,7 +48,12 @@
                             "has" (concat (:ing books) (:wnt books))
                             )
             x (se/find-first #(and (= title (get-prop % :title))
-                                   (= author (get-prop % :author))) update-target)
+                                   (if (and (! su2/blank? author) (! su2/blank? (get-prop % :author)))
+                                     (= author (get-prop % :author))
+                                     true
+                                     )
+                                   )
+                             update-target)
             ]
         (cond
           (nil? x) (ds-put (map-entity *book-entity-name* :user name :title title

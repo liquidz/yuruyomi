@@ -56,11 +56,11 @@
 (defroutes app
   (GET "/" _ (show-html))
   (GET "/user/:name" _ (show-user-html (first (params _ "name"))))
-  (GET "/save" _ (save-user-data _))
-  (GET "/del" req (delete-data req))
+  ;(GET "/save" _ (save-user-data _))
+  ;(GET "/del" req (delete-data req))
   ;(GET "/cron/collect" _ (collect-twitter-data))
-  (GET "/collect" _ (do (collect-tweets) (redirect "/")))
-  (GET "/clear" _ (do (clear-max-id) (redirect "/")))
+  (GET "/cron/collect" _ (do (collect-tweets) (redirect "/")))
+  ;(GET "/clear" _ (do (clear-max-id) (redirect "/")))
   )
 
 (defservice app)
