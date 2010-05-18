@@ -1,4 +1,4 @@
-(ns yuruyomi.html
+(ns yuruyomi.view.html
   (:use
      simply
      [hiccup.core :only [html]]
@@ -7,6 +7,12 @@
      [yuruyomi seq collect-twitter]
      [yuruyomi.model book setting]
      )
+  )
+
+; support function {{{
+(def *doc-type*
+  {:xhtml "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+   }
   )
 
 (defn- make-html-fn [tag base target]
@@ -20,10 +26,8 @@
     )
   )
 
-
 (defn meta->html [key value] [:meta {:http-equiv key :content value}])
 (defn map->meta-html [m] (map #(apply meta->html %) (seq m)))
-;(defn js->html [srcs] (map (fn [src] [:script {:type "text/javascript" :src src}]) srcs))
 (defn js->html [srcs] (map (make-html-fn :script {:type "text/javascript"} :src) srcs))
 (defn css->html [& hrefs]
   (map (make-html-fn :link {:rel "stylesheet" :type "text/css"} :href) hrefs)
@@ -36,21 +40,27 @@
                :xhtml? true :lang "ja"
                :content-type "text/html"
                :charset "UTF-8"
+               :mobile? false
                & body]
-  [:html {:xmlns "http://www.w3.org/1999/xhtml" :lang lang}
-   (map->meta-html {:Content-Language lang
-                    :Content-Type (str content-type "; charset=" charset)
-                    :Content-Script-Type "text/javascript"
-                    :Content-Style-Type "text/css"
-                    })
-   [:head
-    [:title title]
-    (js->html js) (css->html css)
-    head
-    ]
-   [:body body]
-   ]
+  (str
+    (if xhtml? (:xhtml *doc-type*) "")
+    (html
+      [:html (if xhtml? {:xmlns "http://www.w3.org/1999/xhtml" :lang lang})
+       (map->meta-html {:Content-Language lang
+                        :Content-Type (str content-type "; charset=" charset)
+                        :Content-Script-Type "text/javascript"
+                        :Content-Style-Type "text/css"
+                        })
+       [:head
+        (js->html js) (css->html css) (if (! empty? head) head)
+        [:title title]
+        ]
+       [:body body]
+       ]
+      )
+    )
   )
+; }}}
 
 (defn save-form-html [name]
   [:form {:method "GET" :action "/save"}

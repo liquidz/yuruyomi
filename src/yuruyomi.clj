@@ -8,8 +8,9 @@
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper seq html collect-twitter]
+     [yuruyomi clj-gae-ds-wrapper seq collect-twitter]
      [yuruyomi.model book setting]
+     [yuruyomi.view html]
      )
   (:require [clojure.contrib.seq-utils :as se])
   )
