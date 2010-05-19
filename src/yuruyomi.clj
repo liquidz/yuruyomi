@@ -32,39 +32,17 @@
     )
   )
 
-; {{{
-(defn get-last-time []
-  (let [res (query-seq (q "core"))]
-    (if (zero? (count res)) "" (get-prop (first res) :last-time))
-    )
-  )
-
-(defn td []
-  (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)
-  )
-
-(defn collect-twitter-data []
-  (let [res (query-seq (q "core"))]
-    (if (zero? (count res))
-      (ds-put (map-entity "core" :last-time (td)))
-      (let [x (first res)]
-        (set-prop x :last-time (td))
-        (ds-put x)
-        )
-      )
-    )
-  )
-; }}}
-
 (defroutes app
   (GET "/" _ (show-html))
   (GET "/user/:name" _ (show-user-html (first (params _ "name"))))
-  ;(GET "/save" _ (save-user-data _))
-  ;(GET "/del" req (delete-data req))
-  ;(GET "/cron/collect" _ (collect-twitter-data))
-  (GET "/cron/collect" _ (do (collect-tweets) (redirect "/")))
-  ;(GET "/clear" _ (do (clear-max-id) (redirect "/")))
-  (GET "/test" _ (do (twitter-test (-> _ (params "text") first)) (redirect "/")))
+
+  (GET "/admin/" _ (show-admin-html))
+  (GET "/admin/save" _ (save-user-data _))
+  (GET "/admin/del" req (delete-data req))
+  (GET "/admin/clear" _ (do (clear-max-id) (redirect "/")))
+  (GET "/admin/test" _ (do (twitter-test (-> _ (params "text") first)) (redirect "/")))
+
+  (GET "/admin/cron/collect" _ (do (collect-tweets) (redirect "/")))
 
   (route/not-found "<h1>page not found</h1>")
   )

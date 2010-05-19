@@ -3,7 +3,6 @@
      simply
      [hiccup.core :only [html]]
      am.ik.clj-gae-ds.core
-     ;[yuruyomi clj-gae-ds-wrapper seq collect-twitter]
      [yuruyomi seq collect-twitter]
      [yuruyomi.model book setting]
      )
@@ -80,26 +79,24 @@
 (def flag->text
   {"ing" "読中" "fin" "読了" "wnt" "欲しい" "has" "所持"})
 
-(defnk book->html [e :show-user? false :show-flag? false]
-;  (let [[title author date user flag] (get-props e :title :author :date :user :flag)
-;        ]
-    [:p "title: " (:title e) " / author: " (:author e)
-     (if show-user?
-       (list " by " [:a {:href (str "/user/" (:user e))} (:user e)])
-       )
-     " (" (:date e)
-     (if show-flag?
-       (list ", " (get flag->text (:flag e)) ")")
-       ")"
-       )
-     ; ↓削除は認証をいれてから
-     ;[:a {:href (str "/del?id=" (:id e))} "del"]
-     ]
-;    )
+(defnk book->html [e :show-user? false :show-flag? false :show-delete? false]
+  [:p "title: " (:title e) " / author: " (:author e)
+   (if show-user?
+     (list " by " [:a {:href (str "/user/" (:user e))} (:user e)])
+     )
+   " (" (:date e)
+   (if show-flag?
+     (list ", " (get flag->text (:flag e)) ")")
+     ")"
+     )
+   ; ↓削除は認証をいれてから
+   (if show-delete?
+     [:a {:href (str "/admin/del?id=" (:id e))} "del"]
+     )
+   ]
   )
 
 (defn get-user-data-html [name]
-  ;(let [ls (group #(get-prop % :flag) (get-user-books name))
   (let [ls (group :flag (get-user-books name))
         ]
     (concat
@@ -120,28 +117,36 @@
     (str "yuruyomi alpha - " name)
     [:h1 (str name "'s books")]
     (get-user-data-html name)
-    ;[:hr]
-    ;(save-form-html name)
     )
   )
 
 (defn show-test-form []
-  [:form {:method "GET" :action "/test"}
-   [:p "text: " [:input {:type "text" :name "text"}]]
-   [:input {:type "submit" :value "test"}]
+  [:form {:method "GET" :action "/admin/test"}
+   [:p "text: " [:input {:type "text" :name "text"}]
+    [:input {:type "submit" :value "test"}]
+    ]
    ]
   )
 
 (defn show-html []
   (layout
     "yuruyomi alpha"
-    ;[:p "max id = " (get-max-id)]
-    ;[:hr]
     (map #(book->html % :show-user? true :show-flag? true) (get-all-books))
+    )
+  )
+
+(defn show-admin-html []
+  (layout
+    "yuruyomi admin"
+    [:h1 "admin"]
+    [:p "max id = " (get-max-id)]
+    [:hr]
+    (map #(book->html % :show-user? true :show-flag? true :show-delete? true) (get-all-books))
     [:hr]
     (show-test-form)
-    ;[:p [:a {:href "/collect"} "collect twitter data"]]
-    ;[:p [:a {:href "/clear"} "clear max id"]]
+    [:hr]
+    [:p [:a {:href "/admin/cron/collect"} "collect twitter data"]]
+    [:p [:a {:href "/admin/clear"} "clear max id"]]
     )
   )
 

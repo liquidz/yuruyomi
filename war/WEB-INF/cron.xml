@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
 	<cron>
-		<url>/cron/collect</url>
+		<url>/admin/cron/collect</url>
 		<description>Repopulate the cache every 5 minutes</description>
 		<schedule>every 5 minutes</schedule>
 	</cron>
