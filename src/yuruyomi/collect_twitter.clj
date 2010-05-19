@@ -74,7 +74,8 @@
                     :text text :to-user "testuser2" :to-user-id 1
                     }]
 
-    (foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) (tweets->books (list res)))
+    ;(foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) (tweets->books (list res)))
+    (foreach save-book (tweets->books (list res)))
     )
   )
 
@@ -88,10 +89,10 @@
     ; update max id
     (update-max-id (:max-id res))
 
-    (let [tmp (tweets->books (:tweets res))]
-      ;(foreach #(println %) tmp)
-      (foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) tmp)
-      )
+    ;(let [tmp (tweets->books (:tweets res))]
+    ;  (foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) tmp)
+    ;  )
+    (foreach save-book (tweets->books (:tweets res)))
     )
   )
 

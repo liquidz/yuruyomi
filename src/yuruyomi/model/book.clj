@@ -31,8 +31,14 @@
 (defn get-user-books [user-name] (map entity->book (find-books :user user-name)))
 (defn get-all-books [] (map entity->book (find-books)))
 
-(defn save-book [name title author flag]
-  (let [date (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)]
+;(defn save-book [name title author flag]
+(defn save-book [tweet]
+  (let [name (:from-user tweet)
+        title (:title tweet)
+        author (:author tweet)
+        flag (:flag tweet)
+        icon (:profile-image-url tweet)
+        date (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)]
     ; 再読がありえるから fin は同じのがあっても登録/更新
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
     (if (and (or (= flag "fin") (zero? (count (find-books :title title :author author :flag flag))))
@@ -57,13 +63,15 @@
             ]
         (cond
           (nil? x) (ds-put (map-entity *book-entity-name* :user name :title title
-                                       :author author :date date :flag flag))
+                                       :author author :date date :flag flag :icon icon))
           :else (do
                   (set-prop x :flag flag)
                   (set-prop x :date date)
                   ; 著者が登録されていなくて、今回入力されている場合は登録する
                   (if (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
                     (set-prop x :author author))
+                  (if (su2/blank? (get-prop x :icon))
+                    (set-prop x :icon icon))
                   (ds-put x)
                   )
           )
