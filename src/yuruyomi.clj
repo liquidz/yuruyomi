@@ -12,7 +12,10 @@
      [yuruyomi.model book setting]
      [yuruyomi.view html]
      )
-  (:require [clojure.contrib.seq-utils :as se])
+  (:require
+     [clojure.contrib.seq-utils :as se]
+     [compojure.route :as route]
+     )
   )
 
 (defn save-user-data [req]
@@ -61,6 +64,9 @@
   ;(GET "/cron/collect" _ (collect-twitter-data))
   (GET "/cron/collect" _ (do (collect-tweets) (redirect "/")))
   ;(GET "/clear" _ (do (clear-max-id) (redirect "/")))
+  (GET "/test" _ (do (twitter-test (-> _ (params "text") first)) (redirect "/")))
+
+  (route/not-found "<h1>page not found</h1>")
   )
 
 (defservice app)

@@ -125,13 +125,21 @@
     )
   )
 
+(defn show-test-form []
+  [:form {:method "GET" :action "/test"}
+   [:p "text: " [:input {:type "text" :name "text"}]]
+   [:input {:type "submit" :value "test"}]
+   ]
+  )
+
 (defn show-html []
   (layout
     "yuruyomi alpha"
     ;[:p "max id = " (get-max-id)]
     ;[:hr]
     (map #(book->html % :show-user? true :show-flag? true) (get-all-books))
-    ;[:hr]
+    [:hr]
+    (show-test-form)
     ;[:p [:a {:href "/collect"} "collect twitter data"]]
     ;[:p [:a {:href "/clear"} "clear max id"]]
     )

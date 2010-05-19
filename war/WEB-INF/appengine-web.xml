@@ -3,7 +3,9 @@
 	xmlns="http://appengine.google.com/ns/1.0">
 	<application>yuruyomi</application>
 	<version>1</version>
-	<static-files />
+	<static-files>
+		<include path="/public_html/**.(ico|css|js|gif|jpg|png|html?)" />
+	</static-files>
 	<resource-files />
 
 	<system-properties>

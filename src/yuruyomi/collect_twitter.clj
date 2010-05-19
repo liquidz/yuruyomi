@@ -1,6 +1,7 @@
 (ns yuruyomi.collect-twitter
   (:use
      simply
+     simply.date
      twitter
      ;am.ik.clj-gae-ds.core
      [yuruyomi seq]
@@ -12,10 +13,13 @@
   )
 
 ; =CONSTANT {{{
-(def *reading-words* (list "読んでる" "読んでいる" "読中" "読み始めた" "読み中"))
-(def *want-words* (list "欲しい" "読みたい" "読んでみたい"))
-(def *finish-words* (list "読み終わった" "読みおわた" "読了"))
-(def *having-words* (list "買った" "持ってる"))
+(def *reading-words* (list "読んでる" "よんでる" "読んでいる" "よんでいる"
+                           "読中" "読み始めた" "読みはじめた" "よみはじめた" "読み中"))
+(def *want-words* (list "欲しい" "ほしい" "読みたい" "よみたい" "読んでみたい" "よんでみたい"))
+(def *finish-words* (list "読み終わった" "よみおわった" "読みおわた" "よみおわた" "読了"
+                          "どくりょう" "どくりょ"))
+(def *having-words* (list "買った" "かった" "買ってしまった" "かってしまった"
+                          "持ってる" "もってる" "積ん読" "積読" "つんどく"))
 (def *words-list* (list *reading-words* *want-words* *finish-words* *having-words*))
 
 (def *yuruyomi-tag* "#yuruyomi_test")
@@ -39,7 +43,7 @@
   )
 
 (defn string->book-title-author [s]
-  (let [[title & more] (extended-split s #"\s*/\s*" "\"")]
+  (let [[title & more] (extended-split s #"\s*[\/\,\.\|\-\_]\s*" "\"")]
     [title (if (empty? more) "" (first more))]
     )
   )
@@ -61,6 +65,16 @@
            (map #(assoc % :flag "has") h)
            )
          )
+    )
+  )
+
+(defn twitter-test [text]
+  (let [res {:created-at (today) :from-user "testuser" :from-user-id 0 :id 0
+                    :iso-language-code "" :profile-image-url "" :source "test"
+                    :text text :to-user "testuser2" :to-user-id 1
+                    }]
+
+    (foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) (tweets->books (list res)))
     )
   )
 

@@ -61,6 +61,9 @@
           :else (do
                   (set-prop x :flag flag)
                   (set-prop x :date date)
+                  ; 著者が登録されていなくて、今回入力されている場合は登録する
+                  (if (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
+                    (set-prop x :author author))
                   (ds-put x)
                   )
           )
