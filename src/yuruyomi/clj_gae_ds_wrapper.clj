@@ -20,6 +20,7 @@
     :else (map #(get-in req [:params %]) key-names)
     )
   )
+(defn param [req key-name] (first (params req key-name)))
 
 ; =get-props
 (defn get-props [entity & keys]

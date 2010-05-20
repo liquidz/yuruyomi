@@ -18,33 +18,21 @@
      )
   )
 
-(defn save-user-data [req]
-  (let [[name title author flag] (params req "name" "title" "author" "flag")]
-    (save-book name title author flag)
-    (redirect (str "/user/" name))
-    )
-  )
-
-(defn delete-data [req]
-  (let [[id] (params req "id")]
-    (delete-book id)
-    (redirect "/")
-    )
-  )
-
 (defroutes app
-  (GET "/" _ (show-html))
-  (GET "/user/:name" _ (show-user-html (first (params _ "name"))))
+  (GET "/" [] (show-html))
+  (GET "/user/:name" req (show-user-html (param req "name")))
 
-  (GET "/admin/" _ (show-admin-html))
-  (GET "/admin/save" _ (save-user-data _))
-  (GET "/admin/del" req (delete-data req))
-  (GET "/admin/clear" _ (do (clear-max-id) (redirect "/")))
-  (GET "/admin/test" _ (do (twitter-test (-> _ (params "text") first)) (redirect "/")))
+  ; admin
+  (GET "/admin/" [] (show-admin-html))
+  (GET "/admin/del" req (do (delete-book (param req "id")) (redirect "/")))
+  (GET "/admin/clear" [] (do (clear-max-id) (redirect "/")))
+  (GET "/admin/test" req (do (twitter-test (param req "text")) (redirect "/")))
 
-  (GET "/admin/cron/collect" _ (do (collect-tweets) (redirect "/")))
+  (GET "/admin/cron/collect" [] (do (collect-tweets) (redirect "/")))
 
-  (route/not-found "<h1>page not found</h1>")
+  (route/not-found 
+    (layout "page not found" [:h1 "page not found"])
+    )
   )
 
 (defservice app)
