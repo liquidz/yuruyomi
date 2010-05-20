@@ -3,7 +3,8 @@
      simply
      simply.date
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper seq]
+     [yuruyomi clj-gae-ds-wrapper]
+     [yuruyomi.util seq]
      )
   (:require
      [clojure.contrib.seq-utils :as se]

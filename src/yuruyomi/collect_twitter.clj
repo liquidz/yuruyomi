@@ -1,10 +1,8 @@
 (ns yuruyomi.collect-twitter
   (:use
-     simply
-     simply.date
+     simply simply.date
      twitter
-     ;am.ik.clj-gae-ds.core
-     [yuruyomi seq]
+     [yuruyomi.util seq]
      [yuruyomi.model book setting]
      )
   (:require

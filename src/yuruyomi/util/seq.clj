@@ -1,4 +1,4 @@
-(ns yuruyomi.seq
+(ns yuruyomi.util.seq
   (:use simply)
   (:require [clojure.contrib.str-utils :as su])
   (:require [clojure.contrib.str-utils2 :as su2])
