@@ -13,11 +13,12 @@
 ; =CONSTANT {{{
 (def *reading-words* (list "読んでる" "よんでる" "読んでいる" "よんでいる"
                            "読中" "読み始めた" "読みはじめた" "よみはじめた" "読み中"))
-(def *want-words* (list "欲しい" "ほしい" "読みたい" "よみたい" "読んでみたい" "よんでみたい"))
+(def *want-words* (list "欲しい" "ほしい" "読みたい" "よみたい" "読んでみたい" "よんでみたい" "買って帰る"
+                        "買ってかえる" "かって帰る" "かってかえる" "買って行く" "買っていく" "かっていく"))
 (def *finish-words* (list "読み終わった" "よみおわった" "読みおわた" "よみおわた" "読了"
                           "どくりょう" "どくりょ"))
 (def *having-words* (list "買った" "かった" "買ってしまった" "かってしまった"
-                          "持ってる" "もってる" "積ん読" "積読" "つんどく"))
+                          "持ってる" "もってる" "積ん読" "積読" "つんどく" "ゲット" "げっと" "GET"))
 (def *words-list* (list *reading-words* *want-words* *finish-words* *having-words*))
 
 (def *yuruyomi-tag* "#yuruyomi_test")
@@ -84,13 +85,14 @@
                                                 (list :since-id (string->long last-id)))))
         max-id (:max-id res)
         ]
-    ; update max id
-    (update-max-id (:max-id res))
 
-    ;(let [tmp (tweets->books (:tweets res))]
-    ;  (foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) tmp)
-    ;  )
-    (foreach save-book (tweets->books (:tweets res)))
+    (when (try
+            (do (foreach save-book (tweets->books (:tweets res))) true)
+            (catch Exception _ false)
+            )
+      ; update max id
+      (update-max-id (:max-id res))
+      )
     )
   )
 

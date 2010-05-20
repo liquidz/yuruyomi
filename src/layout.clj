@@ -59,6 +59,7 @@
     :html-attr {:xmlns "http://www.w3.org/1999/xhtml" :lang lang}
     :head (list
             (pc-meta lang content-type charset)
+            [:link {:rel "shortcut icon" :href "/favicon.ico"}]
             (if (! empty? js) (js->html js))
             (if (! empty? css) (css->html css))
             (if (! empty? head) head)
