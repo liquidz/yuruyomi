@@ -10,18 +10,21 @@
      [yuruyomi clj-gae-ds-wrapper collect-twitter]
      [yuruyomi.model book setting]
      [yuruyomi.view html admin]
-     [yuruyomi.util seq]
+     [yuruyomi.util seq cache]
      ;layout
      )
   (:require
      [clojure.contrib.seq-utils :as se]
      [compojure.route :as route]
      )
+  (:import [com.google.appengine.api.memcache MemcacheServiceFactory Expiration])
   )
 
 (defroutes app
   (GET "/" [] (index-page))
   (GET "/user/:name" req (show-user-html (param req "name")))
+
+  (GET "/hoge" [] (str (cache-fn "neko" (fn [] (println "kiteru") (+ 1 3)) :expiration 30)))
 
   ; admin
   (GET "/admin/" [] (admin-index-page))

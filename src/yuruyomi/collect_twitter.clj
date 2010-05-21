@@ -72,8 +72,6 @@
                     :iso-language-code "" :profile-image-url "" :source "test"
                     :text text :to-user "testuser2" :to-user-id 1
                     }]
-
-    ;(foreach #(save-book (:from-user %) (:title %) (:author %) (:flag %)) (tweets->books (list res)))
     (foreach save-book (tweets->books (list res)))
     )
   )
@@ -83,16 +81,26 @@
         res (apply twitter-search-all (concat (list *yuruyomi-tag*)
                                               (if (su2/blank? last-id) ()
                                                 (list :since-id (string->long last-id)))))
-        max-id (:max-id res)
         ]
 
-    (when (try
-            (do (foreach save-book (tweets->books (:tweets res))) true)
-            (catch Exception _ false)
-            )
-      ; update max id
-      (update-max-id (:max-id res))
+    (loop [save-targets (-> res :tweets tweets->books)
+           local-last-id last-id]
+      (cond
+        (empty? save-targets) (update-max-id (:max-id res)) ; 最後まで記録できたらQueryのmax-idを記録
+        :else (if (try (save-book (first save-targets)) (catch Exception _ false))
+                (recur (rest save-targets) (:id (first save-targets)))
+                (update-max-id local-last-id) ; 途中で失敗した場合には次回途中から検索するようにIDを記録
+                )
+        )
       )
+
+;    (when (try
+;            (do (foreach save-book (tweets->books (:tweets res))) true)
+;            (catch Exception _ false)
+;            )
+;      ; update max id
+;      (update-max-id (:max-id res))
+;      )
     )
   )
 

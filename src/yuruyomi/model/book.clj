@@ -1,14 +1,20 @@
 (ns yuruyomi.model.book
   (:use
-     simply
-     simply.date
+     simply simply.date
      am.ik.clj-gae-ds.core
+     am.ik.clj-aws-ecs
+     ;am.ik.clj-gae-ds.core
+     ;am.ik.clj-aws-ecs
      [yuruyomi clj-gae-ds-wrapper]
      [yuruyomi.util seq]
      )
   (:require
+     keys
      [clojure.contrib.seq-utils :as se]
      [clojure.contrib.str-utils2 :as su2]
+     [clojure.zip :as z]
+     [clojure.contrib.zip-filter :as zf]
+     [clojure.contrib.zip-filter.xml :as zfx]
      )
   )
 
@@ -29,17 +35,26 @@
     )
   )
 
+(defn get-book-image [title author]
+  (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
+        res (z/xml-zip (item-search-map req "Books" title {"Author" author}))
+        ]
+    (zfx/xml1-> res zf/children :Items :Item :SmallImage :URL zfx/text)
+    )
+  )
+
 (defn get-user-books [user-name] (map entity->book (find-books :user user-name)))
 (defn get-all-books [] (map entity->book (find-books)))
 
-;(defn save-book [name title author flag]
 (defn save-book [tweet]
   (let [name (:from-user tweet)
         title (:title tweet)
         author (:author tweet)
         flag (:flag tweet)
         icon (:profile-image-url tweet)
-        date (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)]
+        date (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)
+        ;image (get-book-image title author)
+        ]
     ; 再読がありえるから fin は同じのがあっても登録/更新
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
     (if (and (or (= flag "fin") (zero? (count (find-books :title title :author author :flag flag))))
@@ -64,7 +79,7 @@
             ]
         (cond
           (nil? x) (ds-put (map-entity *book-entity-name* :user name :title title
-                                       :author author :date date :flag flag :icon icon))
+                                       :author author :date date :flag flag :icon icon)); :image image))
           :else (do
                   (set-prop x :flag flag)
                   (set-prop x :date date)
@@ -73,6 +88,9 @@
                     (set-prop x :author author))
                   (if (su2/blank? (get-prop x :icon))
                     (set-prop x :icon icon))
+                  ;(if (su2/blank? (get-prop x :image))
+                  ;  (set-prop x :image image)
+                  ;  )
                   (ds-put x)
                   )
           )

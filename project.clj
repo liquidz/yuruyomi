@@ -16,6 +16,7 @@
                  [hiccup/hiccup "0.2.3"]
                  [org.clojars.liquidz/simply "0.0.9"]
                  [org.clojars.liquidz/twitter "0.0.2"]
+                 [am.ik/clj-aws-ecs "0.1.0-SNAPSHOT"]
                  ]
 
   :dev-dependencies [[am.ik/clj-gae-testing "0.1.0"]]
