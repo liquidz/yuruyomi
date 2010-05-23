@@ -68,10 +68,11 @@
     :body body
     )
   )
-(def mobile-layout pc-layout)
+;(def mobile-layout pc-layout)
 
 
-(defnk layout [title :mobile? false & args]
-  (apply (if mobile? mobile-layout pc-layout) (cons title args))
-  )
+;(defnk layout [title :mobile? false & args]
+;  (apply (if mobile? mobile-layout pc-layout) (cons title args))
+;  )
 
+(def layout pc-layout)

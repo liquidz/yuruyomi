@@ -57,11 +57,14 @@
              (assoc t :title title :author author)
              )
            )
-         (concat
-           (map #(assoc % :flag "ing") r)
-           (map #(assoc % :flag "wnt") w)
-           (map #(assoc % :flag "fin") f)
-           (map #(assoc % :flag "has") h)
+         (sort
+           (fn [x y] (neg? (.compareTo (:created-at x) (:created-at y))))
+           (concat
+             (map #(assoc % :status "ing") r)
+             (map #(assoc % :status "wnt") w)
+             (map #(assoc % :status "fin") f)
+             (map #(assoc % :status "has") h)
+             )
            )
          )
     )
@@ -93,14 +96,6 @@
                 )
         )
       )
-
-;    (when (try
-;            (do (foreach save-book (tweets->books (:tweets res))) true)
-;            (catch Exception _ false)
-;            )
-;      ; update max id
-;      (update-max-id (:max-id res))
-;      )
     )
   )
 

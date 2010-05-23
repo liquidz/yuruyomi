@@ -22,7 +22,7 @@
     [:h1 "admin"]
     [:p "max id = " (get-max-id)]
     [:hr]
-    (map #(book->html % :show-user? true :show-flag? true :show-delete? true) (get-all-books))
+    (map #(book->html % :show-user? true :show-status? true :show-delete? true) (get-all-books))
     [:hr]
     (show-test-form)
     [:hr]
