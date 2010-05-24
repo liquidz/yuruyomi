@@ -4,6 +4,7 @@
   (:require [clojure.contrib.str-utils2 :as su2])
   )
 
+(comment
 (defn group
   ([col] (group (fn [x] x) col))
   ([get-key-f col]
@@ -14,6 +15,7 @@
          )
        ) {} col)
    )
+  )
   )
 
 (defn extended-split [s reg ignore]
