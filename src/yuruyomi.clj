@@ -22,8 +22,7 @@
   (GET "/" [] (index-page))
   (GET "/user/:name" req (show-user-html (param req "name")))
   (GET "/history/:name" req (show-history-html (param req "name")))
-
-  (GET "/hoge" [] (str (cache-fn "neko" (fn [] (println "kiteru") (+ 1 3)) :expiration 30)))
+  (GET "/search" req (show-search-html (param req "keyword") (param req "mode")))
 
   (GET "/ajax/getimage" req (ajax-get-book-image (param req "id")))
 

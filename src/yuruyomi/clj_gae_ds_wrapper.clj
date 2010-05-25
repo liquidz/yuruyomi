@@ -37,3 +37,23 @@
   query
   )
 
+(defn delete-map-key [m & ks]
+  (let [res (remove #(some (fn [k] (= k %)) ks) (keys m))]
+    (apply array-map (interleave res (map #(% m) res)))
+    )
+  )
+
+(defn find-entity [kind & options]
+  (let [op (apply array-map options)
+        offset (:offset op)
+        limit (:limit op)
+        q (query kind)
+        ]
+    (foreach
+      #(when (! = "" (% op)) (add-filter q (-> % name str) = (% op)))
+      (-> op (delete-map-key :offset :limit) keys)
+      )
+    (query-seq q)
+    )
+  )
+

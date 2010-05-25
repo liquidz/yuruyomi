@@ -4,20 +4,6 @@
   (:require [clojure.contrib.str-utils2 :as su2])
   )
 
-(comment
-(defn group
-  ([col] (group (fn [x] x) col))
-  ([get-key-f col]
-   (fold
-     (fn [x res]
-       (let [key (-> x get-key-f keyword)]
-         (assoc res key (if (nil? (key res)) (list x) (cons x (key res))))
-         )
-       ) {} col)
-   )
-  )
-  )
-
 (defn extended-split [s reg ignore]
   (let [ir (string->regexp "\\" ignore ".+?\\" ignore)
         grp (su/re-partition ir s)

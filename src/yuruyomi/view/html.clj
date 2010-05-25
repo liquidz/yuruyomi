@@ -1,10 +1,7 @@
 (ns yuruyomi.view.html
   (:use
      simply
-     ;am.ik.clj-gae-ds.core
-     ;[yuruyomi collect-twitter]
      [yuruyomi.util seq]
-     ;[yuruyomi.model book setting]
      [yuruyomi.model book history]
      [yuruyomi.view book]
      layout
@@ -15,13 +12,13 @@
 (def *page-title* "yuruyomi alpha")
 
 (defn ajax-get-book-image [id]
-  (let [b (se/find-first #(= id (str (:id %))) (get-all-books))]
+  (let [b (se/find-first #(= id (str (:id %))) (get-books))]
     (p get-book-image (:title b) (:author b))
     )
   )
 
 (defn get-user-data-html [name]
-  (let [ls (group :status (get-user-books name))
+  (let [ls (group :status (get-books :user name))
         ]
     (concat
       (list [:h2 (get status->text "ing")])
@@ -48,6 +45,29 @@
     )
   )
 
+(defn show-search-html [text mode]
+  (layout
+    *page-title*
+
+    (map (fn [b]
+           [:p (:title b) " : " (:author b) " (" (:user b) ")"]
+           )
+         (let [res (apply get-books
+                (list
+                  (keyword (case mode
+                             ["title" "author" "user"] (str mode "-like")
+                             :else "title-like"
+                             )
+                           )
+                  text
+                  )
+                )]
+           res
+           )
+         )
+    )
+  )
+
 (defn show-user-html [name]
   (layout
     (str *page-title* " - " name)
@@ -63,11 +83,24 @@
     )
   )
 
+(defn search-form []
+  [:form {:method "GET" :action "/search"}
+   [:select {:name "mode"}
+    [:option {:value "title"} "title"]
+    [:option {:value "author"} "author"]
+    [:option {:value "user"} "user"]
+    ]
+   [:input {:type "text" :name "keyword"}]
+   [:input {:type "submit" :value "search"}]
+   ]
+  )
+
 (defn index-page []
   (layout
     *page-title*
     :js (list "/js/jquery.js" "/js/main.js")
-    (map #(book->html % :show-user? true :show-status? true) (get-all-books))
+    (search-form)
+    (map #(book->html % :show-user? true :show-status? true) (get-books))
     )
   )
 

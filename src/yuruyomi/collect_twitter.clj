@@ -30,7 +30,6 @@
 (def *yuruyomi-done-tag* "#done")
 ; }}}
 
-
 (defn- string->long [s] (Long/parseLong s))
 (defn has-word? [s col] (some #(su2/contains? s %) col))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
@@ -57,8 +56,8 @@
   )
 
 (defn string->book-title-author [s]
-  (let [[title & more] (extended-split s #"\s*[\/\,\.\|\-]\s*" "\"")]
-  ;(let [[title & more] (extended-split s #"\s*[\/\,\|]\s*" "\"")]
+  ;(let [[title & more] (extended-split s #"\s*[\/\,\.\|\-]\s*" "\"")]
+  (let [[title & more] (extended-split s #"\s*[:：]\s*" "\"")]
     [title (if (empty? more) ""
              ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
              (-> more first su2/trim (su2/split #"\s+") first su2/trim)
@@ -79,7 +78,6 @@
              )
            )
          (sort
-           ;(fn [x y] (neg? (.compareTo (:created-at x) (:created-at y))))
            (fn [x y] (str< (:created-at x) (:created-at y)))
            (concat
              (map #(assoc % :status "ing") r)

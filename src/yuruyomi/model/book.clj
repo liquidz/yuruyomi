@@ -23,48 +23,59 @@
   (-> e entity->map (assoc :id (-> e get-key get-id)))
   )
 
-(defnk- find-books [:user "" :title "" :author "" :date "" :status ""]
-  (let [q (query *book-entity-name*)]
-    (when (! = "" user) (add-filter q "user" = user))
-    (when (! = "" title) (add-filter q "title" = title))
-    (when (! = "" author) (add-filter q "author" = author))
-    (when (! = "" date) (add-filter q "date" = date))
-    (when (! = "" status) (add-filter q "status" = status))
-    ;(when (pos? id) (add-filter q "id" = id))
-    (query-seq q)
+(defnk filters [col :ignore-nil? true & preds]
+  (filter #(every? (fn [pre] (if (nil? pre) (if ignore-nil? true false) (pre %))) preds) col)
+  )
+
+(defnk- find-books [:user "" :title "" :author "" :date "" :status ""
+                    :user-like "" :title-like "" :author-like "" :date-like ""
+                    ]
+  (let [res (find-entity *book-entity-name* :user user :title title :author author :date date :status status)]
+    (if (some #(! = "" %) [user-like title-like author-like date-like])
+      (filters
+        res
+        (if (! = "" user-like) #(su2/contains? (get-prop % :user) user-like))
+        (if (! = "" title-like) #(su2/contains? (get-prop % :title) title-like))
+        (if (! = "" author-like) #(su2/contains? (get-prop % :author) author-like))
+        (if (! = "" date-like) #(su2/contains? (get-prop % :date) date-like))
+        )
+      res
+      )
     )
   )
 
-(defn get-book-image [title author]
+(defnk get-book-image [title author :size "medium"]
   (cache-fn
-    (url-encode title)
+    (url-encode (str title size))
     (fn []
       (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
             res (z/xml-zip (item-search-map req "Books" title {"Author" author, "ResponseGroup" "Images"}))
+            target-size (case size
+                          "small" :SmallImage
+                          "medium" :MediumImage
+                          "large" :LargeImage
+                          :else :MediumImage
+                          )
             ]
-        (println "kiteru")
-        (zfx/xml1-> res zf/children :Items :Item :MediumImage :URL zfx/text)
+        ;(zfx/xml1-> res zf/children :Items :Item :MediumImage :URL zfx/text)
+        (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
         )
       )
     :expiration 86400
     )
   )
 
-(defn get-user-books [user-name] (map entity->book (find-books :user user-name)))
-(defn get-all-books [] (map entity->book (find-books)))
+; global version of find-books
+(defn get-books [& args] (map entity->book (apply find-books args)))
 
 (defn save-book [tweet]
-  (let [name (:from-user tweet)
-        title (:title tweet)
-        author (:author tweet)
-        status (:status tweet)
-        icon (:profile-image-url tweet)
-        date (calendar-format :year "-" :month "-" :day " " :hour ":" :minute ":" :second)
-        ;image (get-book-image title author)
+  (let [name (:from-user tweet), title (:title tweet)
+        author (:author tweet), status (:status tweet)
+        icon (:profile-image-url tweet), date (now)
         ]
     ; 再読がありえるから fin は同じのがあっても登録/更新
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
-    (if (and (or (= status "status") (zero? (count (find-books :user name :title title :author author :status status))))
+    (if (and (or (= status "fin") (zero? (count (find-books :user name :title title :author author :status status))))
                (or (! = status "wnt") (zero? (count (find-books :user name :title title :author author :status "ing")))))
       (let [books (group #(get-prop % :status) (find-books :user name))
             update-target (case status
@@ -87,7 +98,7 @@
         (cond
           (nil? x) (do
                      (ds-put (map-entity *book-entity-name* :user name :title title
-                                         :author author :date date :status status :icon icon)); :image image))
+                                         :author author :date date :status status :icon icon))
                      (save-history :user name :title title :author author :date date
                                    :before "new" :after status)
                      )
@@ -99,9 +110,6 @@
                     (set-prop x :author author))
                   (if (su2/blank? (get-prop x :icon))
                     (set-prop x :icon icon))
-                  ;(if (su2/blank? (get-prop x :image))
-                  ;  (set-prop x :image image)
-                  ;  )
                   (ds-put x)
 
                   (save-history :user name :title title :author (get-prop x :author)
