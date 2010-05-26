@@ -37,17 +37,23 @@
   (list "aaa : bbb" "aaa ： bbb"
         "\"a:a\":bbb" "\"a：a\":bbb" "\"a:a\"：bbb"
         "\":::\":\":::\"" "aaa:bbb:ccc:ddd"
+        "\"a a\":\"b b\""
         )
   )
 ; }}}
 
 (deftest twitter-convert-test
-  (foreach #(println (str "title = [" (:title %) "], author = [" (:author %) "], status = " (:status %)))
-           (tweets->books *test-data*))
+;  (foreach #(println (str "title = [" (:title %) "], author = [" (:author %) "], status = " (:status %)))
+;           (tweets->books *test-data*))
 
   (is (every? #(and (! su2/contains? (:title %) "ng")
                     (! su2/contains? (:author %) "ng")
                     ) (tweets->books *test-data*)))
+
+;  (foreach #(let [[title author] (string->book-title-author %)]
+;              (println "title = [" title "], author = [" author "]")
+;              ) *title-author-test-data*)
+
 
   (is (every?  #(let [[title author] (string->book-title-author %)]
                   (and (= 3 (count title)) (= 3 (count author)))

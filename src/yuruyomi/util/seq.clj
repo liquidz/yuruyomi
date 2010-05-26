@@ -12,8 +12,8 @@
       (let [top (first ls)]
         (cond
           (empty? ls) (reverse (remove empty? (cons tmp res)))
-          (starts-with? top ignore) (recur (str tmp (su2/replace top (string->regexp "\\" ignore) ""))
-                                          res (rest ls))
+          ;(starts-with? top ignore) (recur (str tmp (su2/replace top (string->regexp "\\" ignore) ""))
+          (starts-with? top ignore) (recur (str tmp top) res (rest ls))
           :else (let [[head & tail] (su2/split top reg)]
                   (recur "" (cons (str tmp head) res) (concat tail (rest ls)))
                   )

@@ -58,10 +58,11 @@
 (defn string->book-title-author [s]
   ;(let [[title & more] (extended-split s #"\s*[\/\,\.\|\-]\s*" "\"")]
   (let [[title & more] (extended-split s #"\s*[:：]\s*" "\"")]
-    [title (if (empty? more) ""
-             ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
-             (-> more first su2/trim (su2/split #"\s+") first su2/trim)
-             )]
+    [(su2/replace title #"\"" "")
+     (if (empty? more) ""
+       ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
+       (-> more first su2/trim (extended-split #"\s+" "\"") first (su2/replace #"\"" "") su2/trim)
+       )]
     )
   )
 
