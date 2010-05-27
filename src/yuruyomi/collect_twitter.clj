@@ -30,6 +30,10 @@
 (def *yuruyomi-done-tag* "#done")
 ; }}}
 
+(def *re-book-sep* #"\s*[,、]\s*")
+(def *re-title-author-sep* #"\s*[:：]\s*")
+
+
 (defn- string->long [s] (Long/parseLong s))
 (defn has-word? [s col] (some #(su2/contains? s %) col))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
@@ -56,8 +60,8 @@
   )
 
 (defn string->book-title-author [s]
-  ;(let [[title & more] (extended-split s #"\s*[\/\,\.\|\-]\s*" "\"")]
-  (let [[title & more] (extended-split s #"\s*[:：]\s*" "\"")]
+  ;(let [[title & more] (extended-split s #"\s*[:：]\s*" "\"")]
+  (let [[title & more] (extended-split s *re-title-author-sep* "\"")]
     [(su2/replace title #"\"" "")
      (if (empty? more) ""
        ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
@@ -74,17 +78,28 @@
         ]
 
     (map (fn [t]
-           (let [[title author] (string->book-title-author (delete-words (:text t)))]
+           ;(let [[title author] (string->book-title-author (delete-words (:text t)))]
+           (let [[title author] (string->book-title-author (:text t))]
              (assoc t :title title :author author)
              )
            )
-         (sort
-           (fn [x y] (str< (:created-at x) (:created-at y)))
-           (concat
-             (map #(assoc % :status "ing") r)
-             (map #(assoc % :status "wnt") w)
-             (map #(assoc % :status "fin") f)
-             (map #(assoc % :status "has") h)
+         (fold
+           ; もしカンマなどで複数の本がある場合にはここで分けておく
+           (fn [x res]
+             (concat res (map #(assoc x :text %) (extended-split (:text x) *re-book-sep* "\"")))
+             )
+           ()
+           (sort
+             (fn [x y] (str< (:created-at x) (:created-at y)))
+             (map
+               #(assoc % :text (delete-words (:text %)))
+               (concat
+                 (map #(assoc % :status "ing") r)
+                 (map #(assoc % :status "wnt") w)
+                 (map #(assoc % :status "fin") f)
+                 (map #(assoc % :status "has") h)
+                 )
+               )
              )
            )
          )

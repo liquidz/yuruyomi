@@ -40,6 +40,20 @@
         "\"a a\":\"b b\""
         )
   )
+
+(def *test-data2*
+  (list
+    {:created-at "1", :text "aaa 読んでる"}
+    {:created-at "2", :text "aaa, ccc 読んでる"}
+    {:created-at "3", :text "aaa:bbb、ccc 読んでる"}
+    {:created-at "4", :text "aaa , ccc ： ddd 読んでる"}
+    {:created-at "5", :text "aaa: bbb, ccc :ddd 読んでる"}
+    {:created-at "6", :text "aaa, ccc, eee 読んでる"}
+    {:created-at "7", :text "aaa,, eee 読んでる"}
+    {:created-at "8", :text "aaa,ccc, 読んでる"}
+    {:created-at "9", :text "aaa,ccc,, eee,,,"}
+    )
+  )
 ; }}}
 
 (deftest twitter-convert-test
@@ -58,6 +72,13 @@
   (is (every?  #(let [[title author] (string->book-title-author %)]
                   (and (= 3 (count title)) (= 3 (count author)))
                   ) *title-author-test-data*))
+
+  (let [res (tweets->books *test-data2*)]
+    ;(foreach println res)
+    (is (every? #(= 3 (count (:title %))) res))
+    (is (every? #(if (su2/blank? (:author %)) true (= 3 (count (:author %)))) res))
+    (is (= 16 (count res)))
+    )
   )
 
 
