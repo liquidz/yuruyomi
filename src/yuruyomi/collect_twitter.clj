@@ -24,7 +24,9 @@
 (def *having-words*
   (list "買った" "かった" "買ってしまった" "かってしまった"
         "持ってる" "もってる" "積ん読" "積読" "つんどく" "ゲット" "げっと" "GET"))
-(def *words-list* (list *reading-words* *want-words* *finish-words* *having-words*))
+(def *delete-words*
+  (list "取り消し" "とりけし" "取消" "取消し"))
+(def *words-list* (list *reading-words* *want-words* *finish-words* *having-words* *delete-words*))
 
 (def *yuruyomi-tag* "#yuruyomi_test")
 (def *yuruyomi-done-tag* "#done")
@@ -74,7 +76,7 @@
   (let [conv (except-dones :text tweets)
         conv2 (map (fn [t] (assoc t :text ((comp convert-rt-string delete-hash-tag
                                                  delete-html-symbol delete-html-tag) (:text t)))) conv)
-        [r w f h] (map (fn [wl] (filter #(has-word? (:text %) wl) conv2)) *words-list*)
+        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) conv2)) *words-list*)
         ]
 
     (map (fn [t]
@@ -98,6 +100,7 @@
                  (map #(assoc % :status "wnt") w)
                  (map #(assoc % :status "fin") f)
                  (map #(assoc % :status "has") h)
+                 (map #(assoc % :status "del") d)
                  )
                )
              )
@@ -106,12 +109,42 @@
     )
   )
 
+(defnk update-tweets [tweets last-id :max-id nil]
+  (loop [save-targets tweets
+         local-last-id last-id]
+    (cond
+      (empty? save-targets) (when (! nil? max-id) (update-max-id max-id)) ; 最後まで記録できたらQueryのmax-idを記録
+      :else (let [target (first save-targets)]
+              (if (try (save-book target) (catch Exception _ false))
+                (recur (rest save-targets) (:id target))
+                (update-max-id local-last-id) ; 途中で失敗した場合には次回途中から検索するようにIDを記録
+                )
+;              (case (:status target)
+;                "del" (if (try (delete-book (:from-user target) (:title target) (:author target)) (catch Exception _ false))
+;                        (recur (rest save-targets) (:id target))
+;                        (do
+;                          (println "delete error")
+;                          (update-max-id local-last-id)
+;                          )
+;                        )
+;                :else (if (try (save-book target) (catch Exception _ false))
+;                        (recur (rest save-targets) (:id target))
+;                        (update-max-id local-last-id) ; 途中で失敗した場合には次回途中から検索するようにIDを記録
+;                        )
+;                )
+              )
+      )
+    )
+  )
+
+
 (defn twitter-test [text]
   (let [res {:created-at (now) :from-user "testuser" :from-user-id 0 :id 0
                     :iso-language-code "" :profile-image-url "" :source "test"
                     :text text :to-user "testuser2" :to-user-id 1
                     }]
-    (foreach save-book (tweets->books (list res)))
+    (update-tweets (tweets->books (list res)) (get-max-id))
+    ;(foreach save-book (tweets->books (list res)))
     )
   )
 
@@ -122,16 +155,27 @@
                                                 (list :since-id (string->long last-id)))))
         ]
 
-    (loop [save-targets (-> res :tweets tweets->books)
-           local-last-id last-id]
-      (cond
-        (empty? save-targets) (update-max-id (:max-id res)) ; 最後まで記録できたらQueryのmax-idを記録
-        :else (if (try (save-book (first save-targets)) (catch Exception _ false))
-                (recur (rest save-targets) (:id (first save-targets)))
-                (update-max-id local-last-id) ; 途中で失敗した場合には次回途中から検索するようにIDを記録
-                )
-        )
-      )
+    (update-tweets (-> res :tweets tweets->books) last-id)
+
+;    (loop [save-targets (-> res :tweets tweets->books)
+;           local-last-id last-id]
+;      (->> save-targets first :status (println "status = "))
+;      (cond
+;        (empty? save-targets) (update-max-id (:max-id res)) ; 最後まで記録できたらQueryのmax-idを記録
+;        :else (let [target (first save-targets)]
+;                (case (:status target)
+;                  "del" (if (try (delete-book (:id target)))
+;                          (recur (rest save-targets) (:id target))
+;                          (update-max-id local-last-id)
+;                          )
+;                  :else (if (try (save-book target) (catch Exception _ false))
+;                          (recur (rest save-targets) (:id target))
+;                          (update-max-id local-last-id) ; 途中で失敗した場合には次回途中から検索するようにIDを記録
+;                          )
+;                  )
+;                )
+;        )
+;      )
     )
   )
 

@@ -9,7 +9,13 @@
 (def *history-entity-name* "history")
 
 ; =find-history
-(def find-history (partial find-entity *history-entity-name*))
+;(def find-history (partial find-entity *history-entity-name*))
+(defn find-history [& args]
+  (map
+    entity->map
+    (apply find-entity (cons *history-entity-name* args))
+    )
+  )
 (comment
 (defnk find-history [:user ""]
   (let [q (query *history-entity-name*)]

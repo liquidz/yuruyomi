@@ -4,7 +4,7 @@
   )
 
 (def status->text
-  {"ing" "読中" "fin" "読了" "wnt" "欲しい" "has" "所持"})
+  {"ing" "読中" "fin" "読了" "wnt" "欲しい" "has" "所持" "del" "削除"})
 
 (defnk book->html [book :show-user? false :show-status? false :show-delete? false]
   [:p

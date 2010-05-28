@@ -31,6 +31,7 @@
   (GET "/admin/del" req (do (delete-book (param req "id")) (redirect "/admin/")))
   (GET "/admin/clear" [] (do (clear-max-id) (redirect "/admin/")))
   (GET "/admin/test" req (do (twitter-test (param req "text")) (redirect "/admin/")))
+  (GET "/admin/history" req (admin-history-page (param req "page")))
 
   (GET "/admin/cron/collect" [] (do (collect-tweets) "fin"))
 

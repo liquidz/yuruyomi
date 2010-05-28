@@ -2,7 +2,7 @@
   (:use
      simply
      [yuruyomi.util seq]
-     [yuruyomi.model book setting]
+     [yuruyomi.model book history setting]
      [yuruyomi.view book]
      layout
      )
@@ -14,6 +14,16 @@
     [:input {:type "submit" :value "test"}]
     ]
    ]
+  )
+
+(defn admin-history-page [page]
+  (let [pp (if (nil? page) 1 (i page))]
+    (layout
+      "yuruyomi admin"
+      (map (fn [h] [:p (:user h) "-" (:title h) ":" (:author h) " (" (:date h) ") " (:before h) " => " (:after h)])
+           (find-history :limit 5 :offset (* 5 (dec pp))))
+      )
+    )
   )
 
 (defn admin-index-page []

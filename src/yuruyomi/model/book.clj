@@ -80,12 +80,13 @@
       (let [books (group #(get-prop % :status) (find-books :user name))
             update-target (case status
                             ; ing <= wnt or has
-                            "ing" (concat (:wnt books) (:has books))
-                            "wnt" ()
+                            "ing" (concat (:wnt books) (:has books) (:del books))
+                            "wnt" (:del books)
                             ; fin <= ing, wnt or has
-                            "fin" (concat (:ing books) (:wnt books) (:has books))
+                            "fin" (concat (:ing books) (:wnt books) (:has books) (:del books))
                             ; has <= wnt
-                            "has" (concat (:ing books) (:wnt books))
+                            "has" (concat (:ing books) (:wnt books) (:del books))
+                            "del" (concat (:ing books) (:wnt books) (:fin books) (:has books))
                             )
             x (se/find-first #(and (= title (get-prop % :title))
                                    (if (and (! su2/blank? author) (! su2/blank? (get-prop % :author)))
@@ -103,17 +104,19 @@
                                    :before "new" :after status)
                      )
           :else (let [before-status (get-prop x :status)]
-                  (set-prop x :status status)
-                  (set-prop x :date date)
-                  ; 著者が登録されていなくて、今回入力されている場合は登録する
-                  (if (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
-                    (set-prop x :author author))
-                  (if (su2/blank? (get-prop x :icon))
-                    (set-prop x :icon icon))
-                  (ds-put x)
+                  (when (! = status "del")
+                    (set-prop x :status status)
+                    (set-prop x :date date)
+                    ; 著者が登録されていなくて、今回入力されている場合は登録する
+                    (when (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
+                      (set-prop x :author author))
+                    (when (su2/blank? (get-prop x :icon))
+                      (set-prop x :icon icon))
+                    (ds-put x)
 
-                  (save-history :user name :title title :author (get-prop x :author)
-                                :date date :before before-status :after status)
+                    (save-history :user name :title title :author (get-prop x :author)
+                                  :date date :before before-status :after status)
+                    )
                   )
           )
         true
@@ -123,9 +126,18 @@
     )
   )
 
-(defn delete-book [id]
-  (try-with-boolean
-    (ds-delete (create-key *book-entity-name* (Long/parseLong id)))
-    )
+(defn delete-book
+  ([id]
+   (try-with-boolean
+     (ds-delete (create-key *book-entity-name* (Long/parseLong id)))
+     )
+   )
+  ([user title author]
+   (let [res (apply find-books (p list :user user :title title :author author))]
+     (if (empty? res) false
+       (try-with-boolean (ds-delete (-> res first get-key)))
+       )
+     )
+   )
   )
 
