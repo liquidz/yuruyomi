@@ -155,7 +155,9 @@
                                                 (list :since-id (string->long last-id)))))
         ]
 
-    (update-tweets (-> res :tweets tweets->books) last-id)
+    (when (! nil? res)
+      (update-tweets (-> res :tweets tweets->books) last-id)
+      )
 
 ;    (loop [save-targets (-> res :tweets tweets->books)
 ;           local-last-id last-id]
