@@ -5,7 +5,7 @@
      am.ik.clj-aws-ecs
      [yuruyomi clj-gae-ds-wrapper]
      [yuruyomi.util seq cache]
-     [yuruyomi.model history]
+     [yuruyomi.model history user]
      )
   (:require
      keys
@@ -97,26 +97,32 @@
                              update-target)
             ]
         (cond
-          (nil? x) (do
+          ; 新規登録
+          (nil? x) (when (! = status "del")
                      (ds-put (map-entity *book-entity-name* :user name :title title
                                          :author author :date date :status status :icon icon))
+                     (change-user-data name (keyword status) inc)
                      (save-history :user name :title title :author author :date date
                                    :before "new" :after status)
                      )
+          ; 登録済みのものを更新
           :else (let [before-status (get-prop x :status)]
-                  (when (! = status "del")
-                    (set-prop x :status status)
-                    (set-prop x :date date)
-                    ; 著者が登録されていなくて、今回入力されている場合は登録する
-                    (when (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
-                      (set-prop x :author author))
-                    (when (su2/blank? (get-prop x :icon))
-                      (set-prop x :icon icon))
-                    (ds-put x)
-
-                    (save-history :user name :title title :author (get-prop x :author)
-                                  :date date :before before-status :after status)
+                  (change-user-data
+                    name
+                    (keyword before-status) dec
+                    (keyword status) inc
                     )
+                  (set-prop x :status status)
+                  (set-prop x :date date)
+                  ; 著者が登録されていなくて、今回入力されている場合は登録する
+                  (when (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
+                    (set-prop x :author author))
+                  (when (su2/blank? (get-prop x :icon))
+                    (set-prop x :icon icon))
+                  (ds-put x)
+
+                  (save-history :user name :title title :author (get-prop x :author)
+                                :date date :before before-status :after status)
                   )
           )
         true

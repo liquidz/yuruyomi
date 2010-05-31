@@ -7,8 +7,8 @@
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper collect-twitter]
-     [yuruyomi.model book setting]
+     [yuruyomi clj-gae-ds-wrapper collect-twitter collect-user-data]
+     [yuruyomi.model book setting user]
      [yuruyomi.view html admin]
      [yuruyomi.util seq cache]
      )
@@ -34,6 +34,7 @@
   (GET "/admin/history" req (admin-history-page (param req "page")))
 
   (GET "/admin/cron/collect" [] (do (collect-tweets) "fin"))
+  (GET "/admin/cron/update_user" [] (do (collect-user) "fin"))
 
   (route/not-found (not-found-page))
   )

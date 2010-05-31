@@ -2,7 +2,7 @@
   (:use
      simply
      [yuruyomi.util seq]
-     [yuruyomi.model book history]
+     [yuruyomi.model book history user]
      [yuruyomi.view book]
      layout
      )
@@ -72,6 +72,17 @@
   (layout
     (str *page-title* " - " name)
     [:h1 (str name "'s books")]
+    (let [x (get-user :user name)]
+      (when (! empty? x)
+        (list
+          [:p "ing = " (:ing (first x))]
+          [:p "wnt = " (:wnt (first x))]
+          [:p "has = " (:has (first x))]
+          [:p "fin = " (:fin (first x))]
+          )
+        )
+      )
+    [:hr]
     (get-user-data-html name)
     )
   )

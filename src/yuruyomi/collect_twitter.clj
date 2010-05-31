@@ -154,30 +154,9 @@
                                               (if (su2/blank? last-id) ()
                                                 (list :since-id (string->long last-id)))))
         ]
-
     (when (! nil? res)
       (update-tweets (-> res :tweets tweets->books) last-id)
       )
-
-;    (loop [save-targets (-> res :tweets tweets->books)
-;           local-last-id last-id]
-;      (->> save-targets first :status (println "status = "))
-;      (cond
-;        (empty? save-targets) (update-max-id (:max-id res)) ; 最後まで記録できたらQueryのmax-idを記録
-;        :else (let [target (first save-targets)]
-;                (case (:status target)
-;                  "del" (if (try (delete-book (:id target)))
-;                          (recur (rest save-targets) (:id target))
-;                          (update-max-id local-last-id)
-;                          )
-;                  :else (if (try (save-book target) (catch Exception _ false))
-;                          (recur (rest save-targets) (:id target))
-;                          (update-max-id local-last-id) ; 途中で失敗した場合には次回途中から検索するようにIDを記録
-;                          )
-;                  )
-;                )
-;        )
-;      )
     )
   )
 
