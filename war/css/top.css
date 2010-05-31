@@ -1,0 +1,70 @@
+@import "/css/common.css";
+
+#exp {
+	width:800px;
+	margin: 20px auto;
+
+	text-align: center;
+}
+
+#exp img {
+	display: block;
+}
+#exp p#copy {
+	background: transparent url(../img/top_exp.png) no-repeat top left;
+	width: 750px;
+	height: 236px;
+
+	font-size: 0;
+	text-indent: -10000px;
+}
+
+#exp form {
+	margin-top: 40px;
+}
+#exp form fieldset {
+	border: 0;
+	overflow: hidden;
+}
+#exp form legend, #exp form input {
+	float: left;
+	margin-right: 10px;
+}
+#exp form legend {
+	background: transparent url(../img/arrow.png) no-repeat right 50%;
+	color: #a7e13a;
+
+	font-size: 30px;
+	font-weight: bold;
+	padding-right: 75px;
+
+}
+#exp form input {
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	padding: 3px 5px;
+	height: 40px;
+}
+#exp form input[type="text"] {
+	border: 2px solid #ccc;
+	width: 200px;
+	height: 30px;
+	font-size: 20px;
+}
+#exp form input[type="text"].noinput {
+	color: #ccc;
+}
+#exp form input[type="submit"] {
+	border: 2px solid #bf4;
+	background: #a7e13a;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	color: #fff;
+}
+#exp form input.btn:hover {
+	background: #8c1;
+}
+
+#footer {
+	overflow: hidden;
+}

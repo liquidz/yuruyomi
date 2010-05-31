@@ -1,0 +1,65 @@
+body, h1, h2, div , p, ul, li, fieldset {
+	margin: 0; padding: 0;
+}
+
+body {
+	color: #333;
+}
+
+#header {
+	background: transparent url(../img/bg.png);
+	height: 60px;
+	overflow: hidden;
+}
+
+#header #himg {
+	background: transparent url(../img/logo.png) no-repeat top left;
+	width: 224px;
+	height: 47px;
+
+	font-size: 0;
+	text-indent: -10000px;
+
+	margin-left: 10px;
+}
+
+
+#footer {
+	background: transparent url(../img/foot_bg.png);
+	width: 80%;
+	margin: 40px auto 0 auto;
+	padding: 10px 20px;
+	text-align: right;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+
+	overflow: hidden;
+}
+
+#footer img {
+	float: left;
+}
+#footer ul, #footer p {
+	float: right;
+}
+
+#footer ul {
+	list-style: none;
+	display: inline;
+}
+#footer ul li {
+	display: inline;
+}
+#footer ul li:before {
+	content: " | ";
+}
+
+a:link {
+	color: #04c;
+}
+
+form input {
+	border: 1px solid #ccc;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}

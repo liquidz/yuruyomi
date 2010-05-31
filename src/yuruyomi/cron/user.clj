@@ -1,4 +1,4 @@
-(ns yuruyomi.collect-user-data
+(ns yuruyomi.cron.user
   (:use
      simply
      ;[yuruyomi.util seq cache]

@@ -7,20 +7,26 @@
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper collect-twitter collect-user-data]
+     ;[yuruyomi clj-gae-ds-wrapper collect-twitter collect-user-data]
+     [yuruyomi clj-gae-ds-wrapper]
      [yuruyomi.model book setting user]
      [yuruyomi.view html admin]
      [yuruyomi.util seq cache]
+     [yuruyomi.cron twitter user]
      )
   (:require
      [clojure.contrib.seq-utils :as se]
+     [clojure.contrib.str-utils2 :as su2]
      [compojure.route :as route]
      )
   )
 
 (defroutes app
-  (GET "/" [] (index-page))
-  (GET "/user/:name" req (show-user-html (param req "name")))
+  (GET "/" req (let [name (param req "name")]
+                 (if (or (nil? name) (su2/blank? name)) (index-page) (redirect (str "/user/" name)))
+                 )
+       )
+  (GET "/user/:name" req (user-page (param req "name")))
   (GET "/history/:name" req (show-history-html (param req "name")))
   (GET "/search" req (show-search-html (param req "keyword") (param req "mode")))
 
@@ -33,8 +39,8 @@
   (GET "/admin/test" req (do (twitter-test (param req "text")) (redirect "/admin/")))
   (GET "/admin/history" req (admin-history-page (param req "page")))
 
-  (GET "/admin/cron/collect" [] (do (collect-tweets) "fin"))
-  (GET "/admin/cron/update_user" [] (do (collect-user) "fin"))
+  (GET "/admin/cron/twitter" [] (do (collect-tweets) "fin"))
+  (GET "/admin/cron/user" [] (do (collect-user) "fin"))
 
   (route/not-found (not-found-page))
   )

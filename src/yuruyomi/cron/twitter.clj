@@ -1,4 +1,4 @@
-(ns yuruyomi.collect-twitter
+(ns yuruyomi.cron.twitter
   (:use
      simply simply.date
      twitter
