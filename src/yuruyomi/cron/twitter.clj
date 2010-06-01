@@ -96,11 +96,11 @@
              (map
                #(assoc % :text (delete-words (:text %)))
                (concat
-                 (map #(assoc % :status "ing") r)
-                 (map #(assoc % :status "wnt") w)
-                 (map #(assoc % :status "fin") f)
-                 (map #(assoc % :status "has") h)
-                 (map #(assoc % :status "del") d)
+                 (map #(assoc % :status "reading") r)
+                 (map #(assoc % :status "want") w)
+                 (map #(assoc % :status "finish") f)
+                 (map #(assoc % :status "have") h)
+                 (map #(assoc % :status "delete") d)
                  )
                )
              )

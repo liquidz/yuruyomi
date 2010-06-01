@@ -97,6 +97,7 @@
     )
   )
 
+; =search {{{
 (defn show-search-html [text mode]
   (layout
     *page-title*
@@ -118,8 +119,7 @@
            )
          )
     )
-  )
-
+  ) ; }}}
 
 (defn user-page [name]
   (layout
@@ -152,7 +152,7 @@
   )
 
 
-
+; index {{{
 (defn index-page []
   (layout
     *page-title*
@@ -172,12 +172,13 @@
      ]
     (*parts-footer*)
     )
-  )
+  ) ; }}}
 
+; not-found {{{
 (defn not-found-page []
   (layout
     (str *page-title* " - page not found")
     [:h1 "page not found"]
     )
-  )
+  ) ; }}}
 

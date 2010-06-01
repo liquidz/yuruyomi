@@ -57,7 +57,6 @@
                           :else :MediumImage
                           )
             ]
-        ;(zfx/xml1-> res zf/children :Items :Item :MediumImage :URL zfx/text)
         (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
         )
       )
@@ -75,18 +74,18 @@
         ]
     ; 再読がありえるから fin は同じのがあっても登録/更新
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
-    (if (and (or (= status "fin") (zero? (count (find-books :user name :title title :author author :status status))))
-               (or (! = status "wnt") (zero? (count (find-books :user name :title title :author author :status "ing")))))
+    (if (and (or (= status "finish") (zero? (count (find-books :user name :title title :author author :status status))))
+               (or (! = status "want") (zero? (count (find-books :user name :title title :author author :status "reading")))))
       (let [books (group #(get-prop % :status) (find-books :user name))
             update-target (case status
-                            ; ing <= wnt or has
-                            "ing" (concat (:wnt books) (:has books) (:del books))
-                            "wnt" (:del books)
+                            ; reading <= want or have
+                            "reading" (concat (:want books) (:have books) (:delete books))
+                            "want" (:delete books)
                             ; fin <= ing, wnt or has
-                            "fin" (concat (:ing books) (:wnt books) (:has books) (:del books))
+                            "finish" (concat (:reading books) (:wwnt books) (:have books) (:delete books))
                             ; has <= wnt
-                            "has" (concat (:ing books) (:wnt books) (:del books))
-                            "del" (concat (:ing books) (:wnt books) (:fin books) (:has books))
+                            "have" (concat (:reading books) (:want books) (:delete books))
+                            "delete" (concat (:reading books) (:want books) (:finish books) (:have books))
                             )
             x (se/find-first #(and (= title (get-prop % :title))
                                    (if (and (! su2/blank? author) (! su2/blank? (get-prop % :author)))
@@ -98,7 +97,7 @@
             ]
         (cond
           ; 新規登録
-          (nil? x) (when (! = status "del")
+          (nil? x) (when (! = status "delete")
                      (ds-put (map-entity *book-entity-name* :user name :title title
                                          :author author :date date :status status :icon icon))
                      (change-user-data name (keyword status) inc)
