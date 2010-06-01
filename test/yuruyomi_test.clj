@@ -2,7 +2,7 @@
   (:use
      simply
      clojure.test
-     [yuruyomi collect-twitter]
+     [yuruyomi.cron twitter]
      )
   (:require
      [clojure.contrib.str-utils2 :as su2]

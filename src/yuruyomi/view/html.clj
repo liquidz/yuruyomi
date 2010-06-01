@@ -17,6 +17,7 @@
     )
   )
 
+; footer {{{
 (defn *parts-footer* []
   [:div {:id "footer"}
    [:img {:src "http://code.google.com/appengine/images/appengine-silver-120x30.gif" :alt "Powered by Google App Engine"}]
@@ -27,8 +28,9 @@
     [:li "Copyright &copy; 2010 " [:a {:href "http://twitter.com/uochan/"} "@uochan"] ". All rights reserved."]
     ]
    ]
-  )
+  ) ; }}}
 
+; search-form {{{
 (defn *parts-search-form* []
   [:form {:method "GET" :action "/search"}
    [:select {:name "mode"}
@@ -38,7 +40,7 @@
    [:input {:type "text" :name "keyword"}]
    [:input {:type "submit" :value "検索"}]
    ]
-  )
+  ) ; }}}
 
 (def *main-menu*
   {"all" "すべての本"
@@ -47,43 +49,51 @@
    "have" "持ってる本"
    }
   )
-(def *etc-manu*
+(def *etc-menu*
   {:finish "読み終わった本"}
   )
 
-(defnk *parts-info* [:user nil :image nil :selected "all"]
+(defn selected? [x y]
+  (if (= x y) "selected" "")
+  )
+
+(defnk make-info-ul [menu-pair :name "" :class "" :select ""]
+  [:ul {:class class}
+    (map
+      (fn [k]
+        [:li [:a {:id (str k "_books")
+                  :href (str "/user/" name (if (= k "all") "" (str "/" k)))
+                  :class (selected? select k)} (get menu-pair k)]]
+        )
+      (keys menu-pair))
+    ]
+  )
+
+(defnk *parts-info* [:name "" :image "" :select ""]
   [:div {:id "info"}
    [:p [:a {:href (str "http://twitter.com/" name)}
         [:img {:src image}]]]
-   [:h2 user]
-   [:ul {:class "main"}
-    (map (fn [k]
-           [:li [:a {:href (str "/user/" user (if (= k "all") "" (str "/" k))) :id (str k "_books") :class (if (= selected k) "selected" "")} (get *main-menu* k)]]
-           ) (keys *main-menu*))
-    ]
-   [:ul {:class "etc"}
-    (map (fn [k]
-           [:li [:a {:href (str "/user/" user (if (= k "all") "" (str "/" k))) :id (str k "_books") :class (if (= selected k) "selected" "")} (get *main-menu* k)]]
-           ) (keys *etc-menu*))
-    ]
+   [:h2 name]
+   (make-info-ul *main-menu* :name name :class "main" :select select)
+   (make-info-ul *etc-menu* :name name :class "etc" :select select)
    ]
   )
 
-(defn get-user-data-html [name]
-  (let [ls (group :status (get-books :user name))
-        ]
-    (concat
-      (list [:h2 (get status->text "ing")])
-      (map book->html (:ing ls))
-      (list [:h2 (get status->text "wnt")])
-      (map book->html (:wnt ls))
-      (list [:h2 (get status->text "fin")])
-      (map book->html (:fin ls))
-      (list [:h2 (get status->text "has")])
-      (map book->html (:has ls))
-      )
-    )
-  )
+;(defn get-user-data-html [name]
+;  (let [ls (group :status (get-books :user name))
+;        ]
+;    (concat
+;      (list [:h2 (get status->text "ing")])
+;      (map book->html (:ing ls))
+;      (list [:h2 (get status->text "wnt")])
+;      (map book->html (:wnt ls))
+;      (list [:h2 (get status->text "fin")])
+;      (map book->html (:fin ls))
+;      (list [:h2 (get status->text "has")])
+;      (map book->html (:has ls))
+;      )
+;    )
+;  )
 
 (defn show-history-html [name]
   (layout
@@ -125,7 +135,7 @@
   (layout
     (str *page-title* " - " name)
     :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/main.js"]
-    ;:css ["/css/main.css"]
+    :css ["/css/main.css"]
 
     [:div {:id "header"}
      [:h1 [:a {:href "/" :id "himg"} *page-title*]]
@@ -135,19 +145,13 @@
 
     (*parts-info* :user name :image "")
 
-    [:h1 (str name "'s books")]
-    (let [x (get-user :user name)]
-      (when (! empty? x)
-        (list
-          [:p "ing = " (:ing (first x))]
-          [:p "wnt = " (:wnt (first x))]
-          [:p "has = " (:has (first x))]
-          [:p "fin = " (:fin (first x))]
-          )
-        )
-      )
-    [:hr]
-    (get-user-data-html name)
+    [:div {:id "container"}
+     (let [x (get-books :user name)]
+       (map book->html (get-books :user name))
+       )
+     ]
+
+    (*parts-footer*)
     )
   )
 

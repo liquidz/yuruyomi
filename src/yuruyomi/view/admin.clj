@@ -6,6 +6,7 @@
      [yuruyomi.view book]
      layout
      )
+  (:require [clojure.contrib.str-utils2 :as su2])
   )
 
 (defn show-test-form []
@@ -26,17 +27,39 @@
     )
   )
 
+(defnk admin-book->html [book :show-user? false :show-status? false :show-delete? false]
+  [:p
+   (if (! su2/blank? (:icon book)) [:img {:src (:icon book)}])
+   "title: " (:title book) " / author: " (:author book)
+   (if show-user?
+     (list " by " [:a {:href (str "/user/" (:user book))} (:user book)])
+     )
+   " (" (:date book)
+   (if show-status?
+     (list ", " (:status book) ")")
+     ")"
+     )
+   ; 削除は認証をいれてから
+   (if show-delete?
+     [:a {:href (str "/admin/del?id=" (:id book))} "del"]
+     )
+   [:div {:id (str "box" (:id book))}]
+   [:a {:href (str "javascript:getImage(" (:id book) ");")} "get-image"]
+   ]
+  )
+
 (defn admin-index-page []
   (layout
     "yuruyomi admin"
     [:h1 "admin"]
     [:p "max id = " (get-max-id)]
     [:hr]
-    (map #(book->html % :show-user? true :show-status? true :show-delete? true) (get-books))
+    (map #(admin-book->html % :show-user? true :show-status? true :show-delete? true) (get-books))
     [:hr]
     (show-test-form)
     [:hr]
-    [:p [:a {:href "/admin/cron/collect"} "collect twitter data"]]
+    [:p [:a {:href "/admin/cron/twitter"} "collect twitter data"]]
+    [:p [:a {:href "/admin/cron/user"} "collect user data"]]
     [:p [:a {:href "/admin/clear"} "clear max id"]]
     )
   )

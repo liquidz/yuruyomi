@@ -72,9 +72,10 @@
         author (:author tweet), status (:status tweet)
         icon (:profile-image-url tweet), date (now)
         ]
+    (println "status = " status)
     ; 再読がありえるから fin は同じのがあっても登録/更新
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
-    (if (and (or (= status "finish") (zero? (count (find-books :user name :title title :author author :status status))))
+    (when (and (or (= status "finish") (zero? (count (find-books :user name :title title :author author :status status))))
                (or (! = status "want") (zero? (count (find-books :user name :title title :author author :status "reading")))))
       (let [books (group #(get-prop % :status) (find-books :user name))
             update-target (case status
@@ -95,14 +96,19 @@
                                    )
                              update-target)
             ]
+        (println "x = " x)
         (cond
           ; 新規登録
           (nil? x) (when (! = status "delete")
+                     (println "aaaaa")
                      (ds-put (map-entity *book-entity-name* :user name :title title
                                          :author author :date date :status status :icon icon))
+                     (println "bbb")
                      (change-user-data name (keyword status) inc)
+                     (println "ccc")
                      (save-history :user name :title title :author author :date date
                                    :before "new" :after status)
+                     (println "ddd")
                      )
           ; 登録済みのものを更新
           :else (let [before-status (get-prop x :status)]
@@ -124,9 +130,9 @@
                                 :date date :before before-status :after status)
                   )
           )
-        true
         )
-      false
+      ;false
+      true
       )
     )
   )

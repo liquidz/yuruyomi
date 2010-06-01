@@ -17,7 +17,9 @@
 
 (defn change-user-data [user & kvs]
   (let [res (find-user :user user)
-        e (if (empty? res) (map-entity *user-entity-name* 0 0 0 0) (first res))
+        e (if (empty? res)
+            (map-entity *user-entity-name* :user user :reading 0 :want 0 :have 0 :finish 0)
+            (first res))
         update-data (apply array-map kvs)
         ]
     (foreach
@@ -34,12 +36,12 @@
   (when (! nil? user)
     (let [res (find-user :user user)]
       (if (empty? res)
-        (ds-put (map-entity *user-entity-name* :user user :ing ing :wnt wnt :has has :fin fin))
+        (ds-put (map-entity *user-entity-name* :user user :reading ing :want wnt :have has :finish fin))
         (let [e (first res)]
-          (when (! nil? ing) (set-prop e :ing ing))
-          (when (! nil? wnt) (set-prop e :wnt wnt))
-          (when (! nil? has) (set-prop e :has has))
-          (when (! nil? fin) (set-prop e :fin fin))
+          (when (! nil? ing) (set-prop e :reading ing))
+          (when (! nil? wnt) (set-prop e :want wnt))
+          (when (! nil? has) (set-prop e :have has))
+          (when (! nil? fin) (set-prop e :finish fin))
           (ds-put e)
           )
         )
