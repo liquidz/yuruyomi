@@ -37,17 +37,12 @@
   query
   )
 
-;(defn delete-map-key [m & ks]
-;  (let [res (remove #(some (fn [k] (= k %)) ks) (keys m))]
-;    (apply array-map (interleave res (map #(% m) res)))
-;    )
-;  )
-
-(defn find-entity [kind & options]
+(defn- make-query [kind & options]
   (let [op (apply array-map options)
         offset (:offset op)
         limit (:limit op)
-        ks (-> op (dissoc :offset :limit) keys)
+        count? (:count? op)
+        ks (-> op (dissoc :offset :limit :count?) keys)
         q (query kind)
         fo (apply fetch-options
                  (concat
@@ -58,10 +53,51 @@
         ]
     (foreach
       #(when (! = "" (% op)) (add-filter q (-> % name str) = (% op)))
-      ;(-> op (delete-map-key :offset :limit) keys)
       (if (nil? ks) () ks)
       )
+    [q fo]
+    )
+  )
+
+
+; =find-entity
+(defn find-entity [kind & options]
+  (let [[q fo] (apply make-query (cons kind options))]
     (query-seq q fo)
     )
   )
+
+(defn count-entity [kind & options]
+  (let [[q fo] (apply make-query (cons kind options))]
+    (count-entities q)
+    )
+  )
+
+
+;  (let [op (apply array-map options)
+;        offset (:offset op)
+;        limit (:limit op)
+;        count? (:count? op)
+;        ks (-> op (dissoc :offset :limit :count?) keys)
+;        q (query kind)
+;        fo (apply fetch-options
+;                 (concat
+;                   (if (nil? offset) () (list :offset offset))
+;                   (if (nil? limit) () (list :limit limit))
+;                   )
+;                 )
+;        ]
+;    (foreach
+;      #(when (! = "" (% op)) (add-filter q (-> % name str) = (% op)))
+;      ;(-> op (delete-map-key :offset :limit) keys)
+;      (if (nil? ks) () ks)
+;      )
+;    (println "count? = " count?)
+;    (if (and (! nil? count?) count?)
+;      (count-entities q)
+;      (query-seq q fo)
+;      )
+;    )
+;  )
+
 

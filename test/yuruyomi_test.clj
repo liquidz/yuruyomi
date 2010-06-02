@@ -3,6 +3,7 @@
      simply
      clojure.test
      [yuruyomi.cron twitter]
+     [yuruyomi.view html]
      )
   (:require
      [clojure.contrib.str-utils2 :as su2]
@@ -81,4 +82,8 @@
     )
   )
 
+
+;(deftest parts-test
+;  (*parts-info* :name "uochan")
+;  )
 

@@ -67,6 +67,10 @@
 ; global version of find-books
 (defn get-books [& args] (map entity->book (apply find-books args)))
 
+(defn count-books [& args]
+  (apply count-entity (cons *book-entity-name* args))
+  )
+
 (defn save-book [tweet]
   (let [name (:from-user tweet), title (:title tweet)
         author (:author tweet), status (:status tweet)

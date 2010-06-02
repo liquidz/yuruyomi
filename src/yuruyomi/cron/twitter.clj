@@ -62,7 +62,6 @@
   )
 
 (defn string->book-title-author [s]
-  ;(let [[title & more] (extended-split s #"\s*[:：]\s*" "\"")]
   (let [[title & more] (extended-split s *re-title-author-sep* "\"")]
     [(su2/replace title #"\"" "")
      (if (empty? more) ""
@@ -126,9 +125,11 @@
     )
   )
 
-(defn twitter-test [text]
-  (let [res {:created-at (now) :from-user "testuser" :from-user-id 0 :id 0
-                    :iso-language-code "" :profile-image-url "" :source "test"
+(defn twitter-test [user image text]
+  (let [name (if (or (nil? user) (su2/blank? user)) "testuser" user)
+        icon (if (or (nil? image) (su2/blank? user)) "/img/npc.png" image)
+        res {:created-at (now) :from-user name :from-user-id 0 :id 0
+                    :iso-language-code "" :profile-image-url icon :source "test"
                     :text text :to-user "testuser2" :to-user-id 1
                     }]
     (update-tweets (tweets->books (list res)) (get-max-id))

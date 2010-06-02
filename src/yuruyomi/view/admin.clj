@@ -9,11 +9,15 @@
   (:require [clojure.contrib.str-utils2 :as su2])
   )
 
-(defn show-test-form []
+(def admin-test-form
   [:form {:method "GET" :action "/admin/test"}
-   [:p "text: " [:input {:type "text" :name "text"}]
-    [:input {:type "submit" :value "test"}]
-    ]
+   [:span "user: "]
+   [:input {:type "text" :name "user"}]
+   [:span "image: "]
+   [:input {:type "text" :name "image"}]
+   [:span "text: "]
+   [:input {:type "text" :name "text"}]
+   [:input {:type "submit" :value "test"}]
    ]
   )
 
@@ -48,19 +52,37 @@
    ]
   )
 
-(defn admin-index-page []
-  (layout
-    "yuruyomi admin"
-    [:h1 "admin"]
-    [:p "max id = " (get-max-id)]
-    [:hr]
-    (map #(admin-book->html % :show-user? true :show-status? true :show-delete? true) (get-books))
-    [:hr]
-    (show-test-form)
-    [:hr]
-    [:p [:a {:href "/admin/cron/twitter"} "collect twitter data"]]
-    [:p [:a {:href "/admin/cron/user"} "collect user data"]]
-    [:p [:a {:href "/admin/clear"} "clear max id"]]
+(defn admin-menu []
+  [:ul
+   [:li "max id = " (get-max-id)]
+   [:li [:a {:href "/admin/cron/twitter"} "collect twitter data"]]
+   [:li [:a {:href "/admin/cron/user"} "collect user data"]]
+   ;[:li [:a {:href "/admin/clear"} "clear max id"]]
+   ]
+  )
+
+(defn admin-index-page [page]
+  (let [pp (if (nil? page) 1 (i page))
+        bc (count-books)
+        pc (i (Math/ceil (/ bc 2)))
+        pages (take pc (iterate inc 1))
+        ]
+    (layout
+      "yuruyomi admin"
+      :css ["/css/admin.css"]
+      (admin-menu)
+      [:hr]
+      [:p "count = " (count-books)]
+      (map #(admin-book->html % :show-user? true :show-status? true :show-delete? true)
+           (get-books :limit 2 :offset (* 2 (dec pp))))
+      [:hr]
+      (map (fn [x]
+             [:a {:href (str "/admin/?page=" x)} x]
+             ) pages)
+
+      [:hr]
+      admin-test-form
+      )
     )
   )
 

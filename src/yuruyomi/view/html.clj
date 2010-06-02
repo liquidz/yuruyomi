@@ -18,7 +18,7 @@
   )
 
 ; footer {{{
-(defn *parts-footer* []
+(def footer
   [:div {:id "footer"}
    [:img {:src "http://code.google.com/appengine/images/appengine-silver-120x30.gif" :alt "Powered by Google App Engine"}]
    [:ul
@@ -31,7 +31,7 @@
   ) ; }}}
 
 ; search-form {{{
-(defn *parts-search-form* []
+(def search-form
   [:form {:method "GET" :action "/search"}
    [:select {:name "mode"}
     [:option {:value "title" :selected "selected"} "タイトル"]
@@ -69,32 +69,6 @@
     ]
   )
 
-(defnk *parts-info* [:name "" :image "" :select ""]
-  [:div {:id "info"}
-   [:p [:a {:href (str "http://twitter.com/" name)}
-        [:img {:src image}]]]
-   [:h2 name]
-   (make-info-ul *main-menu* :name name :class "main" :select select)
-   (make-info-ul *etc-menu* :name name :class "etc" :select select)
-   ]
-  )
-
-;(defn get-user-data-html [name]
-;  (let [ls (group :status (get-books :user name))
-;        ]
-;    (concat
-;      (list [:h2 (get status->text "ing")])
-;      (map book->html (:ing ls))
-;      (list [:h2 (get status->text "wnt")])
-;      (map book->html (:wnt ls))
-;      (list [:h2 (get status->text "fin")])
-;      (map book->html (:fin ls))
-;      (list [:h2 (get status->text "has")])
-;      (map book->html (:has ls))
-;      )
-;    )
-;  )
-
 (defn show-history-html [name]
   (layout
     (str *page-title* " - " name)
@@ -131,58 +105,62 @@
     )
   ) ; }}}
 
-(defn user-page [name]
-  (layout
-    (str *page-title* " - " name)
-    :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/main.js"]
-    :css ["/css/main.css"]
+(defnk user-page [name :select "all"]
+  (let [books (get-books :user name)]
+    (layout
+      (str *page-title* " - " name)
+      :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/main.js"]
+      ;:css ["/css/main.css"]
 
-    [:div {:id "header"}
-     [:h1 [:a {:href "/" :id "himg"} *page-title*]]
-     [:p "ゆる～く読書。ゆる～く管理。"]
-     (*parts-search-form*)
-     ]
+      [:div {:id "header"}
+       ;[:h1 [:a {:href "/" :id "himg"} *page-title*]]
+       ;[:p "ゆる～く読書。ゆる～く管理。"]
+       search-form
+       ]
 
-    (*parts-info* :user name :image "")
+      [:div {:id "info"}
+       [:p [:a {:href (str "http://twitter.com/" name)}
+            [:img {:src (-> books first :icon)}]]]
+       [:h2 name]
+       (make-info-ul *main-menu* :name name :class "main" :select select)
+       (make-info-ul *etc-menu* :name name :class "etc" :select select)
+       ]
 
-    [:div {:id "container"}
-     (let [x (get-books :user name)]
-       (map book->html (get-books :user name))
-       )
-     ]
+      [:div {:id "container"} (map book->html books) ]
 
-    (*parts-footer*)
+      footer
+      )
     )
   )
 
 
-; index {{{
-(defn index-page []
-  (layout
-    *page-title*
-    :css ["/css/top.css"]
-    :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/top.js"]
+  ; index {{{
+  (defn index-page []
+    (layout
+      *page-title*
+      :css ["/css/top.css"]
+      :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/top.js"]
 
-    [:div {:id "header"} [:h1 {:id "himg"} *page-title*]]
-    [:div {:id "exp"}
-     [:p {:id "copy"} "ゆるよみはTwitterでつぶやくだけで読書管理ができるゆる～いサービスです。"]
-     [:form {:method "GET" :action "/"}
-      [:fieldset
-       [:legend "早速始める"]
-       [:input {:type "text" :name "name" :title "TwitterIDを入力"}]
-       [:input {:type "submit" :value "あなたのゆるよみを確認" :class "btn"}]
-       ]
-      ]
-     ]
-    (*parts-footer*)
-    )
+      [:div {:id "header"} [:h1 {:id "himg"} *page-title*]]
+      [:div {:id "exp"}
+        [:p {:id "copy"} "ゆるよみはTwitterでつぶやくだけで読書管理ができるゆる～いサービスです。"]
+	    [:form {:method "GET" :action "/"}
+	      [:fieldset
+	        [:legend "早速始める"]
+	        [:input {:type "text" :name "name" :title "TwitterIDを入力"}]
+	        [:input {:type "submit" :value "あなたのゆるよみを確認" :class "btn"}]
+	        ]
+	      ]
+	   ]
+	   footer
+	)
   ) ; }}}
 
-; not-found {{{
-(defn not-found-page []
-  (layout
-    (str *page-title* " - page not found")
-    [:h1 "page not found"]
-    )
-  ) ; }}}
+                                                                                                                                                                                                         ; not-found {{{
+                                                                                                                                                                                                         (defn not-found-page []
+                                                                                                                                                                                                         (layout
+                                                                                                                                                                                                         (str *page-title* " - page not found")
+                                                                                                                                                                                                                                             [:h1 "page not found"]
+                                                                                                                                                                                                                                                                 )
+                                                                                                                                                                                                                                                                 ) ; }}}
 

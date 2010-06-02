@@ -1,0 +1,8 @@
+body, ul, li {
+	margin: 0; padding: 0;
+}
+
+ul li {
+	display: inline;
+	padding-left: 1.5em;
+}

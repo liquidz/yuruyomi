@@ -33,10 +33,11 @@
   (GET "/ajax/getimage" req (ajax-get-book-image (param req "id")))
 
   ; admin
-  (GET "/admin/" [] (admin-index-page))
+  (GET "/admin/" req (admin-index-page (param req "page")))
   (GET "/admin/del" req (do (delete-book (param req "id")) (redirect "/admin/")))
   (GET "/admin/clear" [] (do (clear-max-id) (redirect "/admin/")))
-  (GET "/admin/test" req (do (twitter-test (param req "text")) (redirect "/admin/")))
+  ;(GET "/admin/test" req (do (twitter-test (param req "text")) (redirect "/admin/")))
+  (GET "/admin/test" req (do (apply twitter-test (params req "user" "image" "text")) (redirect "/admin/")))
   (GET "/admin/history" req (admin-history-page (param req "page")))
 
   (GET "/admin/cron/twitter" [] (do (collect-tweets) "fin"))
