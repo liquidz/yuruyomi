@@ -15,7 +15,7 @@
                  [ring/ring-servlet "0.2.0"]
                  [ring/ring-jetty-adapter "0.2.0"]
                  [hiccup/hiccup "0.2.3"]
-                 [org.clojars.liquidz/simply "0.1.4"]
+                 [org.clojars.liquidz/simply "0.1.5"]
                  [org.clojars.liquidz/twitter "0.0.3"]
                  ]
 

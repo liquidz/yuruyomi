@@ -27,17 +27,28 @@
   (filter #(every? (fn [pre] (if (nil? pre) (if ignore-nil? true false) (pre %))) preds) col)
   )
 
-(defnk- find-books [:user "" :title "" :author "" :date "" :status ""
-                    :user-like "" :title-like "" :author-like "" :date-like ""
-                    ]
-  (let [res (find-entity *book-entity-name* :user user :title title :author author :date date :status status)]
-    (if (some #(! = "" %) [user-like title-like author-like date-like])
+;(defnk- find-books [:user "" :title "" :author "" :date "" :status ""
+;                    :user-like "" :title-like "" :author-like "" :date-like ""
+;                    ]
+
+;(defnk- find-books [:user-like "" :title-like "" :author-like "" :date-like "" & args]
+(defn- find-books [& args]
+  ;(let [res (find-entity *book-entity-name* :user user :title title :author author :date date :status status)]
+  (let [m (apply array-map args)
+        user-like (:user-like m)
+        title-like (:title-like m)
+        author-like (:author-like m)
+        date-like (:date-like m)
+        res (apply find-entity (cons *book-entity-name* (fold concat () (dissoc m :user-like :title-lie :author-like :date-like))))
+        ;res (apply find-entity (cons *book-entity-name* args))]
+        ]
+    (if (some #(! nil? %) [user-like title-like author-like date-like])
       (filters
         res
-        (if (! = "" user-like) #(su2/contains? (get-prop % :user) user-like))
-        (if (! = "" title-like) #(su2/contains? (get-prop % :title) title-like))
-        (if (! = "" author-like) #(su2/contains? (get-prop % :author) author-like))
-        (if (! = "" date-like) #(su2/contains? (get-prop % :date) date-like))
+        (when (! nil? user-like) #(su2/contains? (get-prop % :user) (:user-like m)))
+        (when (! nil? title-like) #(su2/contains? (get-prop % :title) (:title-like m)))
+        (when (! nil? author-like) #(su2/contains? (get-prop % :author) (:author-like m)))
+        (when (! nil? date-like) #(su2/contains? (get-prop % :date) (:date-like m)))
         )
       res
       )
@@ -76,7 +87,6 @@
         author (:author tweet), status (:status tweet)
         icon (:profile-image-url tweet), date (now)
         ]
-    (println "status = " status)
     ; 再読がありえるから fin は同じのがあっても登録/更新
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
     (when (and (or (= status "finish") (zero? (count (find-books :user name :title title :author author :status status))))
@@ -100,19 +110,14 @@
                                    )
                              update-target)
             ]
-        (println "x = " x)
         (cond
           ; 新規登録
           (nil? x) (when (! = status "delete")
-                     (println "aaaaa")
                      (ds-put (map-entity *book-entity-name* :user name :title title
                                          :author author :date date :status status :icon icon))
-                     (println "bbb")
                      (change-user-data name (keyword status) inc)
-                     (println "ccc")
                      (save-history :user name :title title :author author :date date
                                    :before "new" :after status)
-                     (println "ddd")
                      )
           ; 登録済みのものを更新
           :else (let [before-status (get-prop x :status)]

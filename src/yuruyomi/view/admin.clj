@@ -64,7 +64,7 @@
 (defn admin-index-page [page]
   (let [pp (if (nil? page) 1 (i page))
         bc (count-books)
-        pc (i (Math/ceil (/ bc 2)))
+        pc (.intValue (Math/ceil (/ bc 2)))
         pages (take pc (iterate inc 1))
         ]
     (layout
