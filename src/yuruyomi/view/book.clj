@@ -10,8 +10,8 @@
 
 (defnk book->html [book :show-user? false :show-status? false :show-delete? false]
   (let [class-name (str "book " (:status book))]
-    [:div {:id (:id book) :class class-name}
-     [:img {:src "" }]
+    [:div {:class class-name}
+     [:img {:src "/img/noimg.png" :id (:id book)}]
      [:p {:class "icon"} (get *status-text* (:status book))]
      [:p {:class "title"} (:title book)]
      ]

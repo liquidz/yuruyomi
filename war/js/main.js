@@ -68,5 +68,19 @@ var getImage = function(id){
 
 	$(function(){
 		$("#info ul.main li a").bind("click", Yuruyomi.changeBooks);
+
+		var books = $("div.book img");
+		var i = 0, l = books.length;
+		var loadImage = function(){
+			if(i >= l) return;
+
+			var target = $(books.get(i));
+			$.get("/ajax/getimage", {id: target.attr("id")}, function(data){
+				target.attr("src", data);
+				++i;
+				setTimeout(loadImage, 1000);
+			});
+		};
+		setTimeout(loadImage, 500);
 	});
 })();

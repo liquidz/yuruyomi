@@ -107,12 +107,13 @@
 
 (defnk user-page [name :status "all"]
   (let [is-finish? (if (= status "finish")
+                     true false
                      )
         books (get-books :user name)]
     (layout
       (str *page-title* " - " name)
       :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/main.js"]
-      ;:css ["/css/main.css"]
+      :css ["/css/main.css"]
 
       [:div {:id "header"}
        ;[:h1 [:a {:href "/" :id "himg"} *page-title*]]

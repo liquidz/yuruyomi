@@ -27,7 +27,7 @@
                  )
        )
   (GET "/user/:name" req (user-page (param req "name")))
-  (GET "/user/:name/:status" req (user-page (param req "name") (param req "status")))
+  (GET "/user/:name/:status" req (user-page (param req "name") :status (param req "status")))
   (GET "/history/:name" req (show-history-html (param req "name")))
   (GET "/search" req (show-search-html (param req "keyword") (param req "mode")))
 
