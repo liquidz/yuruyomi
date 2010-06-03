@@ -13,7 +13,7 @@
 
 (defn ajax-get-book-image [id]
   (let [b (se/find-first #(= id (str (:id %))) (get-books))]
-    (p get-book-image (:title b) (:author b))
+    (get-book-image (:title b) (:author b))
     )
   )
 
