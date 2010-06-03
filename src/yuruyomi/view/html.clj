@@ -106,7 +106,9 @@
   ) ; }}}
 
 (defnk user-page [name :status "all"]
-  (let [books (get-books :user name)]
+  (let [is-finish? (if (= status "finish")
+                     )
+        books (get-books :user name)]
     (layout
       (str *page-title* " - " name)
       :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/main.js"]
