@@ -74,7 +74,8 @@
       [:hr]
       [:p "count = " (count-books)]
       (map #(admin-book->html % :show-user? true :show-status? true :show-delete? true)
-           (get-books :limit 2 :offset (* 2 (dec pp))))
+           (get-books :limit 2 :page pp))
+           ;(get-books :limit 2 :offset (* 2 (dec pp))))
       [:hr]
       (map (fn [x]
              [:a {:href (str "/admin/?page=" x)} x]

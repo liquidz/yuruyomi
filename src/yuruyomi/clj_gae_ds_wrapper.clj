@@ -39,14 +39,17 @@
 
 (defn- make-query [kind & options]
   (let [op (apply array-map options)
-        offset (:offset op)
         limit (:limit op)
-        count? (:count? op)
-        ks (-> op (dissoc :offset :limit :count?) keys)
+        page (:page op)
+        offset (:offset op)
+        offset2 (if (and (nil? offset) (! nil? page) (! nil? limit))
+                  (* limit (dec page))
+                  offset)
+        ks (-> op (dissoc :offset :limit :page) keys)
         q (query kind)
         fo (apply fetch-options
                  (concat
-                   (if (nil? offset) () (list :offset offset))
+                   (if (nil? offset2) () (list :offset offset2))
                    (if (nil? limit) () (list :limit limit))
                    )
                  )
@@ -72,32 +75,5 @@
     (count-entities q)
     )
   )
-
-
-;  (let [op (apply array-map options)
-;        offset (:offset op)
-;        limit (:limit op)
-;        count? (:count? op)
-;        ks (-> op (dissoc :offset :limit :count?) keys)
-;        q (query kind)
-;        fo (apply fetch-options
-;                 (concat
-;                   (if (nil? offset) () (list :offset offset))
-;                   (if (nil? limit) () (list :limit limit))
-;                   )
-;                 )
-;        ]
-;    (foreach
-;      #(when (! = "" (% op)) (add-filter q (-> % name str) = (% op)))
-;      ;(-> op (delete-map-key :offset :limit) keys)
-;      (if (nil? ks) () ks)
-;      )
-;    (println "count? = " count?)
-;    (if (and (! nil? count?) count?)
-;      (count-entities q)
-;      (query-seq q fo)
-;      )
-;    )
-;  )
 
 

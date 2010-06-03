@@ -105,7 +105,7 @@
     )
   ) ; }}}
 
-(defnk user-page [name :select "all"]
+(defnk user-page [name :status "all"]
   (let [books (get-books :user name)]
     (layout
       (str *page-title* " - " name)
@@ -122,8 +122,8 @@
        [:p [:a {:href (str "http://twitter.com/" name)}
             [:img {:src (-> books first :icon)}]]]
        [:h2 name]
-       (make-info-ul *main-menu* :name name :class "main" :select select)
-       (make-info-ul *etc-menu* :name name :class "etc" :select select)
+       (make-info-ul *main-menu* :name name :class "main" :select status)
+       (make-info-ul *etc-menu* :name name :class "etc" :select status)
        ]
 
       [:div {:id "container"} (map book->html books) ]
