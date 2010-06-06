@@ -37,11 +37,13 @@ var getImage = function(id){
 		}
 	};
 
-	Yuruyomi.changeBooks = function(e){
-		var target = $(e.target);
+	//Yuruyomi.changeBooks = function(e){
+	Yuruyomi.changeBooks = function(target){
+		//var target = $(e.target);
 
 		var type = Yuruyomi.getInfoType();
 		var newType = Yuruyomi.getInfoType(target);
+
 		if(newType === "all"){
 			$.each(Yuruyomi.mainBookTypes, function(){
 				if((""+this) !== type) Yuruyomi.showBooks(this);
@@ -67,7 +69,17 @@ var getImage = function(id){
 	// }}}
 
 	$(function(){
-		$("#info ul.main li a").bind("click", Yuruyomi.changeBooks);
+		var selected = $("#info ul li a.selected");
+		if(selected.attr("id") !== "finish_books"){
+			$("#info ul.main li a").bind("click", function(e){
+				return Yuruyomi.changeBooks($(e.target));
+			});
+
+			if(Yuruyomi.getInfoType() !== "all"){
+				$("#container .book").hide();
+				Yuruyomi.changeBooks(selected);
+			}
+		}
 
 		var books = $("div.book img");
 		var i = 0, l = books.length;
@@ -81,6 +93,6 @@ var getImage = function(id){
 				setTimeout(loadImage, 1000);
 			});
 		};
-		setTimeout(loadImage, 500);
+		setTimeout(loadImage, 0);
 	});
 })();

@@ -33,22 +33,18 @@
 
 (defnk admin-book->html [book :show-user? false :show-status? false :show-delete? false]
   [:p
-   (if (! su2/blank? (:icon book)) [:img {:src (:icon book)}])
    "title: " (:title book) " / author: " (:author book)
-   (if show-user?
-     (list " by " [:a {:href (str "/user/" (:user book))} (:user book)])
-     )
+   (list " by " [:a {:href (str "/user/" (:user book))} (:user book)])
    " (" (:date book)
    (if show-status?
      (list ", " (:status book) ")")
      ")"
      )
-   ; 削除は認証をいれてから
    (if show-delete?
      [:a {:href (str "/admin/del?id=" (:id book))} "del"]
      )
-   [:div {:id (str "box" (:id book))}]
-   [:a {:href (str "javascript:getImage(" (:id book) ");")} "get-image"]
+   ;[:div {:id (str "box" (:id book))}]
+   ;[:a {:href (str "javascript:getImage(" (:id book) ");")} "get-image"]
    ]
   )
 
@@ -64,7 +60,7 @@
 (defn admin-index-page [page]
   (let [pp (if (nil? page) 1 (i page))
         bc (count-books)
-        pc (.intValue (Math/ceil (/ bc 2)))
+        pc (.intValue (Math/ceil (/ bc 10)))
         pages (take pc (iterate inc 1))
         ]
     (layout
@@ -73,9 +69,8 @@
       (admin-menu)
       [:hr]
       [:p "count = " (count-books)]
-      (map #(admin-book->html % :show-user? true :show-status? true :show-delete? true)
-           (get-books :limit 2 :page pp))
-           ;(get-books :limit 2 :offset (* 2 (dec pp))))
+      (map #(admin-book->html % :show-user? false :show-status? true :show-delete? true)
+           (get-books :limit 10 :page pp))
       [:hr]
       (map (fn [x]
              [:a {:href (str "/admin/?page=" x)} x]

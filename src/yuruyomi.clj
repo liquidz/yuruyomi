@@ -7,7 +7,6 @@
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
      am.ik.clj-gae-ds.core
-     ;[yuruyomi clj-gae-ds-wrapper collect-twitter collect-user-data]
      [yuruyomi clj-gae-ds-wrapper]
      [yuruyomi.model book setting user]
      [yuruyomi.view html admin]
@@ -22,14 +21,17 @@
   )
 
 (defroutes app
-  (GET "/" req (let [name (param req "name")]
+  (GET "/" req (let [name (escape-input (param req "name"))]
                  (if (or (nil? name) (su2/blank? name)) (index-page) (redirect (str "/user/" name)))
                  )
        )
   (GET "/user/:name" req (user-page (param req "name")))
+  (GET "/user/:name/history" req (history-page (param req "name")))
+  (GET "/user/:name/history/:page" req (history-page (param req "name") :page (param req "page")))
+  (GET "/user/:name/search" req (apply search-page (params req "name" "mode" "keyword" "page")))
   (GET "/user/:name/:status" req (user-page (param req "name") :status (param req "status")))
-  (GET "/history/:name" req (show-history-html (param req "name")))
-  (GET "/search" req (show-search-html (param req "keyword") (param req "mode")))
+  (GET "/user/:name/:status/:page" req (user-page (param req "name") :status (param req "status") :page (param req "page")))
+  ;(GET "/search" req (show-search-html (param req "keyword") (param req "mode")))
 
   (GET "/ajax/getimage" req (ajax-get-book-image (param req "id")))
 

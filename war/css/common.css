@@ -1,9 +1,9 @@
-body, h1, h2, div , p, ul, li, fieldset {
+body, h1, h2, h3, div , p, ul, li, fieldset {
 	margin: 0; padding: 0;
 }
 
 body {
-	color: #333;
+	color: #444;
 }
 
 #header {
@@ -56,6 +56,9 @@ body {
 
 a:link {
 	color: #04c;
+}
+a:hover {
+	color: #37f;
 }
 
 form input {

@@ -18,10 +18,10 @@
               rwhf (group :status user-data) ]
           (update-user-data
             :user (-> user name str)
-            :ing (count (:ing rwhf))
-            :wnt (count (:wnt rwhf))
-            :has (count (:has rwhf))
-            :fin (count (:fin rwhf))
+            :reading (count (:reading rwhf))
+            :want (count (:want rwhf))
+            :have (count (:have rwhf))
+            :finish (count (:finish rwhf))
             )
           )
         ) (keys res))

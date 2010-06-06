@@ -3,6 +3,7 @@
      simply
      am.ik.clj-gae-ds.core
      )
+  (:require [clojure.contrib.str-utils2 :as su2])
   )
 
 ; =entity->map
@@ -45,19 +46,32 @@
         offset2 (if (and (nil? offset) (! nil? page) (! nil? limit))
                   (* limit (dec page))
                   offset)
-        ks (-> op (dissoc :offset :limit :page) keys)
+        sort-key (:sort op)
+        sort-asc-key (:sort-asc op)
+        ks (-> op (dissoc :offset :limit :page :sort :sort-asc) keys)
         q (query kind)
-        fo (apply fetch-options
-                 (concat
-                   (if (nil? offset2) () (list :offset offset2))
-                   (if (nil? limit) () (list :limit limit))
-                   )
-                 )
+        fo (if (and (! nil? limit) (! nil? offset2))
+             (apply fetch-options
+                    (concat
+                      (if (nil? offset2) () (list :offset offset2))
+                      (if (nil? limit) () (list :limit limit))
+                      )
+                    )
+             nil)
         ]
     (foreach
-      #(when (! = "" (% op)) (add-filter q (-> % name str) = (% op)))
+      #(when (! = "" (% op))
+         (let [key (-> % name str)]
+           (cond
+             (.endsWith key "-not") (add-filter q (su2/take key (- (count key) 4)) not= (% op))
+             :else (add-filter q key = (% op))
+             )
+           )
+         )
       (if (nil? ks) () ks)
       )
+    (when (! nil? sort-key) (add-sort q sort-key :desc))
+    (when (! nil? sort-asc-key) (add-sort q sort-asc-key :asc))
     [q fo]
     )
   )
@@ -66,7 +80,10 @@
 ; =find-entity
 (defn find-entity [kind & options]
   (let [[q fo] (apply make-query (cons kind options))]
-    (query-seq q fo)
+    (if (nil? fo)
+      (query-seq q)
+      (query-seq q fo)
+      )
     )
   )
 

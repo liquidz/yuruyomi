@@ -27,28 +27,22 @@
   (filter #(every? (fn [pre] (if (nil? pre) (if ignore-nil? true false) (pre %))) preds) col)
   )
 
-;(defnk- find-books [:user "" :title "" :author "" :date "" :status ""
-;                    :user-like "" :title-like "" :author-like "" :date-like ""
-;                    ]
-
-;(defnk- find-books [:user-like "" :title-like "" :author-like "" :date-like "" & args]
 (defn- find-books [& args]
-  ;(let [res (find-entity *book-entity-name* :user user :title title :author author :date date :status status)]
   (let [m (apply array-map args)
         user-like (:user-like m)
         title-like (:title-like m)
         author-like (:author-like m)
         date-like (:date-like m)
-        res (apply find-entity (cons *book-entity-name* (fold concat () (dissoc m :user-like :title-lie :author-like :date-like))))
-        ;res (apply find-entity (cons *book-entity-name* args))]
+        res (apply find-entity (cons *book-entity-name* (fold concat () (dissoc m :user-like :title-like :author-like :date-like))))
         ]
+
     (if (some #(! nil? %) [user-like title-like author-like date-like])
       (filters
         res
-        (when (! nil? user-like) #(su2/contains? (get-prop % :user) (:user-like m)))
-        (when (! nil? title-like) #(su2/contains? (get-prop % :title) (:title-like m)))
-        (when (! nil? author-like) #(su2/contains? (get-prop % :author) (:author-like m)))
-        (when (! nil? date-like) #(su2/contains? (get-prop % :date) (:date-like m)))
+        (when (! nil? user-like) #(su2/contains? (get-prop % :user) (to-utf8 user-like)))
+        (when (! nil? title-like) #(su2/contains? (get-prop % :title) (to-utf8 title-like)))
+        (when (! nil? author-like) #(su2/contains? (get-prop % :author) (to-utf8 author-like)))
+        (when (! nil? date-like) #(su2/contains? (get-prop % :date) date-like))
         )
       res
       )

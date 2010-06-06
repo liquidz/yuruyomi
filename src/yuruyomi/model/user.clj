@@ -32,16 +32,16 @@
     )
   )
 
-(defnk update-user-data [:user nil :ing nil :wnt nil :has nil :fin nil]
+(defnk update-user-data [:user nil :reading nil :want nil :have nil :finish nil]
   (when (! nil? user)
     (let [res (find-user :user user)]
       (if (empty? res)
-        (ds-put (map-entity *user-entity-name* :user user :reading ing :want wnt :have has :finish fin))
+        (ds-put (map-entity *user-entity-name* :user user :reading reading :want want :have have :finish finish))
         (let [e (first res)]
-          (when (! nil? ing) (set-prop e :reading ing))
-          (when (! nil? wnt) (set-prop e :want wnt))
-          (when (! nil? has) (set-prop e :have has))
-          (when (! nil? fin) (set-prop e :finish fin))
+          (when (! nil? reading) (set-prop e :reading reading))
+          (when (! nil? want) (set-prop e :want want))
+          (when (! nil? have) (set-prop e :have have))
+          (when (! nil? finish) (set-prop e :finish finish))
           (ds-put e)
           )
         )

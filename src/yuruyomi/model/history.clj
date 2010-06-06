@@ -25,4 +25,7 @@
     )
   )
 
+(defn count-histories [& args]
+  (apply count-entity (cons *history-entity-name* args))
+  )
 
