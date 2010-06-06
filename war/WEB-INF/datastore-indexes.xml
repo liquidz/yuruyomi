@@ -1,0 +1,24 @@
+<!-- Indices written at Sun, 6 Jun 2010 17:06:40 UTC -->
+
+<datastore-indexes autoGenerate="true">
+
+    <!-- Used 2 times in query history -->
+    <datastore-index kind="book" ancestor="false" source="auto">
+        <property name="status" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
+    <!-- Used 2 times in query history -->
+    <datastore-index kind="book" ancestor="false" source="auto">
+        <property name="user" direction="asc"/>
+        <property name="status" direction="asc"/>
+    </datastore-index>
+
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="history" ancestor="false" source="auto">
+        <property name="user" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
+</datastore-indexes>
