@@ -28,7 +28,7 @@
   (list "取り消し" "とりけし" "取消" "取消し"))
 (def *words-list* (list *reading-words* *want-words* *finish-words* *having-words* *delete-words*))
 
-(def *yuruyomi-tag* "#yuruyomi_test")
+(def *yuruyomi-tag* "#yuruyomi")
 (def *yuruyomi-done-tag* "#done")
 ; }}}
 
