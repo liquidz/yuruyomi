@@ -130,7 +130,7 @@
         histories (find-history :user name :sort "date" :limit *show-history-num* :page now-page)
         pages (.intValue (Math/ceil (/ (count-histories :user name) *show-history-num*)))
         status "history"
-        user-data (get-user :user name)]
+        user-data (first (get-user :user name))]
     (layout
       (str *page-title* " - " name)
       :css ["/css/main.css"]
@@ -207,7 +207,7 @@
         books (if (> (count escaped-text) 1) (get-books key escaped-text :limit 1000 :offset 0) ())
         pages (.intValue (Math/ceil (/ (count books) *show-search-num*)))
         status "search"
-        user-data (get-user :user name)
+        user-data (first (get-user :user name))
         ]
     (layout
       (str *page-title* " - " name)

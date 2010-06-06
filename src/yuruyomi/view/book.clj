@@ -7,7 +7,7 @@
   {"reading" "読んでる" "finish" "読み終わった"
    "want" "欲しい" "have" "持っている" "delete" "削除" "new" "新規登録"}
   )
-(def *show-title-length* 10)
+(def *show-title-length* 8)
 
 (defn shorten-title [title]
   (if (> (count title) *show-title-length*)
