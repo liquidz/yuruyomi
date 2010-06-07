@@ -4,12 +4,14 @@
 		<url>/admin/cron/twitter</url>
 		<description>collect tweets every 10 minutes</description>
 		<schedule>every 10 minutes</schedule>
+		<timezone>Asia/Tokyo</timezone>
 	</cron>
 
 	<cron>
 		<url>/admin/cron/user</url>
 		<description>collect user data every day</description>
 		<schedule>every 24 hours</schedule>
+		<timezone>Asia/Tokyo</timezone>
 	</cron>
 
 </cronentries>

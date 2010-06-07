@@ -87,6 +87,7 @@
     )
   )
 
+; =count-entity
 (defn count-entity [kind & options]
   (let [[q fo] (apply make-query (cons kind options))]
     (count-entities q)

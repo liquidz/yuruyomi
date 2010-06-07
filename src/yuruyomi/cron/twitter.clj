@@ -32,16 +32,17 @@
 (def *yuruyomi-done-tag* "#done")
 ; }}}
 
-(def *re-book-sep* #"\s*[,、]\s*")
-(def *re-title-author-sep* #"\s*[:：]\s*")
+;(def *re-book-sep* #"\s*[,、]\s*")
+(def *re-book-sep* #"[\s　]+と[\s　]+")
+(def *re-title-author-sep* #"[\s　]+[:：][\s　]+")
 
 
 (defn- string->long [s] (Long/parseLong s))
 (defn has-word? [s col] (some #(su2/contains? s %) col))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
-(defn delete-hash-tag [s] (su2/replace s #"\s*#\w+\s*" ""))
+(defn delete-hash-tag [s] (su2/replace s #"[\s　]*#\w+[\s　]*" ""))
 (defn delete-words [s]
-  (let [ls (su2/split s #"\s+")
+  (let [ls (su2/split s #"[\s　]+")
         [n s] (se/find-first #(has-word-all? (second %)) (se/indexed ls))]
     ; 見つかったword以降は全て無視
     (su2/join " " (take n ls))
@@ -53,10 +54,10 @@
 ; "hello RT @hoge ddd / o-sa- xxx #tag"
 ; => "ddd / o-sa- hello #tag"
 (defn convert-rt-string [s]
-  (let [[msg & more] (su2/split s #"\s*(RT|Rt|rT|rt)\s*@\w+:?\s*")]
+  (let [[msg & more] (su2/split s #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*")]
     (cond
       (empty? more) s
-      :else (su2/join " " (map #(if (has-word-all? %) msg %) (su2/split (last more) #"\s+")))
+      :else (su2/join " " (map #(if (has-word-all? %) msg %) (su2/split (last more) #"[\s　]+")))
       )
     )
   )
@@ -66,7 +67,7 @@
     [(su2/replace title #"\"" "")
      (if (empty? more) ""
        ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
-       (-> more first su2/trim (extended-split #"\s+" "\"") first (su2/replace #"\"" "") su2/trim)
+       (-> more first su2/trim (extended-split #"[\s　]+" "\"") first (su2/replace #"\"" "") su2/trim)
        )]
     )
   )
@@ -126,6 +127,7 @@
   )
 
 (defn twitter-test [user image text]
+  (set-default-timezone)
   (let [name (if (or (nil? user) (su2/blank? user)) "testuser" user)
         icon (if (or (nil? image) (su2/blank? user)) "/img/npc.png" image)
         res {:created-at (now) :from-user name :from-user-id 0 :id 0

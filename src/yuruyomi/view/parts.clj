@@ -6,9 +6,9 @@
   [:div {:id "footer"}
    [:img {:src "http://code.google.com/appengine/images/appengine-silver-120x30.gif" :alt "Powered by Google App Engine"}]
    [:ul
-    [:li [:a {:href ""} "ÍøÍÑµ¬Ìó"]]
-    [:li [:a {:href ""} "¥Ø¥ë¥×"]]
-    [:li [:a {:href "http://github.com/liquidz/yuruyomi"} "¥½¡¼¥¹¥³¡¼¥É"]]
+    [:li [:a {:href ""} "åˆ©ç”¨è¦ç´„"]]
+    [:li [:a {:href ""} "ãƒ˜ãƒ«ãƒ—"]]
+    [:li [:a {:href "http://github.com/liquidz/yuruyomi"} "ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰"]]
     [:li "Copyright &copy; 2010 " [:a {:href "http://twitter.com/uochan/"} "@uochan"] ". All rights reserved."]
     ]
    ]
@@ -18,12 +18,12 @@
 (defn search-form [name]
   [:form {:method "GET" :action (str "/user/" name "/search")}
    [:select {:name "mode"}
-    [:option {:value "title" :selected "selected"} "¥¿¥¤¥È¥ë"]
-    [:option {:value "author"} "Ãø¼Ô"]
+    [:option {:value "title" :selected "selected"} "ã‚¿ã‚¤ãƒˆãƒ«"]
+    [:option {:value "author"} "è‘—è€…"]
     ]
    [:input {:type "text" :name "keyword"}]
    ;[:input {:type "hidden" :name "user" :value name}]
-   [:input {:type "submit" :value "¸¡º÷"}]
+   [:input {:type "submit" :value "æ¤œç´¢"}]
    ]
   ) ; }}}
 

@@ -77,6 +77,7 @@
   )
 
 (defn save-book [tweet]
+  (set-default-timezone)
   (let [name (:from-user tweet), title (:title tweet)
         author (:author tweet), status (:status tweet)
         icon (:profile-image-url tweet), date (now)

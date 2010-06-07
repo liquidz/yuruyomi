@@ -237,6 +237,9 @@
                 (get-books :user name :status status :limit *show-finish-books-num* :page now-page :sort "date")
                 (get-books :user name :status-not "finish"); :sort "date")
                 )
+        other-book-count (if is-finish?
+                           (count-books :status-not "finish" :limit 1 :offset 0)
+                           (count-books :status "finish" :limit 1 :offset 0))
         pages (if is-finish?
                 (.intValue (Math/ceil (/ (count-books :user name :status status) *show-finish-books-num*)))
                 0)
@@ -253,7 +256,7 @@
        (search-form name)
        ]
 
-      (if (empty? books)
+      (if (and (empty? books) (zero? other-book-count))
         (first-user-page name)
         (list
           [:div {:id "info"}
@@ -264,7 +267,12 @@
            (make-info-ul *etc-menu* :name name :class "etc" :select status :user-data user-data)
            ]
 
-          [:div {:id "container"} (map book->html books) ]
+          [:div {:id "container"} 
+           (if (empty? books)
+             [:h3 ]
+             (map book->html books)
+             )
+           ]
 
           (when is-finish? (pager name status now-page pages))
           )
