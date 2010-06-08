@@ -8,6 +8,7 @@
   (:require
      [clojure.contrib.seq-utils :as se]
      [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.logging :as log]
      )
   )
 
@@ -33,8 +34,10 @@
 ; }}}
 
 ;(def *re-book-sep* #"\s*[,、]\s*")
-(def *re-book-sep* #"[\s　]+と[\s　]+")
-(def *re-title-author-sep* #"[\s　]+[:：][\s　]+")
+;(def *re-book-sep* #"[\s　]+と[\s　]+")
+(def *re-book-sep* #"[\s　]+[と\s　]*と[\s　]+")
+
+(def *re-title-author-sep* #"[\s　]*[:：][\s　]*")
 
 
 (defn- string->long [s] (Long/parseLong s))
@@ -109,17 +112,19 @@
     )
   )
 
-(defnk update-tweets [tweets last-id :max-id nil]
+(defnk update-tweets [tweets last-id :max-id -1]
   (loop [save-targets tweets
          local-last-id last-id]
     (cond
       ; 最後まで記録できたらQueryのmax-idを記録
-      (empty? save-targets) (when (! nil? max-id) (update-max-id max-id))
+      (empty? save-targets) (when (pos? max-id) (update-max-id max-id))
       :else (let [target (first save-targets)]
-              (if (try (save-book target) (catch Exception _ false))
+              (if (try (save-book target) (catch Exception e
+                                            (log/warn (str "save book fail: " (.getMessage e)))
+                                            false))
                 (recur (rest save-targets) (:id target))
                 ; 途中で失敗した場合には次回途中から検索するようにIDを記録
-                (when (! su2/blank? local-last-id) (update-max-id local-last-id))
+                (when (pos? local-last-id) (update-max-id local-last-id))
                 )
               )
       )
@@ -140,9 +145,13 @@
 
 (defn collect-tweets []
   (let [last-id (get-max-id)
-        res (apply twitter-search-all (concat (list *yuruyomi-tag*)
-                                              (if (su2/blank? last-id) ()
-                                                (list :since-id (string->long last-id)))))
+        args (concat (list *yuruyomi-tag*)
+                     (if (pos? last-id) (list :since-id last-id) ()))
+        res (try (apply twitter-search-all args)
+              (catch Exception e
+                (log/warn (str "twitter-search-all fail: " (.getMessage e)))
+                nil
+                ))
         ]
     (when (! nil? res)
       (update-tweets (->> res :tweets tweets->books (sort #(< (:id %1) (:id %2))))

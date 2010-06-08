@@ -35,9 +35,14 @@
   )
 
 (def *title-author-test-data*
-  (list "aaa : bbb" "aaa ： bbb"
-        "\"a:a\":bbb" "\"a：a\":bbb" "\"a:a\"：bbb"
-        "\":::\":\":::\"" "aaa:bbb:ccc:ddd"
+  (list "aaa : bbb"
+        "aaa ： bbb"
+        "aaa　: bbb"
+        "\"a:a\":bbb"
+        "\"a：a\"　:bbb"
+        "\"a:a\"：bbb"
+        "\":::\" 　:　 \":::\""
+        "aaa:bbb:ccc:　ddd"
         "\"a a\":\"b b\""
         )
   )
@@ -45,14 +50,15 @@
 (def *test-data2*
   (list
     {:created-at "1", :text "aaa 読んでる"}
-    {:created-at "2", :text "aaa, ccc 読んでる"}
-    {:created-at "3", :text "aaa:bbb、ccc 読んでる"}
-    {:created-at "4", :text "aaa , ccc ： ddd 読んでる"}
-    {:created-at "5", :text "aaa: bbb, ccc :ddd 読んでる"}
-    {:created-at "6", :text "aaa, ccc, eee 読んでる"}
-    {:created-at "7", :text "aaa,, eee 読んでる"}
-    {:created-at "8", :text "aaa,ccc, 読んでる"}
-    {:created-at "9", :text "aaa,ccc,, eee,,,"}
+    {:created-at "2", :text "aaa　と ccc 読んでる"}
+    {:created-at "3", :text "aaa:bbb と　ccc 読んでる"}
+    {:created-at "4", :text "aaa と ccc ： ddd 読んでる"}
+    {:created-at "5", :text "aaa: bbb と  ccc :ddd 読んでる"}
+    {:created-at "6", :text "aaa と ccc と eee 読んでる"}
+    {:created-at "7", :text "aaa と と eee 読んでる"}
+    {:created-at "7", :text "aaa と　と eee 読んでる"}
+    {:created-at "8", :text "aaa　とと ccc 読んでる"}
+    {:created-at "9", :text "aaa と ccc と と　　eee"}
     )
   )
 ; }}}
@@ -78,7 +84,7 @@
     ;(foreach println res)
     (is (every? #(= 3 (count (:title %))) res))
     (is (every? #(if (su2/blank? (:author %)) true (= 3 (count (:author %)))) res))
-    (is (= 16 (count res)))
+    (is (= 18 (count res)))
     )
   )
 

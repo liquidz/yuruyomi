@@ -16,7 +16,7 @@
                  [ring/ring-jetty-adapter "0.2.0"]
                  [hiccup/hiccup "0.2.3"]
                  [org.clojars.liquidz/simply "0.1.6"]
-                 [org.clojars.liquidz/twitter "0.0.3"]
+                 [org.clojars.liquidz/twitter "0.0.4"]
                  ]
 
   :dev-dependencies [[am.ik/clj-gae-testing "0.1.0"]]

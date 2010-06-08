@@ -4,12 +4,18 @@
      am.ik.clj-gae-ds.core
      [yuruyomi clj-gae-ds-wrapper]
      )
-  (:require [clojure.contrib.str-utils2 :as su2])
+  (:require 
+     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.logging :as log]
+     )
   )
 
 (def *yuruyomi-entity* "yuruyomi-core")
 
 ; private ---
+
+(defn- string->long [s] (Long/parseLong s))
+
 (defn- find-setting [key]
   (find-entity *yuruyomi-entity* :key key)
   )
@@ -34,17 +40,28 @@
   )
 
 (defn- save-setting [key value]
-  (ds-put (map-entity *yuruyomi-entity* :key key :value value))
+  (try
+    (ds-put (map-entity *yuruyomi-entity* :key key :value value))
+    (catch Exception e (str "setting save: " key " = " value ", " (.getMessage e)))
+    )
   )
 
 (defn- update-setting [entity new-value]
-  (set-prop entity :value new-value)
-  (ds-put entity)
+  (try
+    (set-prop entity :value new-value)
+    (ds-put entity)
+    (catch Exception e
+      (log/warn (str "setting update: " (get-prop entity :key) " = " new-value ", " (.getMessage e))))
+    )
   )
 
 ; public ---
 ; =get-max-id
-(defn get-max-id [] (get-setting "max-id" ""))
+(defn get-max-id [] 
+  (let [res (get-setting "max-id" "")]
+    (if (su2/blank? res) -1 (string->long res))
+    )
+  )
 
 ; =clear-max-id
 (defn clear-max-id []
@@ -61,11 +78,6 @@
     (if (empty? res)
       (save-setting "max-id" (str max-id))
       (update-setting (first res) (str max-id))
-;      (ds-put (map-entity *yuruyomi-entity* :key "max-id" :value (str max-id)))
-;      (let [x (first res)]
-;        (set-prop x :value (str max-id))
-;        (ds-put x)
-;        )
       )
     )
   )
