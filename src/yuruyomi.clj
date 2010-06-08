@@ -16,12 +16,14 @@
   (:require
      [clojure.contrib.seq-utils :as se]
      [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.logging :as log]
      [compojure.route :as route]
      )
   )
 
 (defroutes app
   (GET "/" req (let [name (escape-input (param req "name"))]
+                 (log/info "user kitayo")
                  (if (or (nil? name) (su2/blank? name)) (index-page) (redirect (str "/user/" name)))
                  )
        )

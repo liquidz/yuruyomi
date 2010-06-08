@@ -145,7 +145,8 @@
                                                 (list :since-id (string->long last-id)))))
         ]
     (when (! nil? res)
-      (update-tweets (-> res :tweets tweets->books) last-id :max-id (:max-id res))
+      (update-tweets (->> res :tweets tweets->books (sort #(< (:id %1) (:id %2))))
+                     last-id :max-id (:max-id res))
       )
     )
   )
