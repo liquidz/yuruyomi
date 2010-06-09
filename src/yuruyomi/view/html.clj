@@ -245,6 +245,8 @@
                 0)
         user-data (first (get-user :user name))
         ]
+    (println "books = " books)
+    (println "other book count = " other-book-count)
     (layout
       (str *page-title* " - " name)
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
