@@ -229,6 +229,18 @@
     )
   ) ; }}}
 
+(defn no-book-box [class]
+  (let [box (fn [label] [:div {:class (str "book no_book_msg " class)} [:h3 label]])]
+    (list
+      (case class
+        "reading" (box "読んでる本はありません")
+        "want" (box "欲しい本はありません")
+        "have" (box "持ってる本はありません")
+        )
+      )
+    )
+  )
+
 ; =user-page {{{
 (defnk user-page [name :status "all" :page 1]
   (let [is-finish? (= status "finish")
@@ -238,15 +250,13 @@
                 (get-books :user name :status-not "finish"); :sort "date")
                 )
         other-book-count (if is-finish?
-                           (count-books :status-not "finish" :limit 1 :offset 0)
-                           (count-books :status "finish" :limit 1 :offset 0))
+                           (count-books :user name :status-not "finish" :limit 1 :offset 0)
+                           (count-books :user name :status "finish" :limit 1 :offset 0))
         pages (if is-finish?
                 (.intValue (Math/ceil (/ (count-books :user name :status status) *show-finish-books-num*)))
                 0)
         user-data (first (get-user :user name))
         ]
-    (println "books = " books)
-    (println "other book count = " other-book-count)
     (layout
       (str *page-title* " - " name)
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
@@ -270,9 +280,19 @@
            ]
 
           [:div {:id "container"} 
-           (if (empty? books)
-             [:h3 ]
-             (map book->html books)
+           (cond
+             is-finish? (if (empty? books)
+                          [:h3 "読み終わった本はありません"]
+                          (map book->html books)
+                          )
+             (and (= status "all") (empty? books)) [:h3 "読んでる本、読みたい本などはありません"]
+             :else (let [x (group :status books)]
+                     (concat
+                       (if (empty? (:reading x)) (no-book-box "reading") (map book->html (:reading x)))
+                       (if (empty? (:want x)) (no-book-box "want") (map book->html (:want x)))
+                       (if (empty? (:have x)) (no-book-box "have") (map book->html (:have x)))
+                       )
+                     )
              )
            ]
 

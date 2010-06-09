@@ -8,6 +8,7 @@ var getImage = function(id){
  	Yuruyomi = {};
 
 	Yuruyomi.mainBookTypes = ["reading", "want", "have"];
+	Yuruyomi.noBookClass = ".no_book_msg";
 	Yuruyomi.fadeSpeed = 500;
 
 	Yuruyomi.getInfoType = function(obj){
@@ -48,11 +49,13 @@ var getImage = function(id){
 			$.each(Yuruyomi.mainBookTypes, function(){
 				if((""+this) !== type) Yuruyomi.showBooks(this);
 			});
+			$("#container " + Yuruyomi.noBookClass).hide();
 		} else {
 			if(type === "all"){
 				$.each(Yuruyomi.mainBookTypes, function(){
 					if((""+this) !== newType) Yuruyomi.hideBooks(this);
 				});
+				$("#container ." + newType).filter(Yuruyomi.noBookClass).fadeIn(Yuruyomi.fadeSpeed);
 			} else {
 				Yuruyomi.hideBooks(type, function(){
 					Yuruyomi.showBooks(newType);
@@ -75,7 +78,11 @@ var getImage = function(id){
 				return Yuruyomi.changeBooks($(e.target));
 			});
 
-			if(Yuruyomi.getInfoType() !== "all"){
+			var type = Yuruyomi.getInfoType();
+
+			if(type === "all"){
+				$("#container " + Yuruyomi.noBookClass).hide();
+			} else {
 				$("#container .book").hide();
 				Yuruyomi.changeBooks(selected);
 			}
