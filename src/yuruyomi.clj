@@ -43,6 +43,7 @@
   ;(GET "/admin/test" req (do (twitter-test (param req "text")) (redirect "/admin/")))
   (GET "/admin/test" req (do (apply twitter-test (params req "user" "image" "text")) (redirect "/admin/")))
   (GET "/admin/history" req (admin-history-page (param req "page")))
+  (GET "/admin/search_twitter" req [] (admin-search-twitter-page))
 
   (GET "/admin/cron/twitter" [] (do (collect-tweets) "fin"))
   (GET "/admin/cron/user" [] (do (collect-user) "fin"))

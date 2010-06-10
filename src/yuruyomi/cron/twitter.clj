@@ -159,7 +159,7 @@
                 nil
                 ))
         ]
-    (when (! nil? res)
+    (when (and (! nil? res) (! empty? (:tweets res)))
       (update-tweets (->> res :tweets tweets->books (sort #(< (:id %1) (:id %2))))
                      last-id :max-id (:max-id res))
       )
