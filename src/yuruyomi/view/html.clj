@@ -21,7 +21,7 @@
   )
 
 (def *show-finish-books-num* 15)
-(def *show-history-num* 5)
+(def *show-history-num* 20)
 (def *show-search-num* 20)
 (def *main-menu*
   {"all" "すべての本"
@@ -127,7 +127,7 @@
        (if (empty? histories)
          [:h3 "まだ履歴がありません"]
          [:table
-          [:tr [:th "タイトル"] [:th "著者"] [:th "ステータス"] [:th "日付"]]
+          [:tr [:th "タイトル"] [:th "著者"] [:th "ステータス"] [:th "日付"] [:th "つぶやき"]]
           (map
             (fn [h]
               [:tr
@@ -135,6 +135,7 @@
                [:td (:author h)]
                [:td (get *status-text* (:before h)) " → "(get *status-text*  (:after h))]
                [:td (:date h)]
+               [:td (:text h)]
                ]
               )
             histories

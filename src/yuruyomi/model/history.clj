@@ -17,11 +17,12 @@
   )
 
 ; =save-history
-(defnk save-history [:user nil :title nil :author "" :date nil :before "new" :after nil]
+(defnk save-history [:user nil :title nil :author "" :date nil :before "new" :after nil :text nil]
   (when (! or-nil? user title date after)
     (ds-put (map-entity *history-entity-name*
                         :user user :title title :author author
-                        :date date :before before :after after))
+                        :date date :before before :after after
+                        :text text))
     )
   )
 

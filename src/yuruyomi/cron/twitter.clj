@@ -77,9 +77,10 @@
 
 (defn tweets->books [tweets]
   (let [conv (except-dones :text tweets)
-        conv2 (map (fn [t] (assoc t :text ((comp convert-rt-string delete-hash-tag
-                                                 delete-html-symbol delete-html-tag) (:text t)))) conv)
-        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) conv2)) *words-list*)
+        conv2 (map #(assoc % :original_text (-> (:text %) delete-hash-tag delete-html-symbol delete-html-tag)) conv)
+        conv3 (map (fn [t] (assoc t :text ((comp convert-rt-string delete-hash-tag
+                                                 delete-html-symbol delete-html-tag) (:text t)))) conv2)
+        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) conv3)) *words-list*)
         ]
 
     (map (fn [t]
@@ -117,14 +118,19 @@
          local-last-id last-id]
     (cond
       ; 最後まで記録できたらQueryのmax-idを記録
-      (empty? save-targets) (when (pos? max-id) (update-max-id max-id))
+      (empty? save-targets) (when (pos? max-id) 
+                              (log/info (str "update max id to " max-id))
+                              (update-max-id max-id))
       :else (let [target (first save-targets)]
+              (log/info (str "try to save: " (:title target) " (" (:from-user target) "/" (:id target) ")"))
               (if (try (save-book target) (catch Exception e
                                             (log/warn (str "save book fail: " (.getMessage e)))
                                             false))
                 (recur (rest save-targets) (:id target))
                 ; 途中で失敗した場合には次回途中から検索するようにIDを記録
-                (when (pos? local-last-id) (update-max-id local-last-id))
+                (when (pos? local-last-id) 
+                  (log/info (str "update max id to " local-last-id " (local)"))
+                  (update-max-id local-last-id))
                 )
               )
       )

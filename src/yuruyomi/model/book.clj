@@ -112,7 +112,7 @@
                                          :author author :date date :status status :icon icon))
                      (change-user-data name (keyword status) inc)
                      (save-history :user name :title title :author author :date date
-                                   :before "new" :after status)
+                                   :before "new" :after status :text (:original_text tweet))
                      )
           ; 瓚狤碧心及手及毛凳蕙
           :else (let [before-status (get-prop x :status)]
@@ -131,7 +131,7 @@
                   (ds-put x)
 
                   (save-history :user name :title title :author (get-prop x :author)
-                                :date date :before before-status :after status)
+                                :date date :before before-status :after status :text (:original_text tweet))
                   )
           )
         )
