@@ -42,6 +42,7 @@
 
 (defn- string->long [s] (Long/parseLong s))
 (defn has-word? [s col] (some #(su2/contains? s %) col))
+(defn index-of-word [s col] (apply min (map #(.indexOf s %) col)))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
 (defn delete-hash-tag [s] (su2/replace s #"[\s　]*#\w+[\s　]*" ""))
 (defn delete-words [s]
@@ -75,12 +76,37 @@
     )
   )
 
+(defn- set-statuses [& args]
+  (if (zero? (mod (count args) 2))
+    (fold (fn [[ls label] res]
+                      (concat res (map #(assoc % :status label) ls))
+                      ) () (partition 2 args))
+    ()
+    )
+  )
+
 (defn tweets->books [tweets]
-  (let [conv (except-dones :text tweets)
-        conv2 (map #(assoc % :original_text (-> (:text %) delete-hash-tag delete-html-symbol delete-html-tag)) conv)
-        conv3 (map (fn [t] (assoc t :text ((comp convert-rt-string delete-hash-tag
-                                                 delete-html-symbol delete-html-tag) (:text t)))) conv2)
-        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) conv3)) *words-list*)
+  (let [delete-texts (comp delete-hash-tag delete-html-symbol delete-html-tag)
+        tweets-without-done (except-dones :text tweets)
+        tweets-with-original (map #(assoc % :original_text (delete-texts (:text %))) tweets-without-done)
+        converted-tweets (map (fn [t] (assoc t :text (convert-rt-string (:original_text t)))) tweets-with-original)
+;        tmp-tweets (if (> (count xxx) 1)
+;                     (map (fn [t] (assoc t :text (su2/take (:text t) (second (sort (map #(index-of-word (:text t) %) *words-list*)))))) converted-tweets)
+;                     converted-tweets
+;                     )
+;        converted-tweets (map (fn [t] (assoc t :text ((comp convert-rt-string delete-hash-tag
+;                                                 delete-html-symbol delete-html-tag) (:text t)))) tweets-with-original)
+
+        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) converted-tweets)) *words-list*)
+        ;[r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
+        ; ステータスを付加
+        tweets-with-status (set-statuses r "reading" w "want" f "finish" h "have" d "delete")
+        sorted-tweets (sort #(str< (:created-at %1) (:created-at %2)) tweets-with-status)
+        ; もしカンマなどで複数の本がある場合にはここで分けておく
+        splitted-tweets (fold (fn [x res]
+                                (concat res (map #(assoc x :text (delete-words %))
+                                                 (extended-split (:text x) *re-book-sep* "\""))))
+                              () sorted-tweets)
         ]
 
     (map (fn [t]
@@ -89,26 +115,27 @@
              (assoc t :title title :author author)
              )
            )
-         (fold
-           ; もしカンマなどで複数の本がある場合にはここで分けておく
-           (fn [x res]
-             (concat res (map #(assoc x :text %) (extended-split (:text x) *re-book-sep* "\"")))
-             )
-           ()
-           (sort
-             (fn [x y] (str< (:created-at x) (:created-at y)))
-             (map
-               #(assoc % :text (delete-words (:text %)))
-               (concat
-                 (map #(assoc % :status "reading") r)
-                 (map #(assoc % :status "want") w)
-                 (map #(assoc % :status "finish") f)
-                 (map #(assoc % :status "have") h)
-                 (map #(assoc % :status "delete") d)
-                 )
-               )
-             )
-           )
+         splitted-tweets
+;         (fold
+;           ; もしカンマなどで複数の本がある場合にはここで分けておく
+;           (fn [x res]
+;             (concat res (map #(assoc x :text %) (extended-split (:text x) *re-book-sep* "\"")))
+;             )
+;           ()
+;           (sort
+;             (fn [x y] (str< (:created-at x) (:created-at y)))
+;             (map
+;               #(assoc % :text (delete-words (:text %)))
+;               (concat
+;                 (map #(assoc % :status "reading") r)
+;                 (map #(assoc % :status "want") w)
+;                 (map #(assoc % :status "finish") f)
+;                 (map #(assoc % :status "have") h)
+;                 (map #(assoc % :status "delete") d)
+;                 )
+;               )
+;             )
+;           )
          )
     )
   )
