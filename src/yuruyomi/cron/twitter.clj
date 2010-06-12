@@ -15,15 +15,19 @@
 ; =CONSTANT {{{
 (def *reading-words*
   (list "読んでる" "よんでる" "読んでいる" "よんでいる"
-        "読中" "読み始めた" "読みはじめた" "よみはじめた" "読み中"))
+        "読中" "読み始めた" "読みはじめた" "よみはじめた" "読み中"
+        "読み始めて" "読みはじめて" "よみ始めて" "よみはじめて"))
 (def *want-words*
-  (list "欲しい" "ほしい" "読みたい" "よみたい" "読んでみたい" "よんでみたい" "買って帰る"
-        "買ってかえる" "かって帰る" "かってかえる" "買って行く" "買っていく" "かっていく"))
+  (list "欲しい" "ほしい" "読みたい" "よみたい" "読んでみたい" "よんでみたい" "買って帰"
+        "買ってかえ" "かって帰" "かってかえ" "買って行" "買ってい" "かってい" "買う" "買おう"
+        "買いたい"))
 (def *finish-words*
   (list "読み終わった" "よみおわった" "読みおわた" "よみおわた" "読了"
-        "どくりょう" "どくりょ" "読んだ" "よんだ"))
+        "どくりょう" "どくりょ" "読んだ" "よんだ"
+        "読み終えた" "読みおえた" "よみ終えた" "よみおえた"))
 (def *having-words*
   (list "買った" "かった" "買ってしまった" "かってしまった"
+        "買っちゃった" "かっちゃった"
         "持ってる" "もってる" "積ん読" "積読" "つんどく" "ゲット" "げっと" "GET"))
 (def *delete-words*
   (list "取り消し" "とりけし" "取消" "取消し"))
@@ -49,7 +53,10 @@
   (let [ls (su2/split s #"[\s　]+")
         [n s] (se/find-first #(has-word-all? (second %)) (se/indexed ls))]
     ; 見つかったword以降は全て無視
-    (su2/join " " (take n ls))
+    (if (and (! nil? n) (! nil? s))
+      (su2/join " " (take n ls))
+      s
+      )
     )
   )
 (defn delete-html-symbol [s] (su2/replace s #"&#\d+;" ""))
@@ -90,52 +97,34 @@
         tweets-without-done (except-dones :text tweets)
         tweets-with-original (map #(assoc % :original_text (delete-texts (:text %))) tweets-without-done)
         converted-tweets (map (fn [t] (assoc t :text (convert-rt-string (:original_text t)))) tweets-with-original)
-;        tmp-tweets (if (> (count xxx) 1)
-;                     (map (fn [t] (assoc t :text (su2/take (:text t) (second (sort (map #(index-of-word (:text t) %) *words-list*)))))) converted-tweets)
-;                     converted-tweets
-;                     )
-;        converted-tweets (map (fn [t] (assoc t :text ((comp convert-rt-string delete-hash-tag
-;                                                 delete-html-symbol delete-html-tag) (:text t)))) tweets-with-original)
-
-        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) converted-tweets)) *words-list*)
-        ;[r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
+        ; 各ワードに対して見つかったらそれ以降の文字列を削除する
+        ;  →最終的に一番最初にあるワードが残る（それでステータスを判別する）
+        tmp-tweets (map (fn [t]
+               (assoc t :text
+               (fold (fn [x res]
+                       (let [i (.indexOf res x)]
+                         (if (pos? i) (su2/take res (+ i (count x))) res)
+                         )
+                       ) (:text t) (apply concat *words-list*))
+                      )
+               ) converted-tweets)
+        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
         ; ステータスを付加
         tweets-with-status (set-statuses r "reading" w "want" f "finish" h "have" d "delete")
-        sorted-tweets (sort #(str< (:created-at %1) (:created-at %2)) tweets-with-status)
+        tweets-without-words (map #(assoc % :text (delete-words (:text %))) tweets-with-status)
+        sorted-tweets (sort #(str< (:created-at %1) (:created-at %2)) tweets-without-words)
         ; もしカンマなどで複数の本がある場合にはここで分けておく
         splitted-tweets (fold (fn [x res]
-                                (concat res (map #(assoc x :text (delete-words %))
-                                                 (extended-split (:text x) *re-book-sep* "\""))))
-                              () sorted-tweets)
+                                (concat res (map #(assoc x :text %) (extended-split (:text x) *re-book-sep* "\"")))
+                                ) () sorted-tweets)
         ]
 
     (map (fn [t]
-           ;(let [[title author] (string->book-title-author (delete-words (:text t)))]
            (let [[title author] (string->book-title-author (:text t))]
              (assoc t :title title :author author)
              )
            )
          splitted-tweets
-;         (fold
-;           ; もしカンマなどで複数の本がある場合にはここで分けておく
-;           (fn [x res]
-;             (concat res (map #(assoc x :text %) (extended-split (:text x) *re-book-sep* "\"")))
-;             )
-;           ()
-;           (sort
-;             (fn [x y] (str< (:created-at x) (:created-at y)))
-;             (map
-;               #(assoc % :text (delete-words (:text %)))
-;               (concat
-;                 (map #(assoc % :status "reading") r)
-;                 (map #(assoc % :status "want") w)
-;                 (map #(assoc % :status "finish") f)
-;                 (map #(assoc % :status "have") h)
-;                 (map #(assoc % :status "delete") d)
-;                 )
-;               )
-;             )
-;           )
          )
     )
   )

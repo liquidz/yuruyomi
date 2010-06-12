@@ -23,6 +23,7 @@
 (def *show-finish-books-num* 15)
 (def *show-history-num* 20)
 (def *show-search-num* 20)
+(def *show-books-num* 20)
 (def *main-menu*
   {"all" "すべての本"
    "reading" "読んでる本"
@@ -88,8 +89,14 @@
                   :href (str "/user/" name (if (= k "all") "" (str "/" k)))
                   :class (selected? select k)}
               (get menu-pair k)
-              (when (and (! = k "all") (! nil? user-data) (! nil? (get user-data (keyword k))))
-                (str " (" (get user-data (keyword k)) ")")
+              ;(when (and (! = k "all") (! nil? user-data) (! nil? (get user-data (keyword k))))
+              (when (or (= k "all") (and (! nil? user-data) (! nil? (get user-data (keyword k)))))
+                (str " ("
+                     (if (= k "all")
+                       (fold (fn [x res] (+ (get user-data x) res)) 0 (list :reading :want :finish :have))
+                       (get user-data (keyword k))
+                       )
+                     ")")
                 )
               ]
          ]
@@ -237,6 +244,7 @@
         "reading" (box "読んでる本はありません")
         "want" (box "欲しい本はありません")
         "have" (box "持ってる本はありません")
+        "finish" (box "読み終わった本はありません")
         )
       )
     )
@@ -244,18 +252,23 @@
 
 ; =user-page {{{
 (defnk user-page [name :status "all" :page 1]
-  (let [is-finish? (= status "finish")
+  (let [is-all? (= status "all")
+        is-finish? (= status "finish")
         now-page (if (pos? (i page)) (i page) 1)
-        books (if is-finish?
-                (get-books :user name :status status :limit *show-finish-books-num* :page now-page :sort "date")
-                (get-books :user name :status-not "finish"); :sort "date")
+;        books (if is-finish?
+;                (get-books :user name :status status :limit *show-finish-books-num* :page now-page :sort "date")
+;                (get-books :user name :status-not "finish"); :sort "date")
+;                )
+        books (if is-all?
+                (get-books :user name :limit *show-books-num* :page now-page :sort "date")
+                (get-books :user name :status status :limit *show-books-num* :page now-page :sort "date")
                 )
-        other-book-count (if is-finish?
-                           (count-books :user name :status-not "finish" :limit 1 :offset 0)
-                           (count-books :user name :status "finish" :limit 1 :offset 0))
-        pages (if is-finish?
-                (.intValue (Math/ceil (/ (count-books :user name :status status) *show-finish-books-num*)))
-                0)
+        book-num (apply count-books (concat (list :user name) (if is-all? () (list :status status))))
+;        other-book-count (if is-finish?
+;                           (count-books :user name :status-not "finish" :limit 1 :offset 0)
+;                           (count-books :user name :status "finish" :limit 1 :offset 0))
+        other-book-num (if is-all?  0 (count-books :user name :status-not status :limit 1 :offset 0))
+        pages (.intValue (Math/ceil (/ book-num *show-books-num*)))
         user-data (first (get-user :user name))
         ]
     (layout
@@ -269,7 +282,7 @@
        (search-form name)
        ]
 
-      (if (and (empty? books) (zero? other-book-count))
+      (if (and (empty? books) (zero? other-book-num))
         (first-user-page name)
         (list
           [:div {:id "info"}
@@ -282,22 +295,25 @@
 
           [:div {:id "container"} 
            (cond
-             is-finish? (if (empty? books)
-                          [:h3 "読み終わった本はありません"]
-                          (map book->html books)
-                          )
-             (and (= status "all") (empty? books)) [:h3 "読んでる本、読みたい本などはありません"]
-             :else (let [x (group :status books)]
-                     (concat
-                       (if (empty? (:reading x)) (no-book-box "reading") (map book->html (:reading x)))
-                       (if (empty? (:want x)) (no-book-box "want") (map book->html (:want x)))
-                       (if (empty? (:have x)) (no-book-box "have") (map book->html (:have x)))
-                       )
-                     )
+             (empty? books) (no-book-box status)
+;             is-finish? (if (empty? books)
+;                          [:h3 "読み終わった本はありません"]
+;                          (map book->html books)
+;                          )
+;             (and (= status "all") (empty? books)) [:h3 "読んでる本、読みたい本などはありません"]
+             :else (map book->html books)
+;             (let [x (group :status books)]
+;                     (concat
+;                       (if (empty? (:reading x)) (no-book-box "reading") (map book->html (:reading x)))
+;                       (if (empty? (:want x)) (no-book-box "want") (map book->html (:want x)))
+;                       (if (empty? (:have x)) (no-book-box "have") (map book->html (:have x)))
+;                       (if (empty? (:finish x)) (no-book-box "finish") (map book->html (:finish x)))
+;                       )
+;                     )
              )
            ]
 
-          (when is-finish? (pager name status now-page pages))
+          (pager name status now-page pages)
           )
         )
 

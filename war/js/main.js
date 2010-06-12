@@ -72,6 +72,7 @@ var getImage = function(id){
 	// }}}
 
 	$(function(){
+			/*
 		var selected = $("#info ul li a.selected");
 		if(selected.attr("id") !== "finish_books"){
 			$("#info ul.main li a").bind("click", function(e){
@@ -87,6 +88,7 @@ var getImage = function(id){
 				Yuruyomi.changeBooks(selected);
 			}
 		}
+		*/
 
 		var books = $("div.book img");
 		var i = 0, l = books.length;

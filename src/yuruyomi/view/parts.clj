@@ -7,7 +7,7 @@
    [:img {:src "http://code.google.com/appengine/images/appengine-silver-120x30.gif" :alt "Powered by Google App Engine"}]
    [:ul
     [:li [:a {:href ""} "利用規約"]]
-    [:li [:a {:href ""} "ヘルプ"]]
+    [:li [:a {:href "http://wiki.github.com/liquidz/yuruyomi/770264"} "ヘルプ"]]
     [:li [:a {:href "http://github.com/liquidz/yuruyomi"} "ソースコード"]]
     [:li "Copyright &copy; 2010 " [:a {:href "http://twitter.com/uochan/"} "@uochan"] ". All rights reserved."]
     ]
