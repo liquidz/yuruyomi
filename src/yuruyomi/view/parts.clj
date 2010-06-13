@@ -1,4 +1,12 @@
 (ns yuruyomi.view.parts
+  (:use simply)
+  )
+
+(def *page-title* "ゆるよみ ベータ")
+(def *no-space* "margin:0;padding:0")
+
+(defnk mobile-border [:color "#dbef02" :height "5px" :text "&nbsp;" :css ""]
+  [:div {:style (str "background-color:" color ";height:" height ";font-size:small;" css)} text]
   )
 
 ; footer {{{
@@ -12,7 +20,17 @@
     [:li "Copyright &copy; 2010 " [:a {:href "http://twitter.com/uochan/"} "@uochan"] ". All rights reserved."]
     ]
    ]
-  ) ; }}}
+  )
+
+(def mobile-footer
+  (list
+    (mobile-border :color "#aaa")
+    [:p {:style "margin:0;padding;0;font-size:x-small;text-align:center"}
+     "(C) 2010 " [:a {:href "http://twtr.jp/user/uochan"} "@uochan"]]
+    )
+  )
+
+; }}}
 
 ; search-form {{{
 (defn search-form [name]
@@ -27,3 +45,9 @@
    ]
   ) ; }}}
 
+(def mobile-header
+  (list
+    ;[:p {:style "background: #dbef02;font-size: x-small"} "ゆる～く読書。ゆる～く管理。"]
+    [:p {:style "text-align:center;"} [:img {:src "/img/mobile_logo.png" :alt *page-title*}]]
+    )
+  )

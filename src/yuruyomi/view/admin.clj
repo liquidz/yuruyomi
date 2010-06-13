@@ -48,20 +48,24 @@
     )
   )
 
-(defn admin-search-twitter-page []
-  (let [last-id (get-max-id)
+(defn admin-search-twitter-page [m]
+  (let [mode (case m "all" :all :else :since)
+        last-id (get-max-id)
         args (concat (list *yuruyomi-tag*)
-                     (if (pos? last-id) (list :since-id last-id) ()))
+                     (if (and (pos? last-id) (= mode :since)) (list :since-id last-id) ()))
         res (try (apply twitter-search-all args) (catch Exception _ nil))
         ]
     (layout
       *admin-page-title*
       :css ["/css/admin.css"]
+      :js ["/js/jquery-1.4.2.min.js" "/js/jquery.colorize-2.0.0.js" "/js/admin.js"]
       (admin-menu)
+      [:p [:a {:href "/admin/search_twitter?mode=all"} "show all"]]
       [:dl
        (map (fn [t]
               (list
-                [:dt (:from-user t) " : id = " (:id t)]
+                [:dt (:from-user t) " : id = " (:id t)
+                 (when (= mode :all) (list " " [:a {:href (str "/admin/save?id=" (:id t))} "save"]))]
                 [:dd (:text t)]
                 )
               )
@@ -72,20 +76,14 @@
     )
   )
 
-(defnk admin-book->html [book :show-user? false :show-status? false :show-delete? false]
-  [:p
-   "title: " (:title book) " / author: " (:author book)
-   (list " by " [:a {:href (str "/user/" (:user book))} (:user book)])
-   " (" (:date book)
-   (if show-status?
-     (list ", " (:status book) ")")
-     ")"
-     )
-   (if show-delete?
-     [:a {:href (str "/admin/del?id=" (:id book))} "del"]
-     )
-   ;[:div {:id (str "box" (:id book))}]
-   ;[:a {:href (str "javascript:getImage(" (:id book) ");")} "get-image"]
+(defn admin-book->html [book]
+  [:tr
+   [:td (:title book)]
+   [:td (:author book)]
+   [:td [:a {:href (str "/user/" (:user book))} (:user book)]]
+   [:td (:date book)]
+   [:td (:status book)]
+   [:td [:a {:href (str "/admin/del?id=" (:id book))} "del"]]
    ]
   )
 
@@ -100,11 +98,18 @@
     (layout
       *admin-page-title*
       :css ["/css/admin.css"]
+      :js ["/js/jquery-1.4.2.min.js" "/js/jquery.colorize-2.0.0.js" "/js/admin.js"]
       (admin-menu)
       [:hr]
       [:p "count = " (count-books)]
-      (map #(admin-book->html % :show-user? false :show-status? true :show-delete? true)
-           (get-books :limit 10 :page pp))
+
+      [:table
+       [:tr [:th "タイトル"] [:th "著者"] [:th "ユーザ"] [:th "日付"] [:th "ステータス"] [:th "削除"]]
+       (map admin-book->html (get-books :limit 10 :page pp))
+       ]
+
+;      (map #(admin-book->html % :show-user? false :show-status? true :show-delete? true)
+;           (get-books :limit 10 :page pp))
       [:hr]
       (map (fn [x]
              [:a {:href (str "/admin/?page=" x)} x]

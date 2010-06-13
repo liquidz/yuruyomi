@@ -12,8 +12,6 @@
      )
   )
 
-(def *page-title* "ゆるよみ ベータ")
-
 (defn ajax-get-book-image [id]
   (let [b (se/find-first #(= id (str (:id %))) (get-books))]
     (get-book-image (:title b) (:author b))
@@ -255,18 +253,11 @@
   (let [is-all? (= status "all")
         is-finish? (= status "finish")
         now-page (if (pos? (i page)) (i page) 1)
-;        books (if is-finish?
-;                (get-books :user name :status status :limit *show-finish-books-num* :page now-page :sort "date")
-;                (get-books :user name :status-not "finish"); :sort "date")
-;                )
         books (if is-all?
                 (get-books :user name :limit *show-books-num* :page now-page :sort "date")
                 (get-books :user name :status status :limit *show-books-num* :page now-page :sort "date")
                 )
         book-num (apply count-books (concat (list :user name) (if is-all? () (list :status status))))
-;        other-book-count (if is-finish?
-;                           (count-books :user name :status-not "finish" :limit 1 :offset 0)
-;                           (count-books :user name :status "finish" :limit 1 :offset 0))
         other-book-num (if is-all?  0 (count-books :user name :status-not status :limit 1 :offset 0))
         pages (.intValue (Math/ceil (/ book-num *show-books-num*)))
         user-data (first (get-user :user name))

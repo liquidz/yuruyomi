@@ -7,6 +7,13 @@
   {"reading" "読んでる" "finish" "読み終わった"
    "want" "欲しい" "have" "持っている" "delete" "削除" "new" "新規登録"}
   )
+(def *status-color*
+  {"reading" "#93d31b"
+   "finish" "#a1723a"
+   "want" "#e13b75"
+   "have" "#479ece"
+   }
+  )
 (def *show-title-length* 8)
 
 (defn shorten-title [title]
@@ -27,4 +34,13 @@
      ]
     )
   )
+
+;dbef02ff
+
+(defn mobile-book->html [book]
+  [:p {:style "margin:0;padding:0;font-size:small"} [:span {:style (str "color: " (get *status-color* (:status book)))} "■"]
+   (:title book)
+   ]
+  )
+
 

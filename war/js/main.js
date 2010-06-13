@@ -90,6 +90,10 @@ var getImage = function(id){
 		}
 		*/
 
+		var mobileUrl = encodeURIComponent(location.href.replace(/\/user/, "/m"));
+		var gcUrl = "http://chart.apis.google.com/chart?cht=qr&chs=110x160&chl=" + mobileUrl;
+		$("#container").append($("<div class='book'><div class='book_image'><img src='" + gcUrl + "' /></div><p class='title'>モバイル</p></div>"));
+
 		var books = $("div.book img");
 		var i = 0, l = books.length;
 		var loadImage = function(){

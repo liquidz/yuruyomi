@@ -130,25 +130,27 @@
   )
 
 (defnk update-tweets [tweets last-id :max-id -1]
-  (loop [save-targets tweets
-         local-last-id last-id]
-    (cond
-      ; 最後まで記録できたらQueryのmax-idを記録
-      (empty? save-targets) (when (pos? max-id) 
-                              (log/info (str "update max id to " max-id))
-                              (update-max-id max-id))
-      :else (let [target (first save-targets)]
-              (log/info (str "try to save: " (:title target) " (" (:from-user target) "/" (:id target) ")"))
-              (if (try (save-book target) (catch Exception e
-                                            (log/warn (str "save book fail: " (.getMessage e)))
-                                            false))
-                (recur (rest save-targets) (:id target))
-                ; 途中で失敗した場合には次回途中から検索するようにIDを記録
-                (when (pos? local-last-id) 
-                  (log/info (str "update max id to " local-last-id " (local)"))
-                  (update-max-id local-last-id))
+  (let [now-max-id (get-max-id)]
+    (loop [save-targets tweets
+           local-last-id last-id]
+      (cond
+        ; 最後まで記録できたらQueryのmax-idを記録
+        (empty? save-targets) (when (and (pos? max-id) (> max-id now-max-id))
+                                (log/info (str "update max id to " max-id))
+                                (update-max-id max-id))
+        :else (let [target (first save-targets)]
+                (log/info (str "try to save: " (:title target) " (" (:from-user target) "/" (:id target) ")"))
+                (if (try (save-book target) (catch Exception e
+                                              (log/warn (str "save book fail: " (.getMessage e)))
+                                              false))
+                  (recur (rest save-targets) (:id target))
+                  ; 途中で失敗した場合には次回途中から検索するようにIDを記録
+                  (when (and (pos? local-last-id) (> local-last-id now-max-id))
+                    (log/info (str "update max id to " local-last-id " (local)"))
+                    (update-max-id local-last-id))
+                  )
                 )
-              )
+        )
       )
     )
   )
@@ -162,6 +164,14 @@
                     :text text :to-user "testuser2" :to-user-id 1
                     }]
     (update-tweets (tweets->books (list res)) (get-max-id))
+    )
+  )
+
+(defn save-tweet [id]
+  (let [lid (string->long id)]
+    (when (< lid (get-max-id))
+      (-> (show-twitter-status lid) list tweets->books (update-tweets (get-max-id)))
+      )
     )
   )
 

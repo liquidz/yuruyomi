@@ -68,7 +68,14 @@
     :body body
     )
   )
-;(def mobile-layout pc-layout)
+
+(defn mobile-layout [title & body]
+  (base-layout
+    :head [:title title]
+    :body-attr {:style "margin:0;padding:0;"}
+    :body body
+    )
+  )
 
 
 ;(defnk layout [title :mobile? false & args]
