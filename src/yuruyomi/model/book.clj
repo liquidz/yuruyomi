@@ -49,23 +49,28 @@
     )
   )
 
-(defnk get-book-image [title author :size "medium"]
-  (cache-fn
-    (url-encode (str title size))
-    (fn []
+(defn make-book-cache-key [title author size]
+  (url-encode (str title author size))
+  )
+
+(defnk get-book-image-cache [title author :size "medium" :default ""]
+  (get-cached-value (make-book-cache-key title author size) :default default)
+  )
+
+(defnk get-book-image [title author :size "medium" :default ""]
+  (let [key (make-book-cache-key title author size)
+        val (get-cached-value key :default nil)]
+    (if (! nil? val)
+      val
       (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
             res (z/xml-zip (item-search-map req "Books" title {"Author" author, "ResponseGroup" "Images"}))
-            target-size (case size
-                          "small" :SmallImage
-                          "medium" :MediumImage
-                          "large" :LargeImage
-                          :else :MediumImage
-                          )
+            target-size (case size "small" :SmallImage "medium" :MediumImage
+                          "large" :LargeImage :else :MediumImage)
+            url (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
             ]
-        (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
+        (cache-val key url :default default :expiration 86400)
         )
       )
-    :expiration 86400
     )
   )
 

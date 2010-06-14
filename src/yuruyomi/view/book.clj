@@ -1,5 +1,7 @@
 (ns yuruyomi.view.book
-  (:use simply layout)
+  (:use
+     simply layout
+     [yuruyomi.model book])
   (:require [clojure.contrib.str-utils2 :as su2])
   )
 
@@ -15,6 +17,7 @@
    }
   )
 (def *show-title-length* 8)
+(def *default-book-image* "/img/noimg.png")
 
 (defn shorten-title [title]
   (if (> (count title) *show-title-length*)
@@ -24,10 +27,12 @@
   )
 
 (defnk book->html [book :show-user? false :show-status? false :show-delete? false]
-  (let [class-name (str "book " (:status book))]
+  (let [class-name (str "book " (:status book))
+        image-url (get-book-image-cache (:title book) (:author book) :default *default-book-image*)
+        no-image? (= image-url *default-book-image*)]
     [:div {:class class-name}
      [:div {:class "book_image"}
-      [:img {:src "/img/noimg.png" :width "110" :height "160" :id (:id book)}]
+      [:img {:src image-url :width "110" :height "160" :id (:id book) :class (if no-image? "load" "")}]
       ]
      [:p {:class "icon"} (get *status-text* (:status book))]
      [:p {:class "title"} (shorten-title (:title book))]
