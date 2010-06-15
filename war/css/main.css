@@ -211,6 +211,18 @@ ul.pager li.now span {
 	background: transparent url(../img/finish_icon.png) no-repeat top left;
 }
 
+#container .book .book_info {
+	position: absolute;
+	top: 60px;
+	left: 15;
+	width: 110px;
+	padding: 5px 0;
+	background: #000;
+	opacity: 0.8;
+	color: #fff;
+	display: none;
+}
+
 #container table {
 	margin: 20px 0 20px; 20px;
 	-webkit-border-radius: 5px;

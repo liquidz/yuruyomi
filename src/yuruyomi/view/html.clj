@@ -178,7 +178,8 @@
 
 ; =search-page {{{
 (defn search-page [name mode text page]
-  (let [now-page (if (and (! nil? page) (pos? (i page))) (i page) 1)
+  (let [pn (i (if (su2/blank? page) "1" page))
+        now-page (if (and (! nil? page) (pos? pn)) pn 1)
         key (case mode
               ["title" "author"] (keyword (str mode "-like"))
               :else :title-like

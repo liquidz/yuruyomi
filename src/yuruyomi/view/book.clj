@@ -35,7 +35,12 @@
       [:img {:src image-url :width "110" :height "160" :id (:id book) :class (if no-image? "load" "")}]
       ]
      [:p {:class "icon"} (get *status-text* (:status book))]
-     [:p {:class "title"} (shorten-title (:title book))]
+     [:div {:class "book_info"}
+      ;[:p {:class "title"} (shorten-title (:title book))]
+      [:p {:class "title"} (:title book)]
+      [:p {:class "author"} (:author book)]
+      [:p {:class "date"} (first (su2/split (:date book) #"\s+"))]
+      ]
      ]
     )
   )

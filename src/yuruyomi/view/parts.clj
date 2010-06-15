@@ -40,7 +40,7 @@
     [:option {:value "author"} "著者"]
     ]
    [:input {:type "text" :name "keyword"}]
-   ;[:input {:type "hidden" :name "user" :value name}]
+   [:input {:type "hidden" :name "page" :value "1"}]
    [:input {:type "submit" :value "検索"}]
    ]
   ) ; }}}

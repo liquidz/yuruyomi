@@ -90,9 +90,15 @@ var getImage = function(id){
 		}
 		*/
 
+		$(".book").hover(function(){
+			$(this).find(".book_info").fadeIn(250);
+		}, function(){
+			$(this).find(".book_info").fadeOut(250);
+		});
+
 		var mobileUrl = encodeURIComponent(location.href.replace(/\/user/, "/m"));
 		var gcUrl = "http://chart.apis.google.com/chart?cht=qr&chs=110x160&chl=" + mobileUrl;
-		$("#container").append($("<div class='book'><div class='book_image'><img src='" + gcUrl + "' /></div><p class='title'>モバイル</p></div>"));
+		$("#container").append($("<div class='book'><div class='book_image'><img src='" + gcUrl + "' /></div></div>"));
 
 		var books = $("div.book img.load");
 		var i = 0, l = books.length;
