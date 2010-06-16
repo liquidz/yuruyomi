@@ -78,8 +78,9 @@
 
 
 ; =find-entity
-(defn find-entity [kind & options]
-  (let [[q fo] (apply make-query (cons kind options))]
+;(defn find-entity [kind & options]
+(defn find-entity [& args]
+  (let [[q fo] (apply make-query args)]
     (if (nil? fo)
       (query-seq q)
       (query-seq q fo)
@@ -88,8 +89,9 @@
   )
 
 ; =count-entity
-(defn count-entity [kind & options]
-  (let [[q fo] (apply make-query (cons kind options))]
+;(defn count-entity [kind & options]
+(defn count-entity [& args]
+  (let [[q fo] (apply make-query args)]
     (count-entities q)
     )
   )

@@ -29,11 +29,11 @@
 
 (defn- find-books [& args]
   (let [m (apply array-map args)
-        user-like (:user-like m)
-        title-like (:title-like m)
-        author-like (:author-like m)
-        date-like (:date-like m)
-        res (apply find-entity (cons *book-entity-name* (fold concat () (dissoc m :user-like :title-like :author-like :date-like))))
+        user-like (:user-like m) title-like (:title-like m)
+        author-like (:author-like m) date-like (:date-like m)
+        find-args (fold concat () (dissoc m :user-like :title-like :author-like :date-like))
+        res (apply find-entity (cons *book-entity-name* find-args))
+        ;res (apply find-entity (cons *book-entity-name* (fold concat () (dissoc m :user-like :title-like :author-like :date-like))))
         ]
 
     (if (some #(! nil? %) [user-like title-like author-like date-like])
