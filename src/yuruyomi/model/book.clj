@@ -33,7 +33,6 @@
         author-like (:author-like m) date-like (:date-like m)
         find-args (fold concat () (dissoc m :user-like :title-like :author-like :date-like))
         res (apply find-entity (cons *book-entity-name* find-args))
-        ;res (apply find-entity (cons *book-entity-name* (fold concat () (dissoc m :user-like :title-like :author-like :date-like))))
         ]
 
     (if (some #(! nil? %) [user-like title-like author-like date-like])
@@ -76,6 +75,10 @@
 
 ; global version of find-books
 (defn get-books [& args] (map entity->book (apply find-books args)))
+
+(defn get-a-book [id]
+  (entity->book (ds-get (create-key *book-entity-name* (Long/parseLong id))))
+  )
 
 (defn count-books [& args]
   (apply count-entity (cons *book-entity-name* args))

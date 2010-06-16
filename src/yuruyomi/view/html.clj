@@ -13,7 +13,7 @@
   )
 
 (defn ajax-get-book-image [id]
-  (let [b (se/find-first #(= id (str (:id %))) (get-books))]
+  (let [b (get-a-book id)]
     (get-book-image (:title b) (:author b))
     )
   )
@@ -185,7 +185,7 @@
               :else :title-like
               )
         escaped-text (escape-input text)
-        books (if (> (count escaped-text) 1) (get-books key escaped-text :limit 1000 :offset 0) ())
+        books (if (! su2/blank? escaped-text) (get-books key escaped-text :limit 1000 :offset 0) ())
         pages (.intValue (Math/ceil (/ (count books) *show-search-num*)))
         status "search"
         user-data (first (get-user :user name))
