@@ -11,6 +11,8 @@ var getImage = function(id){
 	Yuruyomi.noBookClass = ".no_book_msg";
 	Yuruyomi.fadeSpeed = 500;
 
+	Yuruyomi.largeImageSize = 350;
+
 	Yuruyomi.getInfoType = function(obj){
 		var target = obj ? obj : $("#info ul li a.selected");
 		return target.attr("id").split("_")[0];
@@ -71,35 +73,47 @@ var getImage = function(id){
 	};
 	// }}}
 
-	$(function(){
+	jQuery.event.add(window, "load", function(){
+		var lbi = $("#large_book_image img");
+		if(lbi && lbi.height() > Yuruyomi.largeImageSize){
+			//lbi.attr("original_height", lbi.height());
+			//lbi.attr("original_width", lbi.width());
+			lbi.height(Yuruyomi.largeImageSize);
+
 			/*
-		var selected = $("#info ul li a.selected");
-		if(selected.attr("id") !== "finish_books"){
-			$("#info ul.main li a").bind("click", function(e){
-				return Yuruyomi.changeBooks($(e.target));
+			lbi.hover(function(){
+				var obj = $(this);
+				obj.animate({
+					width: parseInt(obj.attr("original_width")),
+					height: parseInt(obj.attr("original_height"))
+				}, 250);
+			}, function(){
+				var obj = $(this);
+				var nh = parseInt(obj.attr("original_height"));
+				var nw = parseInt(obj.attr("original_width"))
+				var sw = Yuruyomi.largeImageSize * nw / nh;
+				obj.animate({width: sw, height: Yuruyomi.largeImageSize}, 250);
 			});
-
-			var type = Yuruyomi.getInfoType();
-
-			if(type === "all"){
-				$("#container " + Yuruyomi.noBookClass).hide();
-			} else {
-				$("#container .book").hide();
-				Yuruyomi.changeBooks(selected);
-			}
+			*/
 		}
-		*/
+	});
 
+	$(function(){
+		// タイトル、著者のホバー表示
 		$(".book").hover(function(){
 			$(this).find(".book_info").fadeIn(250);
 		}, function(){
 			$(this).find(".book_info").fadeOut(250);
 		});
 
-		var mobileUrl = encodeURIComponent(location.href.replace(/\/user/, "/m"));
-		var gcUrl = "http://chart.apis.google.com/chart?cht=qr&chs=110x160&chl=" + mobileUrl;
-		$("#container").append($("<div class='book'><div class='book_image'><img src='" + gcUrl + "' /></div></div>"));
+		// QRコード生成
+		if($("#show_qr_code").length !== 0){
+			var mobileUrl = encodeURIComponent(location.href.replace(/\/user/, "/m"));
+			var gcUrl = "http://chart.apis.google.com/chart?cht=qr&chs=110x160&chl=" + mobileUrl;
+			$("#container").append($("<div class='book'><div class='book_image'><img src='" + gcUrl + "' /></div></div>"));
+		}
 
+		// 画像読み込み
 		var books = $("div.book img.load");
 		var i = 0, l = books.length;
 		var loadImage = function(){

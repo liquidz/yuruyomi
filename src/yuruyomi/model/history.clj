@@ -4,6 +4,9 @@
      am.ik.clj-gae-ds.core
      [yuruyomi clj-gae-ds-wrapper]
      )
+  (:require
+     [clojure.contrib.seq-utils :as se]
+     )
   )
 
 (def *history-entity-name* "history")
@@ -28,5 +31,16 @@
 
 (defn count-histories [& args]
   (apply count-entity (cons *history-entity-name* args))
+  )
+
+(defnk get-active-user [:limit 100]
+  (let [histories (find-history :sort "date" :limit limit :offset 0)]
+    (r-fold (fn [h res]
+              (if (nil? (se/find-first #(= % (:user h)) res))
+                (cons (:user h) res)
+                res
+                )
+              ) () histories)
+    )
   )
 

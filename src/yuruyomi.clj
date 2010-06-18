@@ -32,11 +32,13 @@
   (GET "/user/:name" req (user-page (escaped-param req "name")))
   (GET "/user/:name/history" req (history-page (escaped-param req "name")))
   (GET "/user/:name/history/:page" req (history-page (escaped-param req "name")) :page (escaped-param req "page"))
-  (GET "/user/:name/search" req (apply search-page (escaped-params req "name" "mode" "keyword" "page")))
   (GET "/user/:name/:status" req (user-page (escaped-param req "name") :status (escaped-param req "status")))
   (GET "/user/:name/:status/:page" req (user-page (escaped-param req "name") :status (escaped-param req "status") :page (escaped-param req "page")))
-  ;(GET "/search" req (show-search-html (param req "keyword") (param req "mode")))
   ; }}}
+  
+  (GET "/book/:title" req (book-page (escaped-param req "title")))
+  (GET "/tweet" req (redirect (apply redirect-to-twitter (escaped-params req "title" "author" "status"))))
+  (GET "/search" req (apply search-page (escaped-params req "user" "mode" "keyword" "page" "user_only")))
 
   (GET "/m/" req (let [name (escape-input (escaped-param req "name"))]
                    (if (or (nil? name) (su2/blank? name)) (mobile-index-page) (redirect (str "/m/" name)))))
