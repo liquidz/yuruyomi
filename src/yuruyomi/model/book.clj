@@ -86,11 +86,18 @@
 (defn get-books [& args] (map entity->book (apply find-books args)))
 
 (defn get-a-book [id]
-  (entity->book (ds-get (create-key *book-entity-name* (Long/parseLong id))))
+  (entity->book
+    (ds-get (create-key *book-entity-name*
+                        (if (string? id) (Long/parseLong id) id))))
   )
 
 (defn count-books [& args]
   (apply count-entity (cons *book-entity-name* args))
+  )
+
+(defn history->book [h]
+  (first (get-books :user (:user h) :title (:title h)
+                    :author (:author h) :limit 1 :offset 0))
   )
 
 (defn save-book [tweet]

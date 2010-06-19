@@ -36,7 +36,8 @@
   (GET "/user/:name/:status/:page" req (user-page (escaped-param req "name") :status (escaped-param req "status") :page (escaped-param req "page")))
   ; }}}
   
-  (GET "/book/:title" req (book-page (escaped-param req "title")))
+  ;(GET "/book/:title" req (book-page (to-utf8 (escaped-param req "title"))))
+  (GET "/book/:id" req (book-page (escaped-param req "id")))
   (GET "/tweet" req (redirect (apply redirect-to-twitter (escaped-params req "title" "author" "status"))))
   (GET "/search" req (apply search-page (escaped-params req "user" "mode" "keyword" "page" "user_only")))
   (GET "/status" _ (status-page))
@@ -48,7 +49,8 @@
   (GET "/m/:name/history/:page" req (mobile-history-page (escaped-param req "name") :page (escaped-param req "page")))
   (GET "/m/:name/:status" req (mobile-user-page (escaped-param req "name") :status (escaped-param req "status")))
   (GET "/m/:name/:status/:page" req (mobile-user-page (escaped-param req "name") :status (escaped-param req "status") :page (escaped-param req "page")))
-  (GET "/mb/:title" req (mobile-book-page (escaped-param req "title")))
+  ;(GET "/mb/:title" req (mobile-book-page (to-utf8 (escaped-param req "title"))))
+  (GET "/mb/:id" req (mobile-book-page (escaped-param req "id")))
 
 
   (GET "/ajax/getimage" req (ajax-get-book-image (param req "id")))

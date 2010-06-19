@@ -124,7 +124,7 @@
          [:h3 "まだ履歴がありません"]
          (table
            (map
-             #(list [:a {:href (str "/book/" (:title %))} (:title %)]
+             #(list [:a {:href (str "/book/" (:id (history->book %)))} (:title %)]
                     (:author %)
                     (str (get *status-text* (:before %)) " &raquo; " (get *status-text*  (:after %)))
                     (:date %) (:text %)
@@ -143,8 +143,9 @@
   ) ; }}}
 
 ; =book-page {{{
-(defn book-page [title]
-  (let [books (get-books :title title)
+(defn book-page [id]
+  (let [title (:title (get-a-book id))
+        books (get-books :title title)
         fb (first books)
         author (:author (se/find-first #(! su2/blank? (:author %)) books))
         img (get-book-image title author :size "large"
@@ -334,7 +335,8 @@
          ]
         ]
        (table
-         (map #(list [:a {:href (str "/book/" (:title %))} (:title %)]) new-books)
+         ;(map #(list [:a {:href (str "/book/" (:id (first (get-books :user (:user %) :title (:title %) :author (:author %) :limit 1 :offset 0))))} (:title %)]) new-books)
+         (map #(list [:a {:href (str "/book/" (:id (history->book %)))} (:title %)]) new-books)
          :header ["最近登録された本"]
          :footer? false
          :attr {:id "new_book_table"}

@@ -30,7 +30,7 @@
   (let [class-name (str "book " (:status book))
         image-url (get-book-image-cache (:title book) (:author book) :default *default-book-image*)
         no-image? (= image-url *default-book-image*)
-        book-link (fn [t] [:a {:href (str "/book/" (:title book))} t])
+        book-link (fn [t] [:a {:href (str "/book/" (:id book))} t])
         ]
     [:div {:class class-name}
      [:div {:class "book_image"}
@@ -50,7 +50,7 @@
 
 (defn mobile-book->html [book]
   [:p {:style "margin:0;padding:0;font-size:small"} [:span {:style (str "color: " (get *status-color* (:status book)))} "■"]
-   [:a {:href (str "/mb/" (:title book))} (:title book)]
+   [:a {:href (str "/mb/" (:id book))} (:title book)]
    ]
   )
 

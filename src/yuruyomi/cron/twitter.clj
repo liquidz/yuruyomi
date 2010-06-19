@@ -44,7 +44,7 @@
 (def *re-title-author-sep* #"[\s　]*[:：][\s　]*")
 
 
-(defn- string->long [s] (Long/parseLong s))
+(defn string->long [s] (Long/parseLong s))
 (defn has-word? [s col] (some #(su2/contains? s %) col))
 (defn index-of-word [s col] (apply min (map #(.indexOf s %) col)))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
