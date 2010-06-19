@@ -14,6 +14,7 @@
      [clojure.zip :as z]
      [clojure.contrib.zip-filter :as zf]
      [clojure.contrib.zip-filter.xml :as zfx]
+     [clojure.contrib.logging :as log]
      )
   )
 
@@ -58,16 +59,24 @@
 
 (defnk get-book-image [title author :size "medium" :default ""]
   (let [key (make-book-cache-key title author size)
-        val (get-cached-value key :default nil)]
+        val (get-cached-value key :default nil)
+        base-arg {"ResponseGroup" "Images"}
+        search-arg (if (su2/blank? author) base-arg (assoc base-arg "Author" author))
+        ]
     (if (! nil? val)
       val
-      (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
-            res (z/xml-zip (item-search-map req "Books" title {"Author" author, "ResponseGroup" "Images"}))
-            target-size (case size "small" :SmallImage "medium" :MediumImage
-                          "large" :LargeImage :else :MediumImage)
-            url (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
-            ]
-        (cache-val key url :default default :expiration 86400)
+      (try
+        (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
+              res (z/xml-zip (item-search-map req "Books" title search-arg))
+              target-size (case size "small" :SmallImage "medium" :MediumImage
+                            "large" :LargeImage :else :MediumImage)
+              url (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
+              ]
+          (cache-val key url :default default :expiration 86400)
+          )
+        (catch Exception e
+          (log/warn (str "get-book-image error: " (.getMessage e)))
+          default)
         )
       )
     )

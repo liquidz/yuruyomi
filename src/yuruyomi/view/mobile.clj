@@ -65,7 +65,7 @@
 (defnk mobile-pager [name status now-page max-page :link (fn [x] (str "/" x))]
   (when (> max-page 1)
     (let [prev-label "[4.前]"
-          next-label "[5.次]"]
+          next-label "[6.次]"]
       [:div {:class "pager" :style "font-size:small"}
        (mobile-border :color "#ddd")
        (if (> now-page 1)
@@ -123,7 +123,7 @@
         fb (first books)
         author (:author (se/find-first #(! su2/blank? (:author %)) books))
         img (get-book-image (:title fb) (:author fb) :size "medium"
-                            :default *default-book-image*)
+                                 :default *default-book-image*)
         histories (find-history :title title :sort "date" :limit 5 :offset 0)
         ]
     (mobile-layout

@@ -48,8 +48,6 @@
     )
   )
 
-;dbef02ff
-
 (defn mobile-book->html [book]
   [:p {:style "margin:0;padding:0;font-size:small"} [:span {:style (str "color: " (get *status-color* (:status book)))} "■"]
    [:a {:href (str "/mb/" (:title book))} (:title book)]

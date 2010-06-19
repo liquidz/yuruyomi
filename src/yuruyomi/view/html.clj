@@ -147,8 +147,8 @@
   (let [books (get-books :title title)
         fb (first books)
         author (:author (se/find-first #(! su2/blank? (:author %)) books))
-        img (get-book-image (:title fb) (:author fb) :size "large"
-                            :default *default-book-image*)
+        img (get-book-image title author :size "large"
+                                 :default *default-book-image*)
         histories (find-history :title title :sort "date" :limit 10 :offset 0)
         ]
     (layout
