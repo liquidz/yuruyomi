@@ -21,6 +21,16 @@
         <property name="date" direction="desc"/>
     </datastore-index>
 
+    <datastore-index kind="history" ancestor="false" source="auto">
+        <property name="before" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
+    <datastore-index kind="history" ancestor="false" source="auto">
+        <property name="title" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
     <!-- Used 1 time in query history -->
     <datastore-index kind="book" ancestor="false" source="auto">
         <property name="user" direction="asc"/>

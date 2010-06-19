@@ -13,8 +13,12 @@
 (def *page-title* "ゆるよみ ベータ")
 (def *no-space* "margin:0;padding:0")
 
-(defnk mobile-border [:color "#dbef02" :height "5px" :text "&nbsp;" :css ""]
-  [:div {:style (str "background-color:" color ";height:" height ";font-size:small;" css)} text]
+;(defnk mobile-border [:color "#dbef02" :height "5px" :text "&nbsp;" :css "" :align "center"]
+(defnk mobile-border [:color "#B5D900" :height "5px" :text "&nbsp;"
+                      :text-color "#fff" :css "" :align "center"]
+  [:div {:style (str "background-color:" color ";height:" height 
+                     ";color:" text-color ";text-align:" align
+                     ";font-size:small;" css)} text]
   )
 
 ; =search-form {{{
@@ -61,7 +65,7 @@
 (def mobile-header
   (list
     ;[:p {:style "background: #dbef02;font-size: x-small"} "ゆる～く読書。ゆる～く管理。"]
-    [:p {:style "text-align:center;"} [:img {:src "/img/mobile_logo.png" :alt *page-title*}]]
+    [:p {:style "margin:0 0 5px 0;padding:0;text-align:center;"} [:img {:src "/img/mobile_logo.png" :alt *page-title*}]]
     )
   )
 ; }}}
@@ -71,17 +75,18 @@
   [:div {:id "footer"}
    [:img {:src "http://code.google.com/appengine/images/appengine-silver-120x30.gif" :alt "Powered by Google App Engine"}]
    [:ul
-    [:li [:a {:href ""} "利用規約"]]
-    [:li [:a {:href "http://wiki.github.com/liquidz/yuruyomi/770264"} "ヘルプ"]]
+    [:li [:a {:href "http://wiki.github.com/liquidz/yuruyomi/782841"} "利用規約"]]
+    [:li [:a {:href "http://wiki.github.com/liquidz/yuruyomi/770195"} "ヘルプ"]]
     [:li [:a {:href "http://github.com/liquidz/yuruyomi"} "ソースコード"]]
-    [:li "Copyright &copy; 2010 " [:a {:href "http://twitter.com/uochan/"} "@uochan"] ". All rights reserved."]
+    [:li [:a {:href "/status"} "ステータス一覧"]]
+    [:li "Copyright &copy; 2010 " [:a {:href "http://twitter.com/uochan/" :target "_blank"} "@uochan"] ". All rights reserved."]
     ]
    ]
   )
 
 (def mobile-footer
   (list
-    (mobile-border :color "#aaa")
+    (mobile-border :color "#aaa" :css "margin-top:5px")
     [:p {:style "margin:0;padding;0;font-size:x-small;text-align:center"}
      "(C) 2010 " [:a {:href "http://twtr.jp/user/uochan"} "@uochan"]]
     )

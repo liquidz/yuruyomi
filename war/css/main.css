@@ -213,23 +213,6 @@ ul.pager li.now span {
 #container table#history_table thead th {
 	min-width: 2.5em;
 }
-#container table th, #container table td {
-	padding: 2px 10px;
-}
-#container table thead th, #container table tfoot td {
-	font-weight: bold;
-	text-align: center;
-	color: #93d31b;
-}
-#container table thead th {
-	border-bottom: 3px solid #93d31b;
-}
-#container table tfoot td {
-	border-top: 3px solid #93d31b;
-}
-#container table tbody tr.odd {
-	background: #efefef;
-}
 
 #container #large_book_image {
 	float: left;
@@ -240,6 +223,11 @@ ul.pager li.now span {
 }
 #container h4 {
 	margin-top: 20px;
+}
+
+#container table#reading_words, #container table#want_words, #container table#having_words, #container table#finish_words {
+	float: left;
+	margin-right: 20px;
 }
 
 

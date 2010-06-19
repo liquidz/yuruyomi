@@ -4,6 +4,8 @@
      [yuruyomi.util seq]
      [yuruyomi.model book history]
      [yuruyomi.view parts book]
+     [yuruyomi.cron.twitter :only [*reading-words* *want-words*
+                                   *having-words* *finish-words*]]
      layout
      )
   (:require 
@@ -53,6 +55,50 @@
     )
   )
 
+(defn status-page
+  ([name]
+   (let [status "statuses"]
+     (layout
+       (str *page-title* " - ステータス一覧")
+       :css ["/css/main.css"]
+       (pc-header name)
+       (when (! nil? name)
+         [:div {:id "info"} 
+          [:p [:a {:href (str "http://twitter.com/" name)}
+               [:img {:src (-> (get-books :user name :limit 1 :offset 0) first :icon)}]]]
+          [:h2 name]
+          (make-info-ul *main-menu* :name name :class "main" :select status)
+          (make-info-ul *etc-menu* :name name :class "etc" :select status)
+          ]
+         )
+
+       [:div {:id "container"}
+        [:h2 "ステータス一覧"]
+        (table
+          (partition 1 *reading-words*)
+          :header ["読んでるステータス"]
+          :footer? false :attr {:id "reading_words"})
+        (table
+          (partition 1 *want-words*)
+          :header ["読みたいステータス"]
+          :footer? false :attr {:id "want_words"})
+        (table
+          (partition 1 *having-words*)
+          :header ["持ってるステータス"]
+          :footer? false :attr {:id "having_words"})
+        (table
+          (partition 1 *finish-words*)
+          :header ["読了ステータス"]
+          :footer? false :attr {:id "finish_words"})
+        ]
+
+       pc-footer
+       )
+     )
+   )
+  ([] (status-page nil))
+  )
+
 ; =history-page {{{
 (defnk history-page [name :page 1]
   (let [now-page (if (pos? (i page)) (i page) 1)
@@ -96,6 +142,7 @@
     )
   ) ; }}}
 
+; =book-page {{{
 (defn book-page [title]
   (let [books (get-books :title title)
         fb (first books)
@@ -143,7 +190,7 @@
       pc-footer
       )
     )
-  )
+  ) ; }}}
 
 ; =first-user-page {{{
 ;(def *test-tweet* (str "http://twitter.com/home?status=" (url-encode "本のタイトル これ読んでる！ #yuruyomi")))
@@ -268,6 +315,7 @@
 (defn index-page []
   (let [new-books (find-history :before "new" :sort "date" :limit 5 :offset 0)
         active-user (take 5 (get-active-user :limit 20))
+        recent-tweets (find-history :sort "date" :limit 5 :offset 0)
         ]
     (layout
       *page-title*
@@ -285,14 +333,26 @@
          [:input {:type "submit" :value "あなたのゆるよみを確認" :class "btn"}]
          ]
         ]
-       ]
-      [:h4 "new books"]
-      [:ul
-       (map (fn [b] [:li [:a {:href (str "/book/" (:title b))} (:title b)]]) new-books)
-       ]
-      [:h4 "active users"]
-      [:ul
-       (map (fn [b] [:li [:a {:href (str "/user/" b)} b]]) active-user)
+       (table
+         (map #(list [:a {:href (str "/book/" (:title %))} (:title %)]) new-books)
+         :header ["最近登録された本"]
+         :footer? false
+         :attr {:id "new_book_table"}
+         )
+
+       (table
+         (map #(list [:a {:href (str "/user/" %)} %]) active-user)
+         :header ["アクティブなユーザ"]
+         :footer? false
+         :attr {:id "active_user_table"}
+         )
+
+       (table
+         (map #(list [:a {:href (str "/user/" (:user %) "/history")} (:text %)]) recent-tweets)
+         :header ["最近のつぶやき"]
+         :footer? false
+         :attr {:id "recent_tweets_table"}
+         )
        ]
       pc-footer
       )

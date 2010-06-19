@@ -84,6 +84,7 @@ body {
 }
 #footer ul li {
 	display: inline;
+	font-size: small;
 }
 #footer ul li:before {
 	content: " | ";
@@ -102,20 +103,46 @@ form input {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 }
+form input[type=text]:hover {
+	border:1px solid #ffd694;
+}
 form input[type=submit] {
 	border: 0;
-	padding: 1px 0.5em;
+	padding: 2px 0.5em;
 	background: -moz-linear-gradient(top, #aaa, #777);
 	background: -webkit-gradient(linear, left top, left bottom, from(#aaa), to(#777));
 
 	color: #fff;
 	letter-spacing: 1px;
+	font-weight: bold;
 }
 form input[type=submit]:hover {
 	background: -moz-linear-gradient(top, #ad3, #7b0);
 	background: -webkit-gradient(linear, left top, left bottom, from(#ad3), to(#7b0));
+
+	background: -webkit-gradient(linear, left top, left bottom, from(#6490E8), to(#3571E8));
 }
 
 img {
 	border: 0;
 }
+
+
+table th, table td {
+	padding: 2px 10px;
+}
+table thead th, table tfoot td {
+	font-weight: bold;
+	text-align: center;
+	color: #93d31b;
+}
+table thead th {
+	border-bottom: 3px solid #93d31b;
+}
+table tfoot td {
+	border-top: 3px solid #93d31b;
+}
+table tbody tr.odd {
+	background: #efefef;
+}
+

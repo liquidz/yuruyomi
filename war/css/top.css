@@ -5,6 +5,8 @@
 	margin: 20px auto;
 
 	text-align: center;
+
+	overflow: hidden;
 }
 
 #exp img {
@@ -12,15 +14,15 @@
 }
 #exp p#copy {
 	background: transparent url(../img/top_exp.png) no-repeat top left;
-	width: 750px;
-	height: 236px;
+	width: 670px;
+	height: 127px;
 
 	font-size: 0;
 	text-indent: -10000px;
 }
 
 #exp form {
-	margin-top: 40px;
+	margin: 40px 0 40px 30px;
 }
 #exp form fieldset {
 	border: 0;
@@ -31,13 +33,16 @@
 	margin-right: 10px;
 }
 #exp form legend {
+	/*
 	background: transparent url(../img/arrow.png) no-repeat right 50%;
+	*/
 	color: #a7e13a;
 
 	font-size: 30px;
 	font-weight: bold;
+	/*
 	padding-right: 75px;
-
+*/
 }
 #exp form input {
 	-webkit-border-radius: 10px;
@@ -46,25 +51,41 @@
 	height: 40px;
 }
 #exp form input[type="text"] {
+	background: #fff url(/img/tweet.png) no-repeat 2px 50%;
+	padding-left: 30px;
 	border: 2px solid #ccc;
 	width: 200px;
 	height: 30px;
 	font-size: 20px;
 }
+#exp form input[type="text"]:hover {
+	border: 2px solid #ffd694;
+}
 #exp form input[type="text"].noinput {
 	color: #ccc;
 }
 #exp form input[type="submit"] {
+	/*
 	border: 2px solid #bf4;
 	background: #a7e13a;
+	*/
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
+	font-weight: bold;
+	/*
 	color: #fff;
+	*/
 }
 #exp form input.btn:hover {
+	/*
 	background: #8c1;
+	*/
 }
 
-#footer {
-	overflow: hidden;
+#exp table td {
+	text-align: left;
+}
+#exp table#new_book_table, #exp table#active_user_table {
+	float: left;
+	margin-right: 10px;
 }

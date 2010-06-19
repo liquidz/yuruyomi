@@ -39,6 +39,7 @@
   (GET "/book/:title" req (book-page (escaped-param req "title")))
   (GET "/tweet" req (redirect (apply redirect-to-twitter (escaped-params req "title" "author" "status"))))
   (GET "/search" req (apply search-page (escaped-params req "user" "mode" "keyword" "page" "user_only")))
+  (GET "/status" _ (status-page))
 
   (GET "/m/" req (let [name (escape-input (escaped-param req "name"))]
                    (if (or (nil? name) (su2/blank? name)) (mobile-index-page) (redirect (str "/m/" name)))))
@@ -47,6 +48,7 @@
   (GET "/m/:name/history/:page" req (mobile-history-page (escaped-param req "name") :page (escaped-param req "page")))
   (GET "/m/:name/:status" req (mobile-user-page (escaped-param req "name") :status (escaped-param req "status")))
   (GET "/m/:name/:status/:page" req (mobile-user-page (escaped-param req "name") :status (escaped-param req "status") :page (escaped-param req "page")))
+  (GET "/mb/:title" req (mobile-book-page (escaped-param req "title")))
 
 
   (GET "/ajax/getimage" req (ajax-get-book-image (param req "id")))
