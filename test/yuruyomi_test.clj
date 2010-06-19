@@ -22,12 +22,12 @@
 ; =data {{{
 (def *test-data*
   (list {:created-at "01", :text "ok ほしい #yuruyomi_test"}
-        {:created-at "02", :text "ng かった #yuruyomi_test #done"}
-        {:created-at "03", :text "ng かった #done #yuruyomi_test"}
+        {:created-at "02", :text "ng 買った #yuruyomi_test #done"}
+        {:created-at "03", :text "ng 買った #done #yuruyomi_test"}
         {:created-at "04", :text "ng neko"}
         {:created-at "05", :text "ng"}
         {:created-at "06", :text ""}
-        {:created-at "07", :text "ok:aaa かった"}
+        {:created-at "07", :text "ok:aaa 買った"}
         {:created-at "08", :text "ng:bbb あああ"}
         {:created-at "09", :text "ok：ok ほしい ng"}
         {:created-at "10", :text "ok 222 よんでる #ng"}
@@ -75,11 +75,11 @@
   (list
     ["reading" (list {:created-at "1", :text "aaa 読んでる"})]
     ["want" (list {:created-at "1", :text "aaa ほしい"})]
-    ["have" (list {:created-at "1", :text "aaa かった"})]
+    ["have" (list {:created-at "1", :text "aaa 買った"})]
     ["finish" (list {:created-at "1", :text "aaa よんだ"})]
     ["reading" (list {:created-at "1", :text "aaa:ccc 読んでる。bbb:ddd読んだ"})]
     ["want" (list {:created-at "1", :text "aaa ほしい。bbbよんでるけど"})]
-    ["have" (list {:created-at "1", :text "aaa と bbb かった。ccc読んでるしddd読んだけど"})]
+    ["have" (list {:created-at "1", :text "aaa と bbb 買った。ccc読んでるしddd読んだけど"})]
     )
   )
 ; }}}
