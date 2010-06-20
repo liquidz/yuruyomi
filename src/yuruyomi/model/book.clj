@@ -39,9 +39,9 @@
     (if (some #(! nil? %) [user-like title-like author-like date-like])
       (filters
         res
-        (when (! nil? user-like) #(su2/contains? (get-prop % :user) (to-utf8 user-like)))
-        (when (! nil? title-like) #(su2/contains? (get-prop % :title) (to-utf8 title-like)))
-        (when (! nil? author-like) #(su2/contains? (get-prop % :author) (to-utf8 author-like)))
+        (when (! nil? user-like) #(su2/contains? (get-prop % :user) user-like))
+        (when (! nil? title-like) #(su2/contains? (get-prop % :title) title-like))
+        (when (! nil? author-like) #(su2/contains? (get-prop % :author) author-like))
         (when (! nil? date-like) #(su2/contains? (get-prop % :date) date-like))
         )
       res
@@ -106,8 +106,8 @@
         author (:author tweet), status (:status tweet)
         icon (:profile-image-url tweet), date (now)
         ]
-    ; ºÆÆÉ¤¬¤¢¤ê¤¨¤ë¤«¤é fin ¤ÏÆ±¤¸¤Î¤¬¤¢¤Ã¤Æ¤âÅĞÏ¿/¹¹¿·
-    ; wnt¤Î¾ì¹ç¤Çing¤Ë´û¤ËÆ±¤¸¤â¤Î¤¬Æş¤Ã¤Æ¤¤¤ë¤Î¤Ï¤ª¤«¤·¤¤¤«¤éNG
+    ; å†èª­ãŒã‚ã‚Šãˆã‚‹ã‹ã‚‰ fin ã¯åŒã˜ã®ãŒã‚ã£ã¦ã‚‚ç™»éŒ²/æ›´æ–°
+    ; wntã®å ´åˆã§ingã«æ—¢ã«åŒã˜ã‚‚ã®ãŒå…¥ã£ã¦ã„ã‚‹ã®ã¯ãŠã‹ã—ã„ã‹ã‚‰NG
     (when (and (or (= status "finish") (zero? (count (find-books :user name :title title :author author :status status))))
                (or (! = status "want") (zero? (count (find-books :user name :title title :author author :status "reading")))))
       (let [books (group #(get-prop % :status) (find-books :user name))
@@ -130,7 +130,7 @@
                              update-target)
             ]
         (cond
-          ; ¿·µ¬ÅĞÏ¿
+          ; æ–°è¦ç™»éŒ²
           (nil? x) (when (! = status "delete")
                      (ds-put (map-entity *book-entity-name* :user name :title title
                                          :author author :date date :status status :icon icon))
@@ -138,7 +138,7 @@
                      (save-history :user name :title title :author author :date date
                                    :before "new" :after status :text (:original_text tweet))
                      )
-          ; ÅĞÏ¿ºÑ¤ß¤Î¤â¤Î¤ò¹¹¿·
+          ; ç™»éŒ²æ¸ˆã¿ã®ã‚‚ã®ã‚’æ›´æ–°
           :else (let [before-status (get-prop x :status)]
                   (change-user-data
                     name
@@ -147,7 +147,7 @@
                     )
                   (set-prop x :status status)
                   (set-prop x :date date)
-                  ; Ãø¼Ô¤¬ÅĞÏ¿¤µ¤ì¤Æ¤¤¤Ê¤¯¤Æ¡¢º£²óÆşÎÏ¤µ¤ì¤Æ¤¤¤ë¾ì¹ç¤ÏÅĞÏ¿¤¹¤ë
+                  ; è‘—è€…ãŒç™»éŒ²ã•ã‚Œã¦ã„ãªãã¦ã€ä»Šå›å…¥åŠ›ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ç™»éŒ²ã™ã‚‹
                   (when (and (! su2/blank? author) (su2/blank? (get-prop x :author)))
                     (set-prop x :author author))
                   (when (su2/blank? (get-prop x :icon))
