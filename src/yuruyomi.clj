@@ -55,6 +55,13 @@
 
   (GET "/ajax/getimage" req (ajax-get-book-image (param req "id")))
 
+  (GET "/test/session/save" req
+       (:session req)
+       (get-in req [])
+    :else (map #(get-in req [:params %]) key-names)
+
+       )
+
   ; admin
   (GET "/admin/" req (admin-index-page (param req "page")))
   (GET "/admin/del" req (do (delete-book (param req "id")) (redirect "/admin/")))
