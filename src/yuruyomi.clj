@@ -1,32 +1,30 @@
 (ns yuruyomi
   (:gen-class :extends javax.servlet.http.HttpServlet)
+  ; use {{{
   (:use 
      [simply :only [case delete-html-tag i]]
-     ;simply 
-     ;simply.date
      [hiccup.core :only [html]]
      [compojure.core :only [defroutes GET POST wrap!]]
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
-     ;am.ik.clj-gae-ds.core
      [yuruyomi.model.book :only [delete-book]]
      [yuruyomi.model.setting :only [clear-max-id]]
-     ;[yuruyomi clj-gae-ds-wrapper]
-     ;[yuruyomi.model book setting user]
-     ;[yuruyomi.model user]
-     ;[yuruyomi.util seq cache]
-     ;[yuruyomi.cron twitter user]
      [yuruyomi.cron.twitter :only [collect-tweets twitter-test save-tweet]]
      [yuruyomi.cron.user :only [collect-user]]
      [yuruyomi.view html admin mobile]
-     )
+     [yuruyomi.util session]
+     [twitter :only [get-twitter-oauth-url get-twitter-oauth-access-token
+                     get-twitter-screen-name twitter-logined?]]
+     ) ; }}}
+  ; require {{{
   (:require
      [clojure.contrib.seq-utils :as se]
      [clojure.contrib.str-utils2 :as su2]
      [clojure.contrib.logging :as log]
      [compojure.route :as route]
      [ring.middleware.session :as session]
-     )
+     keys
+     ) ; }}}
   )
 
 (defn escape-input [s]
@@ -38,19 +36,16 @@
 (defn get-param [params key] (-> key params escape-input))
 (defn get-params [params & keys] (map #(get-param params %) keys))
 
-;(defn escaped-param [& args] (escape-input (apply param args)))
-;(defn escaped-params [& args] (map escape-input (apply params args)))
-
 (defroutes app
   ; pc {{{
-  (GET "/" {params :params}
+  (GET "/" {session :session, params :params}
        (let [name (get-param params "name")]
          (if (or (nil? name) (su2/blank? name))
-           (index-page) (redirect (str "/user/" name)))))
+           (index-page session) (redirect (str "/user/" name)))))
   (GET "/user/:name" {params :params}
        (user-page (get-param params "name")))
   (GET "/user/:name/history" {params :params}
-       (history-page (get-params params "name")))
+       (history-page (get-param params "name")))
   (GET "/user/:name/history/:page" {params :params}
        (let [[name page] (get-params params "name" "page")]
          (history-page name :page page)))
@@ -67,30 +62,55 @@
   (GET "/search" {params :params}
        (apply search-page (get-params params "user" "mode" "keyword" "page" "user_only")))
   (GET "/status" _ (status-page))
+
+  (GET "/login" {session :session, params :params}
+       (if (logined? session) (assoc (redirect "/") :session session) ;(with-session session (redirect "/"))
+         (let [[url rt tw] (oauth-url)]
+           ;(with-session session (redirect url) :twitter tw :request-token rt)
+           (assoc (redirect url) :session (assoc session :twitter tw :request-token rt))
+           )
+         )
+       )
+  (GET "/login/:pin" {session :session, params :params}
+       {:session session :body (pr-str session)}
+;       (if (logined? session) (assoc (redirect "/") :session session) ;(with-session session (redirect "/"))
+;         (let [[tw at] (get-twitter-oauth-access-token (:twitter session) (:request-token session) (get-param params "pin"))]
+;           ;(with-session session (redirect "/") :access-token at :twitter tw)
+;           (assoc (redirect "/") :session (assoc session :access-token at :twitter tw))
+;           )
+;         )
+       )
+
   ; }}}
 
-  (GET "/test/session" {session :session} {:body (pr-str session)})
-  (GET "/test/session/:key/:val" {sess :session, prms :params}
-       (let [key (keyword (prms "key"))]
-         {
-          :session (assoc sess key
-                          (case key
-                            :fn (fn [x y] (+ x y))
-                            :else (prms "val")
-                            )
-                          )
-          :body (str "session set (" (prms "key") " = " (prms "val") ")")
-          }
-         )
-       )
-  (GET "/test/session/fn_test/:x/:y" {sess :session, prms :params}
-       (let [x (i (prms "x"))
-             y (i (prms "y"))]
-         {:body (str "result = " ((:fn sess) x y))
-          :session sess
-          }
-         )
-       )
+;  (GET "/test" {session :session}
+;       (let [tw (:twitter session)
+;             logined? (if (! nil? tw) (twitter-logined? tw) false)
+;             sn (if logined? (get-twitter-screen-name tw) "guest")
+;             ]
+;         {:session session
+;          :body (str "logined? = " logined? ", screen name = " sn)
+;          }
+;         )
+;       )
+;
+;  (GET "/test/login" {session :session}
+;       (let [[url rt tw] (get-twitter-oauth-url keys/*twitter-consumer-key* keys/*twitter-consumer-secret*)]
+;         {:session (assoc session :request-token rt :twitter tw)
+;          :body url
+;          }
+;         )
+;       )
+;  (GET "/test/login/:pin" {session :session, params :params}
+;       (let [tw (:twitter session)
+;             rt (:request-token session)
+;             [at tw2] (get-twitter-oauth-access-token tw rt (get-param params "pin"))
+;             ]
+;         {:session (assoc session :access-token at :twitter tw2)
+;          :body "ok"
+;          }
+;         )
+;       )
 
   ; mobile {{{
   (GET "/m/" {params :params}

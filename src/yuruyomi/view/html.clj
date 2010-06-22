@@ -1,7 +1,7 @@
 (ns yuruyomi.view.html
   (:use
      simply
-     [yuruyomi.util seq]
+     [yuruyomi.util seq session]
      [yuruyomi.model book history]
      [yuruyomi.view parts book]
      [yuruyomi.cron.twitter :only [*reading-words* *want-words*
@@ -306,7 +306,7 @@
   ) ; }}}
 
 ; index {{{
-(defn index-page []
+(defn index-page [session]
   (let [new-books (find-history :before "new" :sort "date" :limit 5 :offset 0)
         active-user (take 5 (get-active-user :limit 20))
         recent-tweets (find-history :sort "date" :limit 5 :offset 0)
@@ -323,7 +323,7 @@
        [:form {:method "GET" :action "/"}
         [:fieldset
          [:legend "早速始める"]
-         [:input {:type "text" :name "name" :title "TwitterIDを入力"}]
+         [:input {:type "text" :name "name" :title "TwitterIDを入力" :value (screen-name session :default "")}]
          [:input {:type "submit" :value "あなたのゆるよみを確認" :class "btn"}]
          ]
         ]

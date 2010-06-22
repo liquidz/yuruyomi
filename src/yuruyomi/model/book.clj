@@ -1,11 +1,15 @@
 (ns yuruyomi.model.book
   (:use
-     simply simply.date
-     am.ik.clj-gae-ds.core
-     am.ik.clj-aws-ecs
-     [yuruyomi clj-gae-ds-wrapper]
-     [yuruyomi.util seq cache]
-     [yuruyomi.model history user]
+     [simply :only [defnk case fold ! url-encode group try-with-boolean]]
+     [simply.date :only [set-default-timezone now]]
+     [am.ik.clj-gae-ds.core :only [get-prop set-prop ds-put get-id get-key
+                                   ds-get create-key map-entity ds-delete]]
+     [am.ik.clj-aws-ecs :only [make-requester item-search-map]]
+     [yuruyomi.clj-gae-ds-wrapper :only [find-entity count-entity entity->map]]
+     ;[yuruyomi.util.seq :only [extende]]
+     [yuruyomi.util.cache :only [get-cached-value cache-val]]
+     [yuruyomi.model.history :only [save-history]]
+     [yuruyomi.model.user :only [change-user-data]]
      )
   (:require
      keys
@@ -172,7 +176,7 @@
      )
    )
   ([user title author]
-   (let [res (apply find-books (p list :user user :title title :author author))]
+   (let [res (apply find-books (list :user user :title title :author author))]
      (if (empty? res) false
        (try-with-boolean (ds-delete (-> res first get-key)))
        )

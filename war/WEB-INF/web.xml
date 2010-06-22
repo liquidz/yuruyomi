@@ -7,11 +7,21 @@
 		 <servlet-name>yuruyomi</servlet-name>
 		 <servlet-class>yuruyomi</servlet-class>
 	 </servlet>
+
+	 <servlet> 
+		 <servlet-name>_ah_sessioncleanup</servlet-name> 
+		 <servlet-class>com.google.apphosting.utils.servlet.SessionCleanupServlet</servlet-class> 
+	 </servlet>
+
 	 <servlet-mapping>
 		 <servlet-name>yuruyomi</servlet-name>
 		 <url-pattern>/*</url-pattern>
 	 </servlet-mapping>
 
+	 <servlet-mapping> 
+		 <servlet-name>_ah_sessioncleanup</servlet-name> 
+		 <url-pattern>/_ah/sessioncleanup</url-pattern> 
+	 </servlet-mapping>
 
 	 <security-constraint>
 		 <web-resource-collection>
@@ -20,5 +30,15 @@
 		 <auth-constraint>
 			 <role-name>admin</role-name>
 		 </auth-constraint>
+	 </security-constraint>
+
+	 <security-constraint> 
+		 <web-resource-collection> 
+			 <web-resource-name>session-cleanup</web-resource-name> 
+			 <url-pattern>/_ah/sessioncleanup</url-pattern> 
+		 </web-resource-collection> 
+		 <auth-constraint> 
+			 <role-name>admin</role-name> 
+		 </auth-constraint> 
 	 </security-constraint>
  </web-app>
