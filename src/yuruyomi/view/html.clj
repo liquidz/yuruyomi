@@ -48,13 +48,6 @@
     )
   )
 
-(defn escape-input [s]
-  (if (nil? s)
-    ""
-    (-> s delete-html-tag (su2/replace #"[\"'<>]" ""))
-    )
-  )
-
 (defn status-page
   ([name]
    (let [status "statuses"]

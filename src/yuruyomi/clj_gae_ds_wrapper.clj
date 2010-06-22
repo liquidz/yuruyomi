@@ -1,7 +1,10 @@
 (ns yuruyomi.clj-gae-ds-wrapper
   (:use
-     simply
-     am.ik.clj-gae-ds.core
+     [simply :only [fold foreach !]]
+     ;am.ik.clj-gae-ds.core
+     [am.ik.clj-gae-ds.core :only [entity-map get-prop fetch-options add-filter 
+                                   add-sort query query-seq count-entities]]
+
      )
   (:require [clojure.contrib.str-utils2 :as su2])
   )
@@ -15,13 +18,13 @@
   )
 
 ; =params
-(defn params [req & key-names]
-  (cond
-    (empty? key-names) nil
-    :else (map #(get-in req [:params %]) key-names)
-    )
-  )
-(defn param [req key-name] (first (params req key-name)))
+;(defn params [req & key-names]
+;  (cond
+;    (empty? key-names) nil
+;    :else (map #(get-in req [:params %]) key-names)
+;    )
+;  )
+;(defn param [req key-name] (first (params req key-name)))
 
 ; =get-props
 (defn get-props [entity & keys]

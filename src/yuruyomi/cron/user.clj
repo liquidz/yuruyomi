@@ -1,6 +1,7 @@
 (ns yuruyomi.cron.user
   (:use
      simply
+     ;[simply :only [group]]
      ;[yuruyomi.util seq cache]
      [yuruyomi.model book user]
      )

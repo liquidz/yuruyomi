@@ -1,7 +1,11 @@
 (ns yuruyomi.cron.twitter
   (:use
-     simply simply.date
-     twitter
+     [simply :only [defnk ! fold delete-html-tag str<]]
+     ;simply 
+     ;simply.date
+     [simply.date :only [now set-default-timezone]]
+     ;twitter
+     [twitter :only [show-twitter-status twitter-search-all]]
      [yuruyomi.util seq cache]
      [yuruyomi.model book setting]
      )
@@ -37,8 +41,6 @@
 (def *yuruyomi-done-tag* "#done")
 ; }}}
 
-;(def *re-book-sep* #"\s*[,、]\s*")
-;(def *re-book-sep* #"[\s　]+と[\s　]+")
 (def *re-book-sep* #"[\s　]+[と\s　]*と[\s　]+")
 
 (def *re-title-author-sep* #"[\s　]*[:：][\s　]*")
