@@ -136,11 +136,14 @@
         (cond
           ; 新規登録
           (nil? x) (when (! = status "delete")
-                     (ds-put (map-entity *book-entity-name* :user name :title title
-                                         :author author :date date :status status :icon icon))
-                     (change-user-data name (keyword status) inc)
-                     (save-history :user name :title title :author author :date date
-                                   :before "new" :after status :text (:original_text tweet))
+                     (let [e (map-entity *book-entity-name* :user name :title title
+                                         :author author :date date :status status :icon icon)]
+                       (ds-put e)
+                       (change-user-data name (keyword status) inc)
+                       (save-history :user name :title title :author author :date date
+                                     :before "new" :after status :text (:original_text tweet)
+                                     :book-id (-> e get-key get-id))
+                       )
                      )
           ; 登録済みのものを更新
           :else (let [before-status (get-prop x :status)]
