@@ -327,6 +327,13 @@
          [:input {:type "submit" :value "あなたのゆるよみを確認" :class "btn"}]
          ]
         ]
+       (when (logined? session)
+         [:form {:method "GET" :action "/update"}
+          [:img {:src (profile-image session)}]
+          [:input {:type "text" :name "status"}]
+          [:input {:type "submit" :value "tweet"}]
+          ]
+         )
        (table
          ;(map #(list [:a {:href (str "/book/" (:id (first (get-books :user (:user %) :title (:title %) :author (:author %) :limit 1 :offset 0))))} (:title %)]) new-books)
          (map #(list [:a {:href (str "/book/" (:id (history->book %)))} (:title %)]) new-books)

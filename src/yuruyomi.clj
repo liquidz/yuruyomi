@@ -14,7 +14,7 @@
      [yuruyomi.view html admin mobile]
      [yuruyomi.util session]
      [twitter :only [get-twitter-oauth-url get-twitter-oauth-access-token
-                     get-twitter-screen-name twitter-logined?]]
+                     get-twitter-screen-name twitter-logined? twitter-update]]
      ) ; }}}
   ; require {{{
   (:require
@@ -72,13 +72,19 @@
          )
        )
   (GET "/login/:pin" {session :session, params :params}
-       {:session session :body (pr-str session)}
-;       (if (logined? session) (assoc (redirect "/") :session session) ;(with-session session (redirect "/"))
-;         (let [[tw at] (get-twitter-oauth-access-token (:twitter session) (:request-token session) (get-param params "pin"))]
-;           ;(with-session session (redirect "/") :access-token at :twitter tw)
-;           (assoc (redirect "/") :session (assoc session :access-token at :twitter tw))
-;           )
-;         )
+       (if (logined? session) (assoc (redirect "/") :session session) ;(with-session session (redirect "/"))
+         (let [[at tw] (get-twitter-oauth-access-token (:twitter session) (:request-token session) (get-param params "pin"))]
+           ;(with-session session (redirect "/") :access-token at :twitter tw)
+           (assoc (redirect "/") :session (assoc session :access-token at :twitter tw))
+           )
+         )
+       )
+  (GET "/logout" _ (assoc (redirect "/") :session {}))
+  (GET "/update" {session :session, params :params}
+       (when (logined? session)
+         (twitter-update (:twitter session) (get-param params "status"))
+         )
+       (redirect "/")
        )
 
   ; }}}

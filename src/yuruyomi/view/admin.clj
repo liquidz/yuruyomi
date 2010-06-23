@@ -90,7 +90,7 @@
 
 
 (defn admin-index-page [page]
-  (let [pp (if (nil? page) 1 (i page))
+  (let [pp (if (su2/blank? page) 1 (i page))
         bc (count-books)
         pc (.intValue (Math/ceil (/ bc 10)))
         pages (take pc (iterate inc 1))

@@ -28,6 +28,13 @@
     )
   )
 
+(defnk profile-image [session :default "/img/npc.png"]
+  (if (logined? session)
+    (get-twitter-profile-image-url (:twitter session))
+    default
+    )
+  )
+
 (defn oauth-url []
   (get-twitter-oauth-url keys/*twitter-consumer-key* keys/*twitter-consumer-secret*)
   )
