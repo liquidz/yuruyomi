@@ -2,7 +2,7 @@
   (:gen-class :extends javax.servlet.http.HttpServlet)
   ; use {{{
   (:use 
-     [simply :only [case delete-html-tag i]]
+     [simply :only [case delete-html-tag i escape]]
      [hiccup.core :only [html]]
      [compojure.core :only [defroutes GET POST wrap!]]
      [ring.util.servlet :only [defservice]]
@@ -26,8 +26,8 @@
      ) ; }}}
   )
 
-(defn escape-input [s] (if (nil? s) "" (-> s delete-html-tag (su2/replace #"[\"'<>]" ""))))
-(defn get-param [params key] (-> key params escape-input))
+;(defn escape-input [s] (if (nil? s) "" (-> s delete-html-tag (su2/replace #"[\"'<>]" ""))))
+(defn get-param [params key] (-> key params escape))
 (defn get-params [params & keys] (map #(get-param params %) keys))
 
 (defroutes app

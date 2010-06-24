@@ -32,11 +32,12 @@
 (defn admin-menu []
   [:ul
    [:li [:a {:href "/admin/"} "top"]]
-   [:li "max id = " (get-max-id)]
+   [:li [:a {:href "/admin/history"} "history"]]
+   ;[:li "max id = " (get-max-id)]
    [:li [:a {:href "/admin/cron/twitter" :class "warn"} "collect twitter data"]]
    [:li [:a {:href "/admin/cron/user"} "collect user data"]]
    ;[:li [:a {:href "/admin/clear"} "clear max id"]]
-   [:li [:a {:href "/admin/search_twitter"} "search twitter test"]]
+   [:li [:a {:href "/admin/search_twitter" :class "warn"} "search twitter test"]]
    [:li [:a {:href "/admin/set_book_id" :class "warn"} "set book id to history"]]
    ]
   )
@@ -52,7 +53,8 @@
         (map #(list (:user %) (:book-id %) (:title %) (:author %) (:date %)
                     (str (:before %) " => " (:after %))
                     )
-             (find-history :limit 10 :offset (* 10 (dec pp))))
+             (find-history :sort "date"))
+             ;(find-history :limit 10 :offset (* 10 (dec pp))))
         :header ["user" "book-id" "title" "author" "date" "status"]
         )
 
@@ -127,7 +129,6 @@
     (layout
       *admin-page-title*
       :css ["/css/admin.css"]
-      ;:js ["/js/jquery-1.4.2.min.js" "/js/jquery.colorize-2.0.0.js" "/js/admin.js"]
       :js ["/js/jquery-1.4.2.min.js" "/js/admin.js"]
       (admin-menu)
       [:hr]
@@ -138,17 +139,10 @@
                     (:title %) (:author %)
                     [:a {:href (str "/user/" (:user %))} (:user %)] (:date %) (:status %)
                     [:a {:href (str "/admin/del?id=" (:id %)) :class "warn"} "削除"])
-             (get-books :limit 20 :page pp))
+             (get-books :sort "date" :limit 20 :page pp))
         :header ["ID" "タイトル" "著者" "ユーザ" "日付" "ステータス" "削除"]
         )
 
-;      [:table
-;       [:tr [:th "タイトル"] [:th "著者"] [:th "ユーザ"] [:th "日付"] [:th "ステータス"] [:th "削除"]]
-;       (map admin-book->html (get-books :limit 10 :page pp))
-;       ]
-
-;      (map #(admin-book->html % :show-user? false :show-status? true :show-delete? true)
-;           (get-books :limit 10 :page pp))
       [:hr]
       (map (fn [x]
              [:span "&nbsp;" [:a {:href (str "/admin/?page=" x)} x] "&nbsp;"]
