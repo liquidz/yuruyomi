@@ -23,16 +23,10 @@
      [clojure.contrib.logging :as log]
      [compojure.route :as route]
      [ring.middleware.session :as session]
-     keys
      ) ; }}}
   )
 
-(defn escape-input [s]
-  (if (nil? s) ""
-    (-> s delete-html-tag (su2/replace #"[\"'<>]" ""))
-    )
-  )
-
+(defn escape-input [s] (if (nil? s) "" (-> s delete-html-tag (su2/replace #"[\"'<>]" ""))))
 (defn get-param [params key] (-> key params escape-input))
 (defn get-params [params & keys] (map #(get-param params %) keys))
 
@@ -42,26 +36,28 @@
        (let [name (get-param params "name")]
          (if (or (nil? name) (su2/blank? name))
            (index-page session) (redirect (str "/user/" name)))))
-  (GET "/user/:name" {params :params}
+  (GET "/user/:name" {session :session, params :params}
        (user-page (get-param params "name")))
-  (GET "/user/:name/history" {params :params}
+  (GET "/user/:name/history" {session :session, params :params}
        (history-page (get-param params "name")))
-  (GET "/user/:name/history/:page" {params :params}
+  (GET "/user/:name/history/:page" {session :session, params :params}
        (let [[name page] (get-params params "name" "page")]
          (history-page name :page page)))
-  (GET "/user/:name/:status" {params :params}
+  (GET "/user/:name/:status" {session :session, params :params}
        (let [[name status] (get-params params "name" "status")]
          (user-page name :status status)))
-  (GET "/user/:name/:status/:page" {params :params} 
+  (GET "/user/:name/:status/:page" {session :session, params :params} 
        (let [[name status page] (get-params params "name" "status" "page")]
        (user-page name :status status :page page)))
   
-  (GET "/book/:id" {params :params} (book-page (get-param params "id")))
-  (GET "/tweet" {params :params} 
+  (GET "/book/:id" {session :session, params :params} (book-page (get-param params "id")))
+  (GET "/tweet" {session :session, params :params} 
        (redirect (apply redirect-to-twitter (get-params params "title" "author" "status"))))
-  (GET "/search" {params :params}
+  (GET "/search" {session :session, params :params}
        (apply search-page (get-params params "user" "mode" "keyword" "page" "user_only")))
-  (GET "/status" _ (status-page))
+  (GET "/status" {session :session} (status-page))
+
+  ;(GET "/home" {session :session, params :params})
 
   (GET "/login" {session :session, params :params}
        (if (logined? session) (assoc (redirect "/") :session session) ;(with-session session (redirect "/"))
@@ -89,35 +85,6 @@
 
   ; }}}
 
-;  (GET "/test" {session :session}
-;       (let [tw (:twitter session)
-;             logined? (if (! nil? tw) (twitter-logined? tw) false)
-;             sn (if logined? (get-twitter-screen-name tw) "guest")
-;             ]
-;         {:session session
-;          :body (str "logined? = " logined? ", screen name = " sn)
-;          }
-;         )
-;       )
-;
-;  (GET "/test/login" {session :session}
-;       (let [[url rt tw] (get-twitter-oauth-url keys/*twitter-consumer-key* keys/*twitter-consumer-secret*)]
-;         {:session (assoc session :request-token rt :twitter tw)
-;          :body url
-;          }
-;         )
-;       )
-;  (GET "/test/login/:pin" {session :session, params :params}
-;       (let [tw (:twitter session)
-;             rt (:request-token session)
-;             [at tw2] (get-twitter-oauth-access-token tw rt (get-param params "pin"))
-;             ]
-;         {:session (assoc session :access-token at :twitter tw2)
-;          :body "ok"
-;          }
-;         )
-;       )
-
   ; mobile {{{
   (GET "/m/" {params :params}
        (let [name (get-param params "name")]
@@ -136,7 +103,9 @@
   (GET "/mb/:id" {params :params} (mobile-book-page (get-param params "id")))
   ; }}}
 
+  ; ajax {{{
   (GET "/ajax/getimage" {params :params} (ajax-get-book-image (get-param params "id")))
+  ; }}}
 
   ; admin {{{
   (GET "/admin/" {params :params} (admin-index-page (get-param params "page")))
@@ -147,6 +116,7 @@
   (GET "/admin/history" {params :params} (admin-history-page (get-param params "page")))
   (GET "/admin/search_twitter" {params :params} (admin-search-twitter-page (get-param params "mode")))
   (GET "/admin/save" {params :params} (do (save-tweet (get-param params "id")) (redirect "/admin/")))
+  (GET "/admin/set_book_id" _ (do (admin-set-book-id) "fin"))
 
   (GET "/admin/cron/twitter" [] (do (collect-tweets) "fin"))
   (GET "/admin/cron/user" [] (do (collect-user) "fin"))

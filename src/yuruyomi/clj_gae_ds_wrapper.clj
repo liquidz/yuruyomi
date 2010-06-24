@@ -1,9 +1,9 @@
 (ns yuruyomi.clj-gae-ds-wrapper
   (:use
      [simply :only [fold foreach !]]
-     ;am.ik.clj-gae-ds.core
      [am.ik.clj-gae-ds.core :only [entity-map get-prop fetch-options add-filter 
-                                   add-sort query query-seq count-entities]]
+                                   add-sort query query-seq count-entities
+                                   ds-get create-key ds-delete]]
 
      )
   (:require [clojure.contrib.str-utils2 :as su2])
@@ -26,6 +26,16 @@
 ;  )
 ;(defn param [req key-name] (first (params req key-name)))
 
+; =get-entity
+(defn get-entity [kind id]
+  (ds-get (create-key kind (if (string? id) (Long/parseLong id) id)))
+  )
+
+; =delete-entity
+(defn delete-entity [kind id]
+  (ds-delete (create-key kind (if (string? id) (Long/parseLong id) id)))
+  )
+ 
 ; =get-props
 (defn get-props [entity & keys]
   (cond

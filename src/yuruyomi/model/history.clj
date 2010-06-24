@@ -14,7 +14,7 @@
 ; =find-history
 (defn find-history [& args]
   (map
-    entity->map
+    #(assoc (entity->map %) :id (-> % get-key get-id))
     (apply find-entity (cons *history-entity-name* args))
     )
   )

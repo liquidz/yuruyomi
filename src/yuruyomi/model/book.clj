@@ -5,7 +5,7 @@
      [am.ik.clj-gae-ds.core :only [get-prop set-prop ds-put get-id get-key
                                    ds-get create-key map-entity ds-delete]]
      [am.ik.clj-aws-ecs :only [make-requester item-search-map]]
-     [yuruyomi.clj-gae-ds-wrapper :only [find-entity count-entity entity->map]]
+     [yuruyomi.clj-gae-ds-wrapper :only [find-entity count-entity entity->map get-entity delete-entity]]
      ;[yuruyomi.util.seq :only [extende]]
      [yuruyomi.util.cache :only [get-cached-value cache-val]]
      [yuruyomi.model.history :only [save-history]]
@@ -90,9 +90,7 @@
 (defn get-books [& args] (map entity->book (apply find-books args)))
 
 (defn get-a-book [id]
-  (entity->book
-    (ds-get (create-key *book-entity-name*
-                        (if (string? id) (Long/parseLong id) id))))
+  (->> id (get-entity *book-entity-name*) entity->book)
   )
 
 (defn count-books [& args]
@@ -162,7 +160,8 @@
                   (ds-put x)
 
                   (save-history :user name :title title :author (get-prop x :author)
-                                :date date :before before-status :after status :text (:original_text tweet))
+                                :date date :before before-status :after status
+                                :text (:original_text tweet) :book-id (-> x get-key get-id))
                   )
           )
         )
@@ -172,18 +171,9 @@
     )
   )
 
-(defn delete-book
-  ([id]
-   (try-with-boolean
-     (ds-delete (create-key *book-entity-name* (Long/parseLong id)))
-     )
-   )
-  ([user title author]
-   (let [res (apply find-books (list :user user :title title :author author))]
-     (if (empty? res) false
-       (try-with-boolean (ds-delete (-> res first get-key)))
-       )
-     )
-   )
+(defn delete-book [id]
+  (try-with-boolean
+    (delete-entity *book-entity-name* id)
+    )
   )
 

@@ -1,3 +1,5 @@
+@import "/css/common.css";
+
 body, ul, li {
 	margin: 0; padding: 0;
 }
