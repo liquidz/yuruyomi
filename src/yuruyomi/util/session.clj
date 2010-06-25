@@ -38,3 +38,14 @@
 (defn oauth-url []
   (get-twitter-oauth-url keys/*twitter-consumer-key* keys/*twitter-consumer-secret*)
   )
+
+
+(defn session->twitter-data [session]
+  (assoc session
+         :logined? (logined? session)
+         :screen-name (screen-name session)
+         :image (profile-image session)
+         )
+  )
+
+

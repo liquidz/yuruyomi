@@ -255,7 +255,7 @@
   ) ; }}}
 
 ; =user-page {{{
-(defnk user-page [name :status "all" :page 1]
+(defnk user-page [name :status "all" :page 1 :session session]
   (let [is-all? (= status "all")
         is-finish? (= status "finish")
         now-page (if (pos? (i page)) (i page) 1)
@@ -265,17 +265,20 @@
                 )
         book-num (apply count-books (concat (list :user name) (if is-all? () (list :status status))))
         other-book-num (if is-all?  0 (count-books :user name :status-not status :limit 1 :offset 0))
-        pages (.intValue (Math/ceil (/ book-num *show-books-num*)))]
+        pages (.intValue (Math/ceil (/ book-num *show-books-num*)))
+        td (session->twitter-data session)
+        ]
     (layout
       (str *page-title* " - " name)
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
       :css ["/css/main.css"]
 
-      [:div {:id "header"}
-       [:h1 [:a {:href "/" :id "himg"} *page-title*]]
-       [:p "ゆる～く読書。ゆる～く管理。"]
-       (search-form name)
-       ]
+      (pc-header name)
+;      [:div {:id "header"}
+;       [:h1 [:a {:href "/" :id "himg"} *page-title*]]
+;       [:p "ゆる～く読書。ゆる～く管理。"]
+;       (search-form name)
+;       ]
 
       (if (and (empty? books) (zero? other-book-num))
         (first-user-page name)

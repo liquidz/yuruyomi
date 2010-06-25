@@ -11,9 +11,12 @@
 
 ; =entity->map
 (defn entity->map [e]
-  (fold
-    (fn [x res] (assoc res (-> x first keyword) (second x)))
-    {} (-> e entity-map seq)
+  (assoc 
+    (fold
+      (fn [x res] (assoc res (-> x first keyword) (second x)))
+      {} (-> e entity-map seq)
+      )
+    :id (-> e get-key get-id)
     )
   )
 

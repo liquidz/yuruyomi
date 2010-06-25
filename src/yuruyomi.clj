@@ -37,7 +37,7 @@
          (if (or (nil? name) (su2/blank? name))
            (index-page session) (redirect (str "/user/" name)))))
   (GET "/user/:name" {session :session, params :params}
-       (user-page (get-param params "name")))
+       (user-page (get-param params "name") :session session))
   (GET "/user/:name/history" {session :session, params :params}
        (history-page (get-param params "name")))
   (GET "/user/:name/history/:page" {session :session, params :params}

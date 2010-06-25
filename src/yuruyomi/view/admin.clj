@@ -37,7 +37,7 @@
    [:li [:a {:href "/admin/cron/twitter" :class "warn"} "collect twitter data"]]
    [:li [:a {:href "/admin/cron/user"} "collect user data"]]
    ;[:li [:a {:href "/admin/clear"} "clear max id"]]
-   [:li [:a {:href "/admin/search_twitter" :class "warn"} "search twitter test"]]
+   [:li [:a {:href "/admin/search_twitter" :class ""} "search twitter test"]]
    [:li [:a {:href "/admin/set_book_id" :class "warn"} "set book id to history"]]
    ]
   )
@@ -138,9 +138,9 @@
         (map #(list [:a {:href (str "/book/" (:id %))} (:id %)]
                     (:title %) (:author %)
                     [:a {:href (str "/user/" (:user %))} (:user %)] (:date %) (:status %)
-                    [:a {:href (str "/admin/del?id=" (:id %)) :class "warn"} "削除"])
+                    [:a {:href (str "/admin/del?id=" (:id %)) :class "warn"} "del"])
              (get-books :sort "date" :limit 20 :page pp))
-        :header ["ID" "タイトル" "著者" "ユーザ" "日付" "ステータス" "削除"]
+        :header ["ID" "title" "author" "user" "date" "status" "delete"]
         )
 
       [:hr]

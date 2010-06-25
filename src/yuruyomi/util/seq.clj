@@ -23,3 +23,7 @@
     )
   )
 
+(defnk filters [col :ignore-nil? true & preds]
+  (filter #(every? (fn [pre] (if (nil? pre) (if ignore-nil? true false) (pre %))) preds) col)
+  )
+
