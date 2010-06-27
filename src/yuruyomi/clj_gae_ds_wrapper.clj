@@ -3,7 +3,7 @@
      [simply :only [fold foreach !]]
      [am.ik.clj-gae-ds.core :only [entity-map get-prop fetch-options add-filter 
                                    add-sort query query-seq count-entities
-                                   ds-get create-key ds-delete]]
+                                   ds-get create-key ds-delete get-key get-id]]
 
      )
   (:require [clojure.contrib.str-utils2 :as su2])

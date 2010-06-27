@@ -3,6 +3,7 @@
      simply
      [yuruyomi.model user]
      [yuruyomi.view book]
+     [yuruyomi.util.session :only [session->twitter-data]]
      )
   (:require
      [clojure.contrib.seq-utils :as se]
@@ -50,14 +51,30 @@
    ]
   ) ; }}}
 
+(defnk login-block [:session {}]
+  (let [td (session->twitter-data session)]
+    [:div {:id "login"}
+     (when (:logined? td)
+       [:p [:a {:href (str "/user/" (:screen-name td))} (:screen-name td)]
+        [:span "&nbsp;"]
+        [:a {:href "/logout"} "logout"]
+        ]
+       )
+     ]
+    )
+  )
+
 ; =header {{{
 (defn pc-header
   ([& args]
-   [:div {:id "header"}
-    [:h1 [:a {:href "/" :id "himg"} *page-title*]]
-    [:p "ゆる～く読書。ゆる～く管理。"]
-    (apply search-form args)
-    ]
+   (let [[name & more] (if (keyword? (first args)) (cons "" args) args)]
+     [:div {:id "header"}
+      [:h1 [:a {:href "/" :id "himg"} *page-title*]]
+      [:p "ゆる～く読書。ゆる～く管理。"]
+      (apply search-form (cons name more))
+      (apply login-block more)
+      ]
+     )
    )
   ([] (pc-header ""))
   )
@@ -220,5 +237,66 @@
               )
          )
        )
+  ) ; }}}
+
+; =update-status-form {{{
+(defn update-status-form [id status]
+  [:form {:id "tweet" :method "POST" :action "/change"}
+   [:input {:type "hidden" :name "id" :value id}]
+   (case status
+     "reading" [:div
+                [:textarea {:name "comment"}]
+                [:input {:type "hidden" :name "status" :value "finish"}]
+                [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
+                [:label {:for "twitter-update"} "Twitterでつぶやく"]
+                [:input {:type "submit" :value "読み終わった"}]
+                ]
+     :else
+     [:div
+      [:p "ステータス: "
+       [:select {:name "status"}
+        [:option {:value "reading"} (if (= status "finish") "再読" "読み始めた")]
+        (when (= status "finish") [:option {:value "want"} "読みたい"])
+        (when (= status "want") [:option {:value "have"} "買った"])
+        (when (! = status "finish")
+          [:option {:value "finish"} (if (= status "reading") "読み終わった" "読んだ")]
+          )
+        ]
+       ]
+      [:p "コメント:"]
+      [:textarea {:name "comment"}]
+      [:p
+       [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
+       [:label {:for "twitter-update"} "Twitterでつぶやく"]
+       [:span "&nbsp;"]
+       [:input {:type "submit" :value "変更"}]
+       ]
+      ]
+     )
+   ]
+  ) ; }}}
+
+; =add-book-form {{{
+(defn add-book-form [id]
+  [:form {:id "tweet" :method "POST" :action "/add"}
+   [:input {:type "hidden" :name "id" :value id}]
+
+   [:p "ステータス: "
+    [:select {:name "status"}
+     [:option {:value "reading"} "読んでる"]
+     [:option {:value "want"} "欲しい"]
+     [:option {:value "have"} "持ってる"]
+     [:option {:value "finish"} "読んだ"]
+     ]
+    ]
+   [:p "コメント:"]
+   [:textarea {:name "comment"}]
+   [:p
+    [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
+    [:label {:for "twitter-update"} "Twitterでつぶやく"]
+    [:span "&nbsp;"]
+    [:input {:type "submit" :value "登録する"}]
+    ]
+   ]
   ) ; }}}
 

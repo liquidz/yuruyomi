@@ -238,6 +238,12 @@ form#tweet {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 }
+form#tweet select {
+	width: 8em;
+}
+form#tweet textarea {
+	width: 200px;
+}
 
 /* =exp {{{ */
 #exp {

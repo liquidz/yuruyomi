@@ -6,7 +6,7 @@
      [am.ik.clj-gae-ds.core :only [get-prop set-prop ds-put get-id get-key
                                    ds-get create-key map-entity ds-delete]]
      [am.ik.clj-aws-ecs :only [make-requester item-search-map]]
-     [yuruyomi.clj-gae-ds-wrapper :only [find-entity count-entity entity->map get-entity delete-entity]]
+     [yuruyomi.clj-gae-ds-wrapper :only [find-entity count-entity entity->map get-entity delete-entity get-props]]
      [yuruyomi.util.seq :only [filters]]
      [yuruyomi.util.cache :only [get-cached-value cache-val]]
      [yuruyomi.model.history :only [save-history]]
@@ -109,11 +109,11 @@
 ; =save-new-book
 (defnk save-new-book [:user "" :title "" :author "" :date (now) :status "" :icon "" :text ""]
   (when (and (! su2/blank? user) (! su2/blank? title)(! su2/blank? status) (! = status "delete"))
-    (let [e (map-entity *book-entity-name* :user name :title title
+    (let [e (map-entity *book-entity-name* :user user :title title
                         :author author :date date :status status :icon icon)]
       (ds-put e)
-      (change-user-data name (keyword status) inc)
-      (save-history :user name :title title :author author :date date
+      (change-user-data user (keyword status) inc)
+      (save-history :user user :title title :author author :date date
                     :before "new" :after status :text text
                     :book-id (-> e get-key get-id))
       ;(bot-tweet (str "new book " title " added."))
@@ -122,26 +122,30 @@
   )
 
 ; =change-book-status
-(defnk change-book-status [book-entity new-status :author "" :icon "" :text ""]
-   (let [before-status (get-prop book-entity :status)
-         [name title date] (get-props book-entity :user :title :date)]
+(defnk change-book-status [id-or-entity new-status :author "" :date "" :icon "" :text ""]
+  (set-default-timezone)
+  (let [book-entity (if (string? id-or-entity) (get-entity *book-entity-name* id-or-entity) id-or-entity)
+        before-status (get-prop book-entity :status)
+        [name title] (get-props book-entity :user :title)
+        date2 (if (su2/blank? date) (now) date)]
 
-     (change-user-data name (keyword before-status) dec (keyword new-status) inc)
+    (change-user-data name (keyword before-status) dec (keyword new-status) inc)
 
-     (set-prop book-entity :status status)
-     (set-prop book-entity :date date)
-     ; 著者が登録されていなくて、今回入力されている場合は登録する
-     (when (and (! su2/blank? author) (su2/blank? (get-prop book-entity :author)))
-       (set-prop book-entity :author author))
-     ; アイコンが登録されていなくて、今回入力されている場合は登録する
-     (when (su2/blank? (get-prop book-entity :icon))
-       (set-prop book-entity :icon icon))
-     (ds-put book-entity)
+    (set-prop book-entity :status new-status)
+    (set-prop book-entity :date date2)
 
-     (save-history :user name :title title :author (get-prop book-entity :author)
-                   :date date :before before-status :after new-status
-                   :text text :book-id (-> book-entity get-key get-id))
-     )
+    ; 著者が登録されていなくて、今回入力されている場合は登録する
+    (when (and (! su2/blank? author) (su2/blank? (get-prop book-entity :author)))
+      (set-prop book-entity :author author))
+    ; アイコンが登録されていなくて、今回入力されている場合は登録する
+    (when (su2/blank? (get-prop book-entity :icon))
+      (set-prop book-entity :icon icon))
+    (ds-put book-entity)
+
+    (save-history :user name :title title :author (get-prop book-entity :author)
+                  :date date2 :before before-status :after new-status
+                  :text text :book-id (-> book-entity get-key get-id))
+    )
   )
 
 ; =save-book
@@ -176,7 +180,7 @@
             ]
         (cond
           ; 新規登録
-          (nil? x) (save-new-book :user user :title title :author author :date date
+          (nil? x) (save-new-book :user name :title title :author author :date date
                                   :status status :icon icon :text (:original_text tweet))
 ;          (when (! = status "delete")
 ;                     (let [e (map-entity *book-entity-name* :user name :title title
@@ -189,7 +193,7 @@
 ;                       )
 ;                     )
           ; 登録済みのものを更新
-          :else (change-book-status x status :author author :icon icon :text (:original_text tweet))
+          :else (change-book-status x status :author author :date date :icon icon :text (:original_text tweet))
 ;          (let [before-status (get-prop x :status)]
 ;                  (change-user-data
 ;                    name

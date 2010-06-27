@@ -2,16 +2,17 @@
   (:gen-class :extends javax.servlet.http.HttpServlet)
   ; use {{{
   (:use 
-     [simply :only [case delete-html-tag i escape]]
+     [simply :only [case delete-html-tag i escape !]]
      [hiccup.core :only [html]]
      [compojure.core :only [defroutes GET POST wrap!]]
      [ring.util.servlet :only [defservice]]
      [ring.util.response :only [redirect]]
-     [yuruyomi.model.book :only [delete-book]]
+     [yuruyomi.model.book :only [delete-book get-a-book change-book-status save-new-book]]
      [yuruyomi.model.setting :only [clear-max-id]]
      [yuruyomi.cron.twitter :only [collect-tweets twitter-test save-tweet]]
      [yuruyomi.cron.user :only [collect-user]]
      [yuruyomi.view html admin mobile]
+     [yuruyomi.view.book :only [*status-text*]]
      [yuruyomi.util session]
      [twitter :only [get-twitter-oauth-url get-twitter-oauth-access-token
                      get-twitter-screen-name twitter-logined? twitter-update]]
@@ -42,20 +43,84 @@
        (history-page (get-param params "name")))
   (GET "/user/:name/history/:page" {session :session, params :params}
        (let [[name page] (get-params params "name" "page")]
-         (history-page name :page page)))
+         (history-page name :page page :session session)))
   (GET "/user/:name/:status" {session :session, params :params}
        (let [[name status] (get-params params "name" "status")]
-         (user-page name :status status)))
+         (user-page name :status status :session session)))
   (GET "/user/:name/:status/:page" {session :session, params :params} 
        (let [[name status page] (get-params params "name" "status" "page")]
-       (user-page name :status status :page page)))
+       (user-page name :status status :page page :session session)))
   
-  (GET "/book/:id" {session :session, params :params} (book-page (get-param params "id")))
+  (GET "/book/:id" {session :session, params :params} 
+       (book-page (get-param params "id") :session session))
   (GET "/tweet" {session :session, params :params} 
        (redirect (apply redirect-to-twitter (get-params params "title" "author" "status"))))
   (GET "/search" {session :session, params :params}
-       (apply search-page (get-params params "user" "mode" "keyword" "page" "user_only")))
-  (GET "/status" {session :session} (status-page))
+       (apply search-page
+              (concat 
+                (get-params params "user" "mode" "keyword" "page" "user_only")
+                (list :session session))))
+  (GET "/status" {session :session} (status-page :session session))
+
+  (POST "/change" {session :session, params :params}
+       (let [[id status comment update?] (get-params params "id" "status" "comment" "twitter-update")
+             book (get-a-book id)
+             td (session->twitter-data session)]
+         (when (and (:logined? td) (= (:screen-name td) (:user book)))
+           (change-book-status id status :text comment)
+           (when (! su2/blank? update?)
+             (twitter-update (:twitter session)
+                             (str
+                               "[テスト]"
+                               (:title book) " "
+                               (when (! su2/blank? (str (:author book) " ")))
+                               (get *status-text* status) "。" comment
+                               )
+                             )
+             )
+           )
+         (redirect
+           (if (su2/blank? id)
+             "/"
+             (str "/book/" id)
+             )
+           )
+         )
+       )
+
+  (POST "/add" {session :session, params :params}
+        (let [[id status comment update?] (get-params params "id" "status" "comment" "twitter-update")
+              book (get-a-book id)
+              td (session->twitter-data session)
+              ]
+          (when (:logined? td)
+            (save-new-book
+              :user (:screen-name td)
+              :title (:title book)
+              :author (:author book)
+              :status status
+              :icon (:image td)
+              :text comment
+              )
+            (when (! su2/blank? update?)
+              (twitter-update (:twitter session)
+                              (str
+                                "[テスト]"
+                                (:title book) " "
+                                (when (! su2/blank? (str (:author book) " ")))
+                                (get *status-text* status) "。" comment
+                                )
+                              )
+              )
+            )
+          (redirect
+            (if (su2/blank? id)
+              "/"
+              (str "/book/" id)
+              )
+            )
+          )
+        )
 
   ;(GET "/home" {session :session, params :params})
 

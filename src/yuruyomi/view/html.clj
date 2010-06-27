@@ -48,52 +48,49 @@
     )
   )
 
-(defn status-page
-  ([name]
-   (let [status "statuses"]
-     (layout
-       (str *page-title* " - ステータス一覧")
-       :css ["/css/main.css"]
-       (pc-header name)
-       (when (! nil? name)
-         [:div {:id "info"} 
-          [:p [:a {:href (str "http://twitter.com/" name)}
-               [:img {:src (-> (get-books :user name :limit 1 :offset 0) first :icon)}]]]
-          [:h2 name]
-          (make-info-ul *main-menu* :name name :class "main" :select status)
-          (make-info-ul *etc-menu* :name name :class "etc" :select status)
-          ]
-         )
+(defnk status-page [:name "" :session {}]
+  (let [status "statuses"]
+    (layout
+      (str *page-title* " - ステータス一覧")
+      :css ["/css/main.css"]
+      (pc-header name :session session)
+      (when (! su2/blank? name)
+        [:div {:id "info"} 
+         [:p [:a {:href (str "http://twitter.com/" name)}
+              [:img {:src (-> (get-books :user name :limit 1 :offset 0) first :icon)}]]]
+         [:h2 name]
+         (make-info-ul *main-menu* :name name :class "main" :select status)
+         (make-info-ul *etc-menu* :name name :class "etc" :select status)
+         ]
+        )
 
-       [:div {:id "container"}
-        [:h2 "ステータス一覧"]
-        (table
-          (partition 1 *reading-words*)
-          :header ["読んでるステータス"]
-          :footer? false :attr {:id "reading_words"})
-        (table
-          (partition 1 *want-words*)
-          :header ["読みたいステータス"]
-          :footer? false :attr {:id "want_words"})
-        (table
-          (partition 1 *having-words*)
-          :header ["持ってるステータス"]
-          :footer? false :attr {:id "having_words"})
-        (table
-          (partition 1 *finish-words*)
-          :header ["読了ステータス"]
-          :footer? false :attr {:id "finish_words"})
-        ]
+      [:div {:id "container"}
+       [:h2 "ステータス一覧"]
+       (table
+         (partition 1 *reading-words*)
+         :header ["読んでるステータス"]
+         :footer? false :attr {:id "reading_words"})
+       (table
+         (partition 1 *want-words*)
+         :header ["読みたいステータス"]
+         :footer? false :attr {:id "want_words"})
+       (table
+         (partition 1 *having-words*)
+         :header ["持ってるステータス"]
+         :footer? false :attr {:id "having_words"})
+       (table
+         (partition 1 *finish-words*)
+         :header ["読了ステータス"]
+         :footer? false :attr {:id "finish_words"})
+       ]
 
-       pc-footer
-       )
-     )
-   )
-  ([] (status-page nil))
+      pc-footer
+      )
+    )
   )
 
 ; =history-page {{{
-(defnk history-page [name :page 1]
+(defnk history-page [name :page 1 :session {}]
   (let [now-page (if (pos? (i page)) (i page) 1)
         histories (find-history :user name :sort "date" :limit *show-history-num* :page now-page)
         pages (.intValue (Math/ceil (/ (count-histories :user name) *show-history-num*)))
@@ -101,7 +98,7 @@
     (layout
       (str *page-title* " - " name)
       :css ["/css/main.css"]
-      (pc-header name)
+      (pc-header name :session session)
 
       [:div {:id "info"} 
        [:p [:a {:href (str "http://twitter.com/" name)}
@@ -136,7 +133,7 @@
   ) ; }}}
 
 ; =book-page {{{
-(defn book-page [id]
+(defnk book-page [id :session {}]
   (let [title (:title (get-a-book id))
         books (get-books :title title)
         fb (first books)
@@ -144,12 +141,14 @@
         img (get-book-image title author :size "large"
                                  :default *default-book-image*)
         histories (find-history :title title :sort "date" :limit 10 :offset 0)
+        td (session->twitter-data session)
+        your-book (if (:logined? td) (se/find-first #(= (:user %) (:screen-name td)) books) nil)
         ]
     (layout
       (str *page-title* " - " title)
       :css ["/css/main.css"]
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
-      (pc-header nil)
+      (pc-header :session session)
       
       (if (empty? books)
         [:div {:id "container"} [:h2 "&quote;" title "&quote; という本は見つかりませんでした"]]
@@ -157,7 +156,13 @@
          [:h2 title (when (! nil? author) (str " - " author "(著)"))]
          [:div {:id "large_book_image"}
           [:img {:src img :alt title}]
-          (tweet-form title author)
+          (if (! :logined? td)
+            (tweet-form title author)
+            (if (nil? your-book)
+              (add-book-form (:id fb))
+              (update-status-form (:id your-book) (:status your-book))
+              )
+            )
           ]
          [:h3 "この本を登録している人"]
          (map (fn [b]
@@ -209,7 +214,7 @@
   ) ; }}}
 
 ; =search-page {{{
-(defn search-page [name mode text page user-only]
+(defnk search-page [name mode text page user-only :session {}]
   (let [pn (i (if (su2/blank? page) "1" page))
         now-page (if (and (! nil? page) (pos? pn)) pn 1)
         key (case mode
@@ -227,7 +232,7 @@
       (str *page-title* " - " text)
       :css ["/css/main.css"]
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
-      (pc-header name :text text :mode mode :user-only (= user-only "true"))
+      (pc-header name :text text :mode mode :user-only (= user-only "true") :session session)
 
       (when (! su2/blank? name)
         [:div {:id "info"} 
@@ -255,7 +260,7 @@
   ) ; }}}
 
 ; =user-page {{{
-(defnk user-page [name :status "all" :page 1 :session session]
+(defnk user-page [name :status "all" :page 1 :session {}]
   (let [is-all? (= status "all")
         is-finish? (= status "finish")
         now-page (if (pos? (i page)) (i page) 1)
@@ -273,12 +278,7 @@
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
       :css ["/css/main.css"]
 
-      (pc-header name)
-;      [:div {:id "header"}
-;       [:h1 [:a {:href "/" :id "himg"} *page-title*]]
-;       [:p "ゆる～く読書。ゆる～く管理。"]
-;       (search-form name)
-;       ]
+      (pc-header name :session session)
 
       (if (and (empty? books) (zero? other-book-num))
         (first-user-page name)
@@ -320,7 +320,7 @@
       :js ["/js/jquery-1.4.2.min.js" "/js/jquery.fieldtag.min.js" "/js/top.js"]
 
       ;[:div {:id "header"} [:h1 {:id "himg"} *page-title*]]
-      (pc-header)
+      (pc-header :session session)
       [:div {:id "exp"}
        [:p {:id "copy"} "ゆるよみはTwitterでつぶやくだけで読書管理ができるゆる～いサービスです。"]
        [:form {:method "GET" :action "/"}
@@ -330,15 +330,7 @@
          [:input {:type "submit" :value "あなたのゆるよみを確認" :class "btn"}]
          ]
         ]
-       (when (logined? session)
-         [:form {:method "GET" :action "/update"}
-          [:img {:src (profile-image session)}]
-          [:input {:type "text" :name "status"}]
-          [:input {:type "submit" :value "tweet"}]
-          ]
-         )
        (table
-         ;(map #(list [:a {:href (str "/book/" (:id (first (get-books :user (:user %) :title (:title %) :author (:author %) :limit 1 :offset 0))))} (:title %)]) new-books)
          (map #(list [:a {:href (str "/book/" (:id (history->book %)))} (:title %)]) new-books)
          :header ["最近登録された本"]
          :footer? false

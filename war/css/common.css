@@ -36,7 +36,19 @@ body {
 	margin-left: 20px;
 }
 
+
+#header form, #header #login {
+	background-color: rgba(196, 209, 63, 0.6);
+
+	padding-top: 3px;
+	padding-left: 5px;
+	height: 27px;
+
+	float: right;
+}
+
 #header form {
+	/*
 	background: #effb74;
 
 	margin-top: 10px;
@@ -48,6 +60,8 @@ body {
 	-moz-border-radius-bottomleft: 10px;
 
 	float: right;
+	*/
+	padding-left: 5px;
 }
 #header form label {
 	font-size: small;
@@ -56,6 +70,21 @@ body {
 #header form input#user_only {
 	margin-left: 5px;
 }
+
+
+#header #login {
+	padding-right: 5px;
+	-webkit-border-bottom-left-radius: 10px;
+	-moz-border-radius-bottomleft: 10px;
+}
+#header #login p {
+    line-height: 21px;
+
+	padding-right: 5px;
+	border-right: 2px solid #B0BD2D;
+}
+
+
 /* }}} */
 
 /* =footer {{{ */
@@ -98,7 +127,7 @@ a:hover {
 	color: #37f;
 }
 
-form input {
+form input, form textarea {
 	border: 1px solid #ccc;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -114,6 +143,7 @@ form input[type=submit] {
 
 	color: #fff;
 	letter-spacing: 1px;
+	font-size: 12px;
 	font-weight: bold;
 }
 form input[type=submit]:hover {
