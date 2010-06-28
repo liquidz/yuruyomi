@@ -89,6 +89,17 @@
     )
   )
 
+(defn check-params [params]
+  (layout
+    *page-title*
+    (map (fn [k]
+           [:p k " => " (get params k)]
+           )
+         (keys params)
+         )
+    )
+  )
+
 ; =history-page {{{
 (defnk history-page [name :page 1 :session {}]
   (let [now-page (if (pos? (i page)) (i page) 1)

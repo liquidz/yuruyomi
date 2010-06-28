@@ -125,10 +125,18 @@
   ;(GET "/home" {session :session, params :params})
 
   (GET "/login" {session :session, params :params}
-       (if (logined? session) (assoc (redirect "/") :session session) ;(with-session session (redirect "/"))
-         (let [[url rt tw] (oauth-url)]
-           ;(with-session session (redirect url) :twitter tw :request-token rt)
-           (assoc (redirect url) :session (assoc session :twitter tw :request-token rt))
+       (if (logined? session)
+         (redirect "/")
+         (let [verifier (get-param params "oauth_token")]
+           (if (su2/blank? verifier)
+             (let [[url rt tw] (oauth-url)]
+               (assoc (redirect url) :session (assoc session :twitter tw :request-token rt))
+               )
+             ;(let [[at tw] (get-twitter-oauth-access-token (:twitter session) (:request-token session) verifier)]
+             (let [[at tw] (get-twitter-oauth-access-token (:twitter session) (:request-token session))]
+               (assoc (redirect "/") :session (assoc session :access-token at :twitter tw))
+               )
+             )
            )
          )
        )
@@ -187,9 +195,8 @@
   (GET "/admin/cron/user" [] (do (collect-user) "fin"))
   ; }}}
 
-  (GET "/check_env" {headers :headers}
-       (println headers)
-       ""
+  (GET "/check" {params :params}
+       (check-params params)
        )
 
   (route/not-found (not-found-page))

@@ -157,8 +157,15 @@ ul.pager li.now span {
 }
 
 #container .book div.book_image {
+	/*
 	background: transparent url(/img/shadow.png) no-repeat right bottom;
 	padding: 0 8px 8px 0;
+	*/
+
+	-webkit-box-shadow: #ccc 4px 4px 8px;
+	-moz-box-shadow: #ccc 4px 4px 8px;
+	box-shadow: #ccc 4px 4px 8px;
+
 	margin-bottom: 3px;
 }
 
@@ -237,6 +244,7 @@ form#tweet {
 	padding: 5px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
+	border-radius: 5px;
 }
 form#tweet select {
 	width: 8em;
