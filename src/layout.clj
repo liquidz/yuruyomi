@@ -45,8 +45,7 @@
        (html
          [:html (if!nil html-attr)
           [:head (if!nil head-attr) head]
-          [:body (if!nil body-attr) body]
-          ]
+          [:body (if!nil body-attr) body]]
          )
        after
        )

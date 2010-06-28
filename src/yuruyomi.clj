@@ -187,6 +187,11 @@
   (GET "/admin/cron/user" [] (do (collect-user) "fin"))
   ; }}}
 
+  (GET "/check_env" {headers :headers}
+       (println headers)
+       ""
+       )
+
   (route/not-found (not-found-page))
   )
 
