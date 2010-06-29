@@ -23,56 +23,63 @@
   )
 
 ; =search-form {{{
-(defnk search-form [name :mode "title" :text "" :user-only false]
-  ;[:form {:method "GET" :action (str "/user/" name "/search")}
-  [:form {:method "GET" :action "/search"}
-   [:select {:name "mode"}
-    (if (= mode "title") 
-      [:option {:value "title" :selected "selected"} "タイトル"]
-      [:option {:value "title"} "タイトル"]
-      )
-    (if (= mode "author")
-      [:option {:value "author" :selected "selected"} "著者"]
-      [:option {:value "author"} "著者"]
-      )
-    ]
-   [:input {:type "text" :name "keyword" :value text}]
-   (when (! su2/blank? name)
-     (if user-only
-       [:span [:input {:type "checkbox" :name "user_only" :value "true" :id "user_only" :checked "checked"}]
-        [:label {:for "user_only"} "あなたの本だけ"]]
-       [:span [:input {:type "checkbox" :name "user_only" :value "true" :id "user_only"}]
-        [:label {:for "user_only"} "あなたの本だけ"]]
+(defnk search-form [name :mode "title" :text "" :user-only false :session {}]
+  (let [td (session->twitter-data session)]
+    [:form {:method "GET" :action "/search"}
+     [:span {:id "login_user"}
+      (if (:logined? td)
+        [:a {:href (str "/user/" (:screen-name td))} (:screen-name td) "さん"]
+        "ゲストさん"
+        )
+      ]
+     [:select {:name "mode"}
+      (if (= mode "title") 
+        [:option {:value "title" :selected "selected"} "タイトル"]
+        [:option {:value "title"} "タイトル"]
+        )
+      (if (= mode "author")
+        [:option {:value "author" :selected "selected"} "著者"]
+        [:option {:value "author"} "著者"]
+        )
+      ]
+     [:input {:type "text" :name "keyword" :value text}]
+     ;(when (! su2/blank? name)
+     (when (:logined? td)
+       (if user-only
+         [:span [:input {:type "checkbox" :name "user_only" :value "true" :id "user_only" :checked "checked"}]
+          [:label {:for "user_only"} "あなたの本だけ"]]
+         [:span [:input {:type "checkbox" :name "user_only" :value "true" :id "user_only"}]
+          [:label {:for "user_only"} "あなたの本だけ"]]
+         )
        )
-     )
-   [:input {:type "hidden" :name "page" :value "1"}]
-   [:input {:type "hidden" :name "user" :value name}]
-   [:input {:type "submit" :value "検索"}]
-   ]
+     [:input {:type "hidden" :name "page" :value "1"}]
+     [:input {:type "hidden" :name "user" :value name}]
+     [:input {:type "submit" :value "検索"}]
+     ]
+    )
   ) ; }}}
 
-(defnk login-block [:session {}]
-  (let [td (session->twitter-data session)]
-    [:div {:id "login"}
-     (when (:logined? td)
-       [:p [:a {:href (str "/user/" (:screen-name td))} (:screen-name td)]
-        [:span "&nbsp;"]
-        [:a {:href "/logout"} "logout"]
-        ]
-       )
-     ]
+(defnk login-block [td]
+  (if (:logined? td)
+    [:p [:a {:href "/logout"} "logout"]]
+    [:p [:a {:href "/login"} "login"]]
     )
   )
 
 ; =header {{{
 (defn pc-header
   ([& args]
-   (let [[name & more] (if (keyword? (first args)) (cons "" args) args)]
+   (let [[name & more] (if (keyword? (first args)) (cons "" args) args)
+         td (->> more (apply array-map) :session session->twitter-data)
+         ]
+
      [:div {:id "header"}
       [:h1 [:a {:href "/" :id "himg"} *page-title*]]
       [:p "ゆる～く読書。ゆる～く管理。"]
-      (apply search-form (cons name more))
-      (apply login-block more)
+      [:div {:id "search-login"}
+       (apply search-form (cons name more))
+       (login-block td)
+       ]
       ]
      )
    )

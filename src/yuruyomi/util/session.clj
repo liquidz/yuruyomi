@@ -21,7 +21,7 @@
     )
   )
 
-(defnk screen-name [session :default "guest"]
+(defnk screen-name [session :default "*guest*"]
   (if (logined? session)
     (get-twitter-screen-name (:twitter session))
     default

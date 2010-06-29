@@ -125,7 +125,7 @@
          [:h3 "まだ履歴がありません"]
          (table
            (map
-             #(list [:a {:href (str "/book/" (:id (history->book %)))} (:title %)]
+             #(list [:a {:href (str "/book/" (:book-id %))} (:title %)]
                     (:author %)
                     (str (get *status-text* (:before %)) " &raquo; " (get *status-text*  (:after %)))
                     (:date %) (:text %)
@@ -321,9 +321,11 @@
 
 ; index {{{
 (defn index-page [session]
-  (let [new-books (find-history :before "new" :sort "date" :limit 5 :offset 0)
+  (let [new-books 
+        (take 5 (delete-duplicates :title (find-history :before "new" :sort "date" :limit 10 :offset 0)))
         active-user (take 5 (get-active-user :limit 20))
-        recent-tweets (find-history :sort "date" :limit 5 :offset 0)
+        recent-tweets 
+        (take 5 (delete-duplicates :text (find-history :sort "date" :limit 10 :offset 0)))
         ]
     (layout
       *page-title*
@@ -342,7 +344,7 @@
          ]
         ]
        (table
-         (map #(list [:a {:href (str "/book/" (:id (history->book %)))} (:title %)]) new-books)
+         (map #(list [:a {:href (str "/book/" (:book-id %))} (:title %)]) new-books)
          :header ["最近登録された本"]
          :footer? false
          :attr {:id "new_book_table"}
