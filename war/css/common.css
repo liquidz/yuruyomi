@@ -45,11 +45,20 @@ body {
 	-moz-border-radius-bottomleft: 12px;
 }
 
+#header #search-login p {
+	padding-right: 10px;
+}
+
 #header form {
+	padding-bottom: 2px;
+	margin-bottom: 2px;
 }
 #header form span#login_user {
 	padding-right: 5px;
 	border-right: 2px solid #B0BD2D;
+}
+#header form span#login_user span {
+	font-size: x-small;
 }
 #header form select {
 	margin-left: 10px;
@@ -60,6 +69,9 @@ body {
 }
 #header form input#user_only {
 	margin-left: 5px;
+}
+
+#header #search-login {
 }
 
 

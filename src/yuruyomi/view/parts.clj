@@ -28,8 +28,8 @@
     [:form {:method "GET" :action "/search"}
      [:span {:id "login_user"}
       (if (:logined? td)
-        [:a {:href (str "/user/" (:screen-name td))} (:screen-name td) "さん"]
-        "ゲストさん"
+        [:a {:href (str "/user/" (:screen-name td))} (:screen-name td) [:span "さん"]]
+        (list "ゲスト" [:span "さん"])
         )
       ]
      [:select {:name "mode"}
@@ -62,7 +62,7 @@
 (defnk login-block [td]
   (if (:logined? td)
     [:p [:a {:href "/logout"} "logout"]]
-    [:p [:a {:href "/login"} "login"]]
+    [:p [:a {:href "/login"} [:img {:src "/img/sign-in-with-twitter.png" :alt "ログイン"}]]]
     )
   )
 

@@ -321,10 +321,10 @@
 
 ; index {{{
 (defn index-page [session]
-  (let [new-books 
+  (let [new-books
         (take 5 (delete-duplicates :title (find-history :before "new" :sort "date" :limit 10 :offset 0)))
         active-user (take 5 (get-active-user :limit 20))
-        recent-tweets 
+        recent-tweets
         (take 5 (delete-duplicates :text (find-history :sort "date" :limit 10 :offset 0)))
         ]
     (layout
