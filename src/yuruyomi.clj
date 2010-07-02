@@ -88,24 +88,29 @@
          )
        )
 
+  (POST "/new" {session :session, params :params}
+        (let [[title author status comment update?] (get-params params "title" "author" "status" "twitter-update")
+              td (session->twitter-data session)
+              ]
+          (when (:logined? td)
+            (save-new-book
+              )
+            )
+          (redirect "/")
+          )
+        )
+
   (POST "/add" {session :session, params :params}
         (let [[id status comment update?] (get-params params "id" "status" "comment" "twitter-update")
               book (get-a-book id)
               td (session->twitter-data session)
               ]
           (when (:logined? td)
-            (save-new-book
-              :user (:screen-name td)
-              :title (:title book)
-              :author (:author book)
-              :status status
-              :icon (:image td)
-              :text comment
-              )
+            (save-new-book :user (:screen-name td) :id id :status status :icon (:image td) :text comment)
             (when (! su2/blank? update?)
               (twitter-update (:twitter session)
                               (str
-                                "[テスト]"
+                                "[TEST]"
                                 (:title book) " "
                                 (when (! su2/blank? (str (:author book) " ")))
                                 (get *status-text* status) "。" comment

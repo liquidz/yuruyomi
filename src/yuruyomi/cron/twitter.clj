@@ -142,9 +142,9 @@
                                 (update-max-id max-id))
         :else (let [target (first save-targets)]
                 (log/info (str "try to save: " (:title target) " (" (:from-user target) "/" (:id target) ")"))
-                (if (try (save-book target) (catch Exception e
-                                              (log/warn (str "save book fail: " (.getMessage e)))
-                                              false))
+                (if (try (save-book-from-tweet target)
+                      (catch Exception e
+                        (log/warn (str "save book fail: " (.getMessage e))) false))
                   (recur (rest save-targets) (:id target))
                   ; 途中で失敗した場合には次回途中から検索するようにIDを記録
                   (when (and (pos? local-last-id) (> local-last-id now-max-id))

@@ -107,16 +107,21 @@
   )
 
 ; =save-new-book
-(defnk save-new-book [:user "" :title "" :author "" :date (now) :status "" :icon "" :text ""]
-  (when (and (! su2/blank? user) (! su2/blank? title)(! su2/blank? status) (! = status "delete"))
-    (let [e (map-entity *book-entity-name* :user user :title title
-                        :author author :date date :status status :icon icon)]
-      (ds-put e)
-      (change-user-data user (keyword status) inc)
-      (save-history :user user :title title :author author :date date
-                    :before "new" :after status :text text
-                    :book-id (-> e get-key get-id))
-      ;(bot-tweet (str "new book " title " added."))
+(defnk save-new-book [:user "" :id -1 :title "" :author "" :date (now) :status "" :icon "" :text ""]
+  (let [book (if (pos? id) (get-a-book id))
+        book-title (if (nil? book) title (:title book))
+        book-author (if (nil? book) author (if (su2/blank? (:author book)) author (:author book)))
+        ]
+    (when (and (! su2/blank? user) (! su2/blank? book-title)(! su2/blank? status) (! = status "delete"))
+      (let [e (map-entity *book-entity-name* :user user :title book-title
+                          :author book-author :date date :status status :icon icon)]
+        (ds-put e)
+        (change-user-data user (keyword status) inc)
+        (save-history :user user :title book-title :author book-author :date date
+                      :before "new" :after status :text text
+                      :book-id (-> e get-key get-id))
+        ;(bot-tweet (str "new book " title " added."))
+        )
       )
     )
   )
@@ -148,8 +153,8 @@
     )
   )
 
-; =save-book
-(defn save-book [tweet]
+; =save-book-from-tweet
+(defn save-book-from-tweet [tweet]
   (set-default-timezone)
   (let [name (:from-user tweet), title (:title tweet)
         author (:author tweet), status (:status tweet)
