@@ -3,6 +3,7 @@
   ; use {{{
   (:use 
      [simply :only [case delete-html-tag i escape !]]
+     [simply.date :only [set-default-timezone]]
      [hiccup.core :only [html]]
      [compojure.core :only [defroutes GET POST wrap!]]
      [ring.util.servlet :only [defservice]]
@@ -40,7 +41,7 @@
   (GET "/user/:name" {session :session, params :params}
        (user-page (get-param params "name") :session session))
   (GET "/user/:name/history" {session :session, params :params}
-       (history-page (get-param params "name")))
+       (history-page (get-param params "name") :session session))
   (GET "/user/:name/history/:page" {session :session, params :params}
        (let [[name page] (get-params params "name" "page")]
          (history-page name :page page :session session)))
@@ -69,14 +70,7 @@
          (when (and (:logined? td) (= (:screen-name td) (:user book)))
            (change-book-status id status :text comment)
            (when (! su2/blank? update?)
-             (twitter-update (:twitter session)
-                             (str
-                               "[テスト]"
-                               (:title book) " "
-                               (when (! su2/blank? (str (:author book) " ")))
-                               (get *status-text* status) "。" comment
-                               )
-                             )
+             (tweet-when-update session :title (:title book) :author (:author book) :status status :comment comment)
              )
            )
          (redirect
@@ -89,14 +83,20 @@
        )
 
   (POST "/new" {session :session, params :params}
-        (let [[title author status comment update?] (get-params params "title" "author" "status" "twitter-update")
+        (let [[title author status comment update?] (get-params params "title" "author" "status" "comment" "twitter-update")
               td (session->twitter-data session)
               ]
-          (when (:logined? td)
-            (save-new-book
+          (if (:logined? td)
+            (do
+              (set-default-timezone)
+              (save-new-book :user (:screen-name td) :title title :author author :status status :icon (:image td) :text comment)
+              (when (! su2/blank? update?)
+                (tweet-when-update session :title title :author author :status status :comment comment)
+                )
+              (redirect (str "/user/" (:screen-name td)))
               )
+            (redirect "/")
             )
-          (redirect "/")
           )
         )
 
@@ -106,16 +106,10 @@
               td (session->twitter-data session)
               ]
           (when (:logined? td)
-            (save-new-book :user (:screen-name td) :id id :status status :icon (:image td) :text comment)
+            (set-default-timezone)
+            (save-new-book :user (:screen-name td) :id (:id book) :status status :icon (:image td) :text comment)
             (when (! su2/blank? update?)
-              (twitter-update (:twitter session)
-                              (str
-                                "[TEST]"
-                                (:title book) " "
-                                (when (! su2/blank? (str (:author book) " ")))
-                                (get *status-text* status) "。" comment
-                                )
-                              )
+              (tweet-when-update session :title (:title book) :author (:author book) :status status :comment comment)
               )
             )
           (redirect
@@ -154,12 +148,12 @@
          )
        )
   (GET "/logout" _ (assoc (redirect "/") :session {}))
-  (GET "/update" {session :session, params :params}
-       (when (logined? session)
-         (twitter-update (:twitter session) (get-param params "status"))
-         )
-       (redirect "/")
-       )
+;  (GET "/update" {session :session, params :params}
+;       (when (logined? session)
+;         (twitter-update (:twitter session) (get-param params "status"))
+;         )
+;       (redirect "/")
+;       )
 
   ; }}}
 

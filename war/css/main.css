@@ -253,6 +253,16 @@ form#tweet textarea {
 	width: 200px;
 }
 
+
+form#new-book-form {
+	margin: 10px;
+}
+form#new-book-form fieldset {
+	padding: 10px;
+}
+form#new-book-form fieldset legend {
+}
+
 /* =exp {{{ */
 #exp {
 	width: 70%;

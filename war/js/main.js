@@ -113,6 +113,10 @@ var getImage = function(id){
 			$("#container").append($("<div class='book'><div class='book_image'><img src='" + gcUrl + "' /></div></div>"));
 		}
 
+		$("form#new-book-form").bind("submit", function(e){
+			return window.confirm("本当に" + $("form#new-book-form input.confirm").val() + "して良いですか？");
+		});
+
 		// 画像読み込み
 		var books = $("div.book img.load");
 		var i = 0, l = books.length;

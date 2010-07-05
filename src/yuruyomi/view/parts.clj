@@ -28,8 +28,8 @@
     [:form {:method "GET" :action "/search"}
      [:span {:id "login_user"}
       (if (:logined? td)
-        [:a {:href (str "/user/" (:screen-name td))} (:screen-name td) [:span "さん"]]
-        (list "ゲスト" [:span "さん"])
+        [:a {:href (str "/user/" (:screen-name td))} (:screen-name td) [:span " さん"]]
+        (list "ゲスト" [:span " さん"])
         )
       ]
      [:select {:name "mode"}
@@ -61,7 +61,7 @@
 
 (defnk login-block [td]
   (if (:logined? td)
-    [:p [:a {:href "/logout"} "logout"]]
+    [:p [:a {:href "/logout"} "ログアウト"]]
     [:p [:a {:href "/login"} [:img {:src "/img/sign-in-with-twitter.png" :alt "ログイン"}]]]
     )
   )
@@ -252,11 +252,13 @@
    [:input {:type "hidden" :name "id" :value id}]
    (case status
      "reading" [:div
-                [:textarea {:name "comment"}]
                 [:input {:type "hidden" :name "status" :value "finish"}]
-                [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
-                [:label {:for "twitter-update"} "Twitterでつぶやく"]
-                [:input {:type "submit" :value "読み終わった"}]
+                [:p [:textarea {:name "comment"}]]
+                [:p
+                 [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
+                 [:label {:for "twitter-update"} "Twitterでつぶやく"]
+                 [:input {:type "submit" :value "読み終わった"}]
+                 ]
                 ]
      :else
      [:div
@@ -283,24 +285,32 @@
    ]
   ) ; }}}
 
+(def status-select
+  [:select {:name "status"}
+   [:option {:value "reading"} "読んでる"]
+   [:option {:value "want"} "欲しい"]
+   [:option {:value "have"} "持ってる"]
+   [:option {:value "finish"} "読んだ"]
+   ]
+  )
+
+(def update-twitter-check
+  (list
+    [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
+    [:label {:for "twitter-update"} "Twitterでつぶやく"]
+    )
+  )
+
 ; =add-book-form {{{
 (defn add-book-form [id]
   [:form {:id "tweet" :method "POST" :action "/add"}
    [:input {:type "hidden" :name "id" :value id}]
 
-   [:p "ステータス: "
-    [:select {:name "status"}
-     [:option {:value "reading"} "読んでる"]
-     [:option {:value "want"} "欲しい"]
-     [:option {:value "have"} "持ってる"]
-     [:option {:value "finish"} "読んだ"]
-     ]
-    ]
+   [:p "ステータス: " status-select]
    [:p "コメント:"]
    [:textarea {:name "comment"}]
    [:p
-    [:input {:type "checkbox" :name "twitter-update" :id "twitter-update" :checked "checked"}]
-    [:label {:for "twitter-update"} "Twitterでつぶやく"]
+    update-twitter-check
     [:span "&nbsp;"]
     [:input {:type "submit" :value "登録する"}]
     ]

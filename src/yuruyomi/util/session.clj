@@ -2,8 +2,12 @@
   (:use
      simply
      twitter
+     [yuruyomi.view.book :only [*status-text*]]
      )
-  (:require keys)
+  (:require
+     keys
+     [clojure.contrib.str-utils2 :as su2]
+     )
   )
 
 (defn with-session [session body & update-key-value]
@@ -46,6 +50,20 @@
          :screen-name (screen-name session)
          :image (profile-image session)
          )
+;  {:logined? true
+;   :screen-name "testuser"
+;   :image "/img/npc.png"
+;   }
   )
 
+(defnk tweet-when-update [session :title "" :author "" :status "" :comment ""]
+  (twitter-update
+    (:twitter session)
+    (str
+      ;"[テスト]"
+      title (when (! su2/blank? author) (str ":" author))
+      " ["(get *status-text* status) "] " comment
+      )
+    )
+  )
 

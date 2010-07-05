@@ -160,7 +160,7 @@
       :css ["/css/main.css"]
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
       (pc-header :session session)
-      
+
       (if (empty? books)
         [:div {:id "container"} [:h2 "&quote;" title "&quote; という本は見つかりませんでした"]]
         [:div {:id "container"} 
@@ -312,6 +312,23 @@
 
           (pager name status now-page pages)
           )
+        )
+
+      ; your page
+      (when (= name (:screen-name td))
+        [:form {:id "new-book-form" :method "POST" :action "/new"}
+         [:fieldset
+          [:legend "新しい本を追加"]
+          [:p "タイトル: " [:input {:type "text" :name "title"}]]
+          [:p "著者: " [:input {:type "text" :name "author"}]]
+          [:p "ステータス" status-select]
+          [:p "コメント" [:textarea {:name "comment"}]]
+          [:p
+           update-twitter-check
+           [:input {:type "submit" :class "confirm" :value "登録"}]
+           ]
+          ]
+         ]
         )
 
       pc-footer

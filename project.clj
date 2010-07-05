@@ -1,6 +1,6 @@
 (defproject
-  yuruyomi "0.0.1" 
-  :description "lazy management tool for reading books" 
+  yuruyomi "0.0.1"
+  :description "lazy management tool for reading books"
   :repositories {"gaejtools" "http://gaejtools.sourceforge.jp/maven/repository",
                  "maven.seasar.org" "http://maven.seasar.org/maven2"}
 
@@ -20,7 +20,7 @@
                  ]
 
   :dev-dependencies [[am.ik/clj-gae-testing "0.1.0"]]
-  :compile-path "war/WEB-INF/classes/" 
+  :compile-path "war/WEB-INF/classes/"
   :library-path "war/WEB-INF/lib/"
   :namespaces [yuruyomi]
   )
