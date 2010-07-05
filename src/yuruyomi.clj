@@ -50,10 +50,10 @@
   (GET "/user/:name/:status/:page" {session :session, params :params} 
        (let [[name status page] (get-params params "name" "status" "page")]
        (user-page name :status status :page page :session session)))
-  
-  (GET "/book/:id" {session :session, params :params} 
+
+  (GET "/book/:id" {session :session, params :params}
        (book-page (get-param params "id") :session session))
-  (GET "/tweet" {session :session, params :params} 
+  (GET "/tweet" {session :session, params :params}
        (redirect (apply redirect-to-twitter (get-params params "title" "author" "status"))))
   (GET "/search" {session :session, params :params}
        (apply search-page
