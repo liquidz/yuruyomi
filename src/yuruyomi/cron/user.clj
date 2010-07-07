@@ -1,16 +1,9 @@
 (ns yuruyomi.cron.user
   (:use
-     ;simply
      [simply :only [group foreach]]
-     ;[yuruyomi.util seq cache]
-     ;[yuruyomi.model book user]
      [yuruyomi.model.book :only [get-books]]
      [yuruyomi.model.user :only [update-user-data]]
      )
-;  (:require
-;     [clojure.contrib.seq-utils :as se]
-;     [clojure.contrib.str-utils2 :as su2]
-;     )
   )
 
 (defn collect-user []
