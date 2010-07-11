@@ -108,7 +108,7 @@
        [:input {:type "submit" :value "確認" :style "font-size:small"}]
        ]
       (mobile-border :text "最近登録された本" :height "1.5em")
-      (map (fn [b] [:p no-margin-small [:a {:href (str "/mb/" (:id (history->book b)))} (:title b)]])
+      (map (fn [b] [:p no-margin-small [:a {:href (str "/mb/" (:book-id b))} (:title b)]])
            new-books)
       (mobile-border :text "アクティブなユーザ" :height "1.5em")
       (map (fn [u] [:p no-margin-small [:a {:href (str "/m/" u)} u]]) active-user)
@@ -124,7 +124,7 @@
         fb (first books)
         author (:author (se/find-first #(! su2/blank? (:author %)) books))
         img (get-book-image (:title fb) (:author fb) :size "medium"
-                                 :default *default-book-image*)
+                                 :default *no-book-image*)
         histories (find-history :title title :sort "date" :limit 5 :offset 0)
         ]
     (mobile-layout
@@ -159,7 +159,7 @@
         (map
           (fn [h]
             [:p no-margin-small
-             [:a {:href (str "/mb/" (:id (history->book h)))} (:title h)] " " 
+             [:a {:href (str "/mb/" (:book-id h))} (:title h)] " " 
              (get *status-text* (:before h)) "&raquo;" (get *status-text* (:after h))
              [:br] [:span {:style "font-size:x-small"} "&nbsp; (" (:date h) ")"]
              ]

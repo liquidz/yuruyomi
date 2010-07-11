@@ -35,7 +35,7 @@
 
 (defn ajax-get-book-image [id]
   (let [b (get-a-book id)]
-    (get-book-image (:title b) (:author b))
+    (get-book-image (:title b) (:author b) :default *no-book-image*)
     )
   )
 
@@ -150,7 +150,7 @@
         fb (first books)
         author (:author (se/find-first #(! su2/blank? (:author %)) books))
         img (get-book-image title author :size "large"
-                                 :default *default-book-image*)
+                                 :default *no-book-image*)
         histories (find-history :title title :sort "date" :limit 10 :offset 0)
         td (session->twitter-data session)
         your-book (if (:logined? td) (se/find-first #(= (:user %) (:screen-name td)) books) nil)

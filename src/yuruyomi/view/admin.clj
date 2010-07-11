@@ -104,21 +104,13 @@
 ;  )
 
 (defn admin-set-book-id []
-  (let [histories (find-history)
-        books (map history->book histories)
-        res (partition 2 (interleave histories books))
-        ]
-    (foreach (fn [[h b]]
-               (when (nil? (:book-id h))
-                 (let [his (get-entity *history-entity-name* (:id h))]
-                   (set-prop his :book-id (:id b))
-                   (ds-put his)
-                   )
-                 )
-               ) res)
-    )
+  (foreach #(when (nil? (:book-id %))
+              (let [his (get-entity *history-entity-name* (:id %))]
+                (set-prop his :book-id (:book-id %))
+                (ds-put his)
+                )
+              ) (find-history))
   )
-
 
 (defn admin-index-page [page]
   (let [pp (if (su2/blank? page) 1 (i page))

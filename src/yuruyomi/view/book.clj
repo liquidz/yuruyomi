@@ -17,7 +17,8 @@
    }
   )
 (def *show-title-length* 8)
-(def *default-book-image* "/img/noimg.png")
+(def *loading-image* "/img/loading.png")
+(def *no-book-image* "/img/noimg.png")
 
 (defn shorten-title [title]
   (if (> (count title) *show-title-length*)
@@ -28,8 +29,8 @@
 
 (defnk book->html [book :show-user? false :show-status? false :show-delete? false]
   (let [class-name (str "book " (:status book))
-        image-url (get-book-image-cache (:title book) (:author book) :default *default-book-image*)
-        no-image? (= image-url *default-book-image*)
+        image-url (get-book-image-cache (:title book) (:author book) :default *loading-image*)
+        no-image? (= image-url *loading-image*)
         book-link (fn [t] [:a {:href (str "/book/" (:id book))} t])
         ]
     [:div {:class class-name}

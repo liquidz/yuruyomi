@@ -43,7 +43,7 @@
         search-arg (if (su2/blank? author) base-arg (assoc base-arg "Author" author))
         ]
     (if (! nil? val)
-      val
+      (if (su2/blank? val) default val)
       (try
         (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
               res (z/xml-zip (item-search-map req "Books" title search-arg))
