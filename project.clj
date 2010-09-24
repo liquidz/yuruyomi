@@ -10,7 +10,7 @@
                  [am.ik/clj-gae-ds "0.2.0-SNAPSHOT"]
                  [am.ik/clj-gae-users "0.1.0-SNAPSHOT"]
                  [am.ik/clj-aws-ecs "0.1.0-SNAPSHOT"]
-                 [com.google.appengine/appengine-api-1.0-sdk "1.3.5"]
+                 [com.google.appengine/appengine-api-1.0-sdk "1.3.7"]
                  [ring/ring-core "0.2.0"]
                  [ring/ring-servlet "0.2.0"]
                  [ring/ring-jetty-adapter "0.2.0"]
