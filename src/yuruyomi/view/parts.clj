@@ -1,13 +1,13 @@
 (ns yuruyomi.view.parts
-  (:use 
-     simply
+  (:use
+     [simply core string]
      [yuruyomi.model user]
      [yuruyomi.view book]
      [yuruyomi.util.session :only [session->twitter-data]]
      )
   (:require
-     [clojure.contrib.seq-utils :as se]
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.seq :as se]
+     ;[clojure.contrib.string :as st]
      )
   )
 
@@ -43,7 +43,6 @@
         )
       ]
      [:input {:type "text" :name "keyword" :value text}]
-     ;(when (! su2/blank? name)
      (when (:logined? td)
        (if user-only
          [:span [:input {:type "checkbox" :name "user_only" :value "true" :id "user_only" :checked "checked"}]
@@ -197,7 +196,7 @@
 ; =table {{{
 (defnk table [body :header () :attr {} :footer? true]
   [:table attr
-   (when (! empty? header)
+   (when-not (empty? header)
      [:thead [:tr (map (fn [h] [:th h]) header)]]
      )
    (when (and (! empty? header) footer?)
@@ -240,7 +239,7 @@
        (url-encode
          (str title (if (nil? author) "" (str " : " author))
               " " (if (nil? custom) (get *status-text* status) custom)
-              " #yuruyomi" 
+              " #yuruyomi"
               )
          )
        )
@@ -260,14 +259,14 @@
                  [:input {:type "submit" :value "読み終わった"}]
                  ]
                 ]
-     :else
+     ;:else
      [:div
       [:p "ステータス: "
        [:select {:name "status"}
         [:option {:value "reading"} (if (= status "finish") "再読" "読み始めた")]
         (when (= status "finish") [:option {:value "want"} "読みたい"])
         (when (= status "want") [:option {:value "have"} "買った"])
-        (when (! = status "finish")
+        (when-not (= status "finish")
           [:option {:value "finish"} (if (= status "reading") "読み終わった" "読んだ")]
           )
         ]

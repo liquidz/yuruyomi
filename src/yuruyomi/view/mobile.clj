@@ -1,13 +1,13 @@
 (ns yuruyomi.view.mobile
   (:use
-     simply
+     simply.core
      layout
      [yuruyomi.view parts book]
      [yuruyomi.model book history]
      )
   (:require
-     [clojure.contrib.seq-utils :as se]
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.seq :as se]
+     [clojure.contrib.string :as st]
      )
   )
 
@@ -27,7 +27,7 @@
    (list
      (mobile-border :text "メニュー" :height "1.5em")
      [:ul {:style "list-style:none;margin:0;padding:0;"}
-      (when (! nil? name)
+      (when-not (nil? name)
         (list
           [:li [:span {:style "font-size:small;color:#93d31b"} "[1]"]
            [:a {:href (str "/m/" name "/reading") :style "font-size:small" :accesskey "1"} "読んでる本"]]
@@ -122,7 +122,7 @@
   (let [title (:title (get-a-book id))
         books (get-books :title title)
         fb (first books)
-        author (:author (se/find-first #(! su2/blank? (:author %)) books))
+        author (:author (se/find-first #(! st/blank? (:author %)) books))
         img (get-book-image (:title fb) (:author fb) :size "medium"
                                  :default *no-book-image*)
         histories (find-history :title title :sort "date" :limit 5 :offset 0)
@@ -130,7 +130,7 @@
     (mobile-layout
       *page-title*
       mobile-header
-      (mobile-border :text (str title (when (! nil? author) (str " - " author)))
+      (mobile-border :text (str title (when-not (nil? author) (str " - " author)))
                      :height "1.5em"
                      )
       [:img {:src img}]
@@ -145,7 +145,7 @@
   )
 
 (defnk mobile-history-page [name :page 1]
-  (let [now-page (if (pos? (i page)) (i page) 1)
+  (let [now-page (if (pos? (Integer/parseInt page)) (Integer/parseInt page) 1)
         histories (find-history :user name :sort "date" :limit *show-mobile-history-num* :page now-page)
         pages (.intValue (Math/ceil (/ (count-histories :user name) *show-mobile-history-num*)))
         status "history"
@@ -182,7 +182,7 @@
 
 (defnk mobile-user-page [name :status "all" :page 1]
   (let [is-all? (= status "all")
-        now-page (if (pos? (i page)) (i page) 1)
+        now-page (if (pos? (Integer/parseInt page)) (Integer/parseInt page) 1)
         books (if is-all?
                 (get-books :user name :sort "date"
                            :limit *show-mobile-books-num* :page now-page)

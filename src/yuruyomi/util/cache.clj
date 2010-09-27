@@ -1,6 +1,6 @@
 (ns yuruyomi.util.cache
-  (:use simply)
-  (:require [clojure.contrib.str-utils2 :as su2])
+  (:use simply.core)
+  (:require [clojure.contrib.string :as st])
   (:import [com.google.appengine.api.memcache MemcacheServiceFactory Expiration])
   )
 
@@ -26,10 +26,10 @@
   )
 
 (defnk cache-val [key value :expiration 0 :default nil]
-  (if (su2/blank? value)
+  (if (st/blank? value)
     default
     (try
-      (let [ms (MemcacheServiceFactory/getMemcacheService) ]
+      (let [ms (MemcacheServiceFactory/getMemcacheService)]
         (if (cached? key :ms ms)
           (.get ms key)
           (do

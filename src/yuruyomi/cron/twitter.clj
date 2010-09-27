@@ -1,14 +1,15 @@
 (ns yuruyomi.cron.twitter
   (:use
-     [simply :only [defnk ! fold delete-html-tag str<]]
-     [simply.date :only [now set-default-timezone]]
+     ;[simply :only [defnk ! fold delete-html-tag str<]]
+     ;[simply.date :only [now set-default-timezone]]
+     [simply core string date]
      [twitter :only [show-twitter-status twitter-search-all]]
      [yuruyomi.util seq cache]
      [yuruyomi.model book setting]
      )
   (:require
-     [clojure.contrib.seq-utils :as se]
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.seq :as se]
+     [clojure.contrib.string :as st]
      [clojure.contrib.logging :as log]
      )
   )
@@ -42,40 +43,40 @@
 ; }}}
 
 (defn string->long [s] (Long/parseLong s))
-(defn has-word? [s col] (some #(su2/contains? s %) col))
+(defn has-word? [s col] (some #(st/substring? s %) col))
 (defn index-of-word [s col] (apply min (map #(.indexOf s %) col)))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
-(defn delete-hash-tag [s] (su2/replace s #"[\s　]*#\w+[\s　]*" ""))
+(defn delete-hash-tag [s] (st/replace-re #"[\s　]*#\w+[\s　]*" "" s))
 (defn delete-words [s]
-  (let [ls (su2/split s #"[\s　]+")
+  (let [ls (st/split s #"[\s　]+")
         [n s] (se/find-first #(has-word-all? (second %)) (se/indexed ls))]
     ; 見つかったword以降は全て無視
     (if (and (! nil? n) (! nil? s))
-      (su2/join " " (take n ls))
+      (st/join " " (take n ls))
       s
       )
     )
   )
-(defn delete-html-symbol [s] (su2/replace s #"&#\d+;" ""))
-(defn except-dones [f col] (remove #(su2/contains? (f %) *yuruyomi-done-tag*) col))
+(defn delete-html-symbol [s] (st/replace-re #"&#\d+;" "" s))
+(defn except-dones [f col] (remove #(st/substring? (f %) *yuruyomi-done-tag*) col))
 
 ; "hello RT @hoge ddd / o-sa- xxx #tag"
 ; => "ddd / o-sa- hello #tag"
 (defn convert-rt-string [s]
-  (let [[msg & more] (su2/split s #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*")]
+  (let [[msg & more] (st/split s #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*")]
     (cond
       (empty? more) s
-      :else (su2/join " " (map #(if (has-word-all? %) msg %) (su2/split (last more) #"[\s　]+")))
+      :else (st/join " " (map #(if (has-word-all? %) msg %) (st/split (last more) #"[\s　]+")))
       )
     )
   )
 
 (defn string->book-title-author [s]
   (let [[title & more] (extended-split s *re-title-author-sep* "\"")]
-    [(su2/replace title #"\"" "")
+    [(st/replace-str "\"" "" title)
      (if (empty? more) ""
        ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
-       (-> more first su2/trim (extended-split #"[\s　]+" "\"") first (su2/replace #"\"" "") su2/trim)
+       (->> more first st/trim (extended-split #"[\s　]+" "\"") first (st/replace-str "\"" "") st/trim)
        )]
     )
   )
@@ -100,7 +101,7 @@
                (assoc t :text
                (fold (fn [x res]
                        (let [i (.indexOf res x)]
-                         (if (pos? i) (su2/take res (+ i (count x))) res)
+                         (if (pos? i) (st/take res (+ i (count x))) res)
                          )
                        ) (:text t) (apply concat *words-list*))
                       )
@@ -154,8 +155,8 @@
 
 (defn twitter-test [user image text]
   (set-default-timezone)
-  (let [name (if (or (nil? user) (su2/blank? user)) "testuser" user)
-        icon (if (or (nil? image) (su2/blank? user)) "/img/npc.png" image)
+  (let [name (if (or (nil? user) (st/blank? user)) "testuser" user)
+        icon (if (or (nil? image) (st/blank? user)) "/img/npc.png" image)
         res {:created-at (now) :from-user name :from-user-id 0 :id 0
                     :iso-language-code "" :profile-image-url icon :source "test"
                     :text text :to-user "testuser2" :to-user-id 1

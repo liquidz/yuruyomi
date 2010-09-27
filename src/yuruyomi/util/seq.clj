@@ -1,20 +1,19 @@
 (ns yuruyomi.util.seq
-  (:use simply)
-  (:require [clojure.contrib.str-utils :as su])
-  (:require [clojure.contrib.str-utils2 :as su2])
+  (:use [simply core string])
+  (:require [clojure.contrib.string :as st])
   )
 
-(defn extended-split [s reg ignore]
+(defn extended-split [reg ignore s]
   (let [ir (string->regexp "\\" ignore ".+?\\" ignore)
-        grp (su/re-partition ir s)
+        grp (st/partition ir s)
         ]
     (loop [tmp "", res (), ls grp]
       (let [top (first ls)]
         (cond
           (empty? ls) (reverse (remove empty? (cons tmp res)))
-          ;(starts-with? top ignore) (recur (str tmp (su2/replace top (string->regexp "\\" ignore) ""))
+          ;(starts-with? top ignore) (recur (str tmp (st/replace top (string->regexp "\\" ignore) ""))
           (starts-with? top ignore) (recur (str tmp top) res (rest ls))
-          :else (let [[head & tail] (su2/split top reg)]
+          :else (let [[head & tail] (st/split top reg)]
                   (recur "" (cons (str tmp head) res) (concat tail (rest ls)))
                   )
           )
@@ -24,6 +23,6 @@
   )
 
 (defnk filters [col :ignore-nil? true & preds]
-  (filter #(every? (fn [pre] (if (nil? pre) (if ignore-nil? true false) (pre %))) preds) col)
+  (filter #(every? (fn [pre] (if (nil? pre) ignore-nil? (pre %))) preds) col)
   )
 

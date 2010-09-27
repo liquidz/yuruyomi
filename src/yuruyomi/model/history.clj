@@ -1,11 +1,11 @@
 (ns yuruyomi.model.history
   (:use
-     simply
+     [simply core]
      am.ik.clj-gae-ds.core
      [yuruyomi clj-gae-ds-wrapper]
      )
   (:require
-     [clojure.contrib.seq-utils :as se]
+     [clojure.contrib.seq :as se]
      )
   )
 
@@ -22,7 +22,8 @@
 
 ; =save-history
 (defnk save-history [:user nil :title nil :author "" :date nil :before "new" :after nil :text nil :book-id nil]
-  (when (! or-nil? user title date after)
+  ;(when-not (or-nil? user title date after)
+  (when-not (some #(nil? %) [user title date after])
     (ds-put (map-entity *history-entity-name*
                         :user user :title title :author author
                         :date date :before before :after after
@@ -36,12 +37,14 @@
 
 (defnk get-active-user [:limit 100]
   (let [histories (find-history :sort "date" :limit limit :offset 0)]
-    (r-fold (fn [h res]
+    (reverse
+      (fold (fn [h res]
               (if (nil? (se/find-first #(= % (:user h)) res))
                 (cons (:user h) res)
                 res
                 )
               ) () histories)
+      )
     )
   )
 

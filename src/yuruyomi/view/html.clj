@@ -1,6 +1,6 @@
 (ns yuruyomi.view.html
   (:use
-     simply
+     [simply core string list]
      [yuruyomi.util seq session]
      [yuruyomi.model book history]
      [yuruyomi.view parts book]
@@ -9,8 +9,8 @@
      layout
      )
   (:require 
-     [clojure.contrib.seq-utils :as se]
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.seq :as se]
+     [clojure.contrib.string :as st]
      )
   )
 
@@ -40,10 +40,10 @@
   )
 
 (defn redirect-to-twitter [title author status]
-  (let [a (if (su2/blank? author) author nil)
+  (let [a (if (st/blank? author) author nil)
         ]
-    (if (su2/blank? title) "/"
-      (make-tweet title :author (if (su2/blank? author) nil author) :status status)
+    (if (st/blank? title) "/"
+      (make-tweet title :author (if (st/blank? author) nil author) :status status)
       )
     )
   )
@@ -54,7 +54,7 @@
       (str *page-title* " - ステータス一覧")
       :css ["/css/main.css"]
       (pc-header name :session session)
-      (when (! su2/blank? name)
+      (when-not (st/blank? name)
         [:div {:id "info"} 
          [:p [:a {:href (str "http://twitter.com/" name)}
               [:img {:src (-> (get-books :user name :limit 1 :offset 0) first :icon)}]]]
@@ -92,17 +92,13 @@
 (defn check-params [params]
   (layout
     *page-title*
-    (map (fn [k]
-           [:p k " => " (get params k)]
-           )
-         (keys params)
-         )
+    (map #(identity [:p % " => " (get params %)]) (keys params))
     )
   )
 
 ; =history-page {{{
 (defnk history-page [name :page 1 :session {}]
-  (let [now-page (if (pos? (i page)) (i page) 1)
+  (let [now-page (if (pos? (Integer/parseInt page)) (Integer/parseInt page) 1)
         histories (find-history :user name :sort "date" :limit *show-history-num* :page now-page)
         pages (.intValue (Math/ceil (/ (count-histories :user name) *show-history-num*)))
         status "history"]
@@ -148,7 +144,7 @@
   (let [title (:title (get-a-book id))
         books (get-books :title title)
         fb (first books)
-        author (:author (se/find-first #(! su2/blank? (:author %)) books))
+        author (:author (se/find-first #(! st/blank? (:author %)) books))
         img (get-book-image title author :size "large"
                                  :default *no-book-image*)
         histories (find-history :title title :sort "date" :limit 10 :offset 0)
@@ -164,10 +160,10 @@
       (if (empty? books)
         [:div {:id "container"} [:h2 "&quote;" title "&quote; という本は見つかりませんでした"]]
         [:div {:id "container"} 
-         [:h2 title (when (! nil? author) (str " - " author "(著)"))]
+         [:h2 title (when-not (nil? author) (str " - " author "(著)"))]
          [:div {:id "large_book_image"}
           [:img {:src img :alt title}]
-          (if (! :logined? td)
+          (if-not (:logined? td)
             (tweet-form title author)
             (if (nil? your-book)
               (add-book-form (:id fb))
@@ -226,15 +222,15 @@
 
 ; =search-page {{{
 (defnk search-page [name mode text page user-only :session {}]
-  (let [pn (i (if (su2/blank? page) "1" page))
+  (let [pn (Integer/parseInt (if (st/blank? page) "1" page))
         now-page (if (and (! nil? page) (pos? pn)) pn 1)
         key (case mode
               ["title" "author"] (keyword (str mode "-like"))
               :else :title-like
               )
-        books (if (! su2/blank? text)
+        books (if-not (st/blank? text)
                 (apply get-books (concat (list key text :limit 1000 :offset 0)
-                                         (if (and (! su2/blank? name) (= user-only "true")) (list :user name) ())))
+                                         (if (and (! st/blank? name) (= user-only "true")) (list :user name) ())))
                 ())
         pages (.intValue (Math/ceil (/ (count books) *show-search-num*)))
         status "search"
@@ -245,7 +241,7 @@
       :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
       (pc-header name :text text :mode mode :user-only (= user-only "true") :session session)
 
-      (when (! su2/blank? name)
+      (when-not (st/blank? name)
         [:div {:id "info"} 
          [:p [:a {:href (str "http://twitter.com/" name)}
               [:img {:src (-> (get-books :user name :limit 1 :offset 0) first :icon)}]]]
@@ -274,7 +270,7 @@
 (defnk user-page [name :status "all" :page 1 :session {}]
   (let [is-all? (= status "all")
         is-finish? (= status "finish")
-        now-page (if (pos? (i page)) (i page) 1)
+        now-page (if (pos? (Integer/parseInt page)) (Integer/parseInt page) 1)
         books (if is-all?
                 (get-books :user name :limit *show-books-num* :page now-page :sort "date")
                 (get-books :user name :status status :limit *show-books-num* :page now-page :sort "date")

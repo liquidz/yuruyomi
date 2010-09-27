@@ -1,7 +1,10 @@
 (ns layout
   (:use
-     simply
+     [simply core]
      [hiccup.core :only [html]]
+     )
+  (:require
+     [clojure.contrib.logging :as log]
      )
   )
 
@@ -59,9 +62,9 @@
     :head (list
             (pc-meta lang content-type charset)
             [:link {:rel "shortcut icon" :href "/favicon.ico"}]
-            (if (! empty? js) (js->html js))
-            (if (! empty? css) (css->html css))
-            (if (! empty? head) head)
+            (if-not (empty? js) (js->html js))
+            (if-not (empty? css) (css->html css))
+            (if-not (empty? head) head)
             [:title title]
             )
     :body body

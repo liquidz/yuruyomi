@@ -1,12 +1,13 @@
 (ns yuruyomi.clj-gae-ds-wrapper
   (:use
-     [simply :only [fold foreach !]]
+     ;[simply :only [fold foreach !]]
+     [simply core]
      [am.ik.clj-gae-ds.core :only [entity-map get-prop fetch-options add-filter 
                                    add-sort query query-seq count-entities
                                    ds-get create-key ds-delete get-key get-id]]
 
      )
-  (:require [clojure.contrib.str-utils2 :as su2])
+  (:require [clojure.contrib.string :as st])
   )
 
 ; =entity->map
@@ -70,10 +71,10 @@
         fo (make-fetch-options limit offset2)
         ]
     (foreach
-      #(when (! = "" (% op))
+      #(when-not (= "" (% op))
          (let [key (-> % name str)]
            (cond
-             (.endsWith key "-not") (add-filter q (su2/take key (- (count key) 4)) not= (% op))
+             (.endsWith key "-not") (add-filter q (st/take key (- (count key) 4)) not= (% op))
              :else (add-filter q key = (% op))
              )
            )

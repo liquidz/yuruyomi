@@ -1,8 +1,9 @@
 ; ns {{{
 (ns yuruyomi.model.book
   (:use
-     [simply :only [defnk case fold ! url-encode group try-with-boolean]]
-     [simply.date :only [set-default-timezone now]]
+     ;[simply :only [defnk case fold ! url-encode group try-with-boolean]]
+     ;[simply.date :only [set-default-timezone now]]
+     [simply core date string]
      [am.ik.clj-gae-ds.core :only [get-prop set-prop ds-put get-id get-key
                                    ds-get create-key map-entity ds-delete]]
      [am.ik.clj-aws-ecs :only [make-requester item-search-map]]
@@ -14,8 +15,8 @@
      )
   (:require
      keys
-     [clojure.contrib.seq-utils :as se]
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.seq :as se]
+     [clojure.contrib.string :as st]
      [clojure.zip :as z]
      [clojure.contrib.zip-filter :as zf]
      [clojure.contrib.zip-filter.xml :as zfx]
@@ -40,15 +41,15 @@
   (let [key (make-book-cache-key title author size)
         val (get-cached-value key :default nil)
         base-arg {"ResponseGroup" "Images"}
-        search-arg (if (su2/blank? author) base-arg (assoc base-arg "Author" author))
+        search-arg (if (st/blank? author) base-arg (assoc base-arg "Author" author))
         ]
-    (if (! nil? val)
-      (if (su2/blank? val) default val)
+    (if-not (nil? val)
+      (if (st/blank? val) default val)
       (try
         (let [req (make-requester "ecs.amazonaws.jp" keys/*aws-access-key* keys/*aws-secret-key*)
               res (z/xml-zip (item-search-map req "Books" title search-arg))
               target-size (case size "small" :SmallImage "medium" :MediumImage
-                            "large" :LargeImage :else :MediumImage)
+                            "large" :LargeImage :MediumImage)
               url (zfx/xml1-> res zf/children :Items :Item target-size :URL zfx/text)
               ]
           (cache-val key url :default default :expiration 86400)
@@ -73,10 +74,10 @@
     (if (some #(! nil? %) [user-like title-like author-like date-like])
       (filters
         res
-        (when (! nil? user-like) #(su2/contains? (get-prop % :user) user-like))
-        (when (! nil? title-like) #(su2/contains? (get-prop % :title) title-like))
-        (when (! nil? author-like) #(su2/contains? (get-prop % :author) author-like))
-        (when (! nil? date-like) #(su2/contains? (get-prop % :date) date-like))
+        (when-not (nil? user-like) #(st/substring? (get-prop % :user) user-like))
+        (when-not (nil? title-like) #(st/substring? (get-prop % :title) title-like))
+        (when-not (nil? author-like) #(st/substring? (get-prop % :author) author-like))
+        (when-not (nil? date-like) #(st/substring? (get-prop % :date) date-like))
         )
       res
       )
@@ -104,9 +105,9 @@
 (defnk save-new-book [:user "" :id -1 :title "" :author "" :date (now) :status "" :icon "" :text ""]
   (let [book (if (pos? id) (get-a-book id))
         book-title (if (nil? book) title (:title book))
-        book-author (if (nil? book) author (if (su2/blank? (:author book)) author (:author book)))
+        book-author (if (nil? book) author (if (st/blank? (:author book)) author (:author book)))
         ]
-    (when (and (! su2/blank? user) (! su2/blank? book-title)(! su2/blank? status) (! = status "delete"))
+    (when (and (! st/blank? user) (! st/blank? book-title) (! st/blank? status) (! = status "delete"))
       (let [e (map-entity *book-entity-name* :user user :title book-title
                           :author book-author :date date :status status :icon icon)]
         (ds-put e)
@@ -126,7 +127,7 @@
   (let [book-entity (if (string? id-or-entity) (get-entity *book-entity-name* id-or-entity) id-or-entity)
         before-status (get-prop book-entity :status)
         [name title] (get-props book-entity :user :title)
-        date2 (if (su2/blank? date) (now) date)]
+        date2 (if (st/blank? date) (now) date)]
 
     (change-user-data name (keyword before-status) dec (keyword new-status) inc)
 
@@ -134,10 +135,10 @@
     (set-prop book-entity :date date2)
 
     ; 著者が登録されていなくて、今回入力されている場合は登録する
-    (when (and (! su2/blank? author) (su2/blank? (get-prop book-entity :author)))
+    (when (and (! st/blank? author) (st/blank? (get-prop book-entity :author)))
       (set-prop book-entity :author author))
     ; アイコンが登録されていなくて、今回入力されている場合は登録する
-    (when (su2/blank? (get-prop book-entity :icon))
+    (when (st/blank? (get-prop book-entity :icon))
       (set-prop book-entity :icon icon))
     (ds-put book-entity)
 
@@ -158,7 +159,7 @@
     ; wntの場合でingに既に同じものが入っているのはおかしいからNG
     (when (and (or (= status "finish") (zero? (count (find-books :user name :title title :author author :status status))))
                (or (! = status "want") (zero? (count (find-books :user name :title title :author author :status "reading")))))
-      (let [books (group #(get-prop % :status) (find-books :user name))
+      (let [books (group-by #(get-prop % :status) (find-books :user name))
             update-target (case status
                             ; reading <= want or have
                             "reading" (concat (:want books) (:have books) (:delete books))
@@ -170,7 +171,7 @@
                             "delete" (concat (:reading books) (:want books) (:finish books) (:have books))
                             )
             x (se/find-first #(and (= title (get-prop % :title))
-                                   (if (and (! su2/blank? author) (! su2/blank? (get-prop % :author)))
+                                   (if (and (! st/blank? author) (! st/blank? (get-prop % :author)))
                                      (= author (get-prop % :author))
                                      true
                                      )
@@ -200,8 +201,10 @@
   )
 
 (defn delete-book [id]
-  (try-with-boolean
+  (try
     (delete-entity *book-entity-name* id)
+    true
+    (catch Exception e false)
     )
   )
 

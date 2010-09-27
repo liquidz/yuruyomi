@@ -1,8 +1,9 @@
 (ns yuruyomi.view.book
   (:use
-     simply layout
+     simply.core
+     layout
      [yuruyomi.model book])
-  (:require [clojure.contrib.str-utils2 :as su2])
+  (:require [clojure.contrib.string :as st])
   )
 
 (def *status-text*
@@ -22,7 +23,7 @@
 
 (defn shorten-title [title]
   (if (> (count title) *show-title-length*)
-    (str (su2/take title *show-title-length*) "...")
+    (str (st/take title *show-title-length*) "...")
     title
     )
   )
@@ -43,7 +44,7 @@
      [:div {:class "book_info"}
       [:p {:class "title"} (book-link (:title book))]
       [:p {:class "author"} (book-link (:author book))]
-      [:p {:class "date"} (book-link (first (su2/split (:date book) #"\s+")))]
+      [:p {:class "date"} (book-link (first (st/split (:date book) #"\s+")))]
       ]
      ]
     )

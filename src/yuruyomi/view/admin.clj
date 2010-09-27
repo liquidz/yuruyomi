@@ -1,6 +1,6 @@
 (ns yuruyomi.view.admin
   (:use
-     simply
+     simply.core
      twitter
      [yuruyomi.util seq]
      [yuruyomi.model book history setting]
@@ -12,7 +12,7 @@
      [am.ik.clj-gae-ds.core :only [set-prop ds-put]]
      layout
      )
-  (:require [clojure.contrib.str-utils2 :as su2])
+  (:require [clojure.contrib.string :as st])
   )
 
 (def *admin-page-title* "yuruyomi admin")
@@ -43,7 +43,7 @@
   )
 
 (defn admin-history-page [page]
-  (let [pp (if (su2/blank? page) 1 (i page))]
+  (let [pp (if (st/blank? page) 1 (Integer/parseInt page))]
     (layout
       *admin-page-title*
       :css ["/css/admin.css"]
@@ -65,7 +65,7 @@
   )
 
 (defn admin-search-twitter-page [m]
-  (let [mode (case m "all" :all :else :since)
+  (let [mode (case m "all" :all :since)
         last-id (get-max-id)
         args (concat (list *yuruyomi-tag*)
                      (if (and (pos? last-id) (= mode :since)) (list :since-id last-id) ()))
@@ -113,7 +113,7 @@
   )
 
 (defn admin-index-page [page]
-  (let [pp (if (su2/blank? page) 1 (i page))
+  (let [pp (if (st/blank? page) 1 (Integer/parseInt page))
         bc (count-books)
         pc (.intValue (Math/ceil (/ bc 20)))
         pages (take pc (iterate inc 1))

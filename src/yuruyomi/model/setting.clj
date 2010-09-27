@@ -1,11 +1,11 @@
 (ns yuruyomi.model.setting
   (:use
-     simply
+     simply.core
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper]
+     yuruyomi.clj-gae-ds-wrapper
      )
   (:require 
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.string :as st]
      [clojure.contrib.logging :as log]
      )
   )
@@ -19,17 +19,6 @@
 (defn- find-setting [key]
   (find-entity *yuruyomi-entity* :key key)
   )
-;(defn- find-yuruyomi-entity [key]
-;  (-> (q *yuruyomi-entity*) (add-filter "key" = key) query-seq)
-;  )
-;(defn- get-yuruyomi-entity [key & default]
-;  (let [res (find-yuruyomi-entity key)]
-;    (if (empty? res)
-;      (if (empty? default) nil (first default))
-;      (get-prop (first res) :value)
-;      )
-;    )
-;  )
 (defn- get-setting [key & default]
   (let [res (find-setting key)]
     (if (empty? res)
@@ -59,14 +48,14 @@
 ; =get-max-id
 (defn get-max-id [] 
   (let [res (get-setting "max-id" "")]
-    (if (su2/blank? res) -1 (string->long res))
+    (if (st/blank? res) -1 (string->long res))
     )
   )
 
 ; =clear-max-id
 (defn clear-max-id []
   (let [res (find-setting "max-id")]
-    (when (! empty? res)
+    (when-not (empty? res)
       (-> res first get-key ds-delete)
       )
     )

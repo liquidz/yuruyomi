@@ -1,8 +1,8 @@
 (ns yuruyomi.model.user
   (:use
-     simply
+     simply.core
      am.ik.clj-gae-ds.core
-     [yuruyomi clj-gae-ds-wrapper]
+     yuruyomi.clj-gae-ds-wrapper
      )
   )
 
@@ -33,15 +33,15 @@
   )
 
 (defnk update-user-data [:user nil :reading nil :want nil :have nil :finish nil]
-  (when (! nil? user)
+  (when-not (nil? user)
     (let [res (find-user :user user)]
       (if (empty? res)
         (ds-put (map-entity *user-entity-name* :user user :reading reading :want want :have have :finish finish))
         (let [e (first res)]
-          (when (! nil? reading) (set-prop e :reading reading))
-          (when (! nil? want) (set-prop e :want want))
-          (when (! nil? have) (set-prop e :have have))
-          (when (! nil? finish) (set-prop e :finish finish))
+          (when-not (nil? reading) (set-prop e :reading reading))
+          (when-not (nil? want) (set-prop e :want want))
+          (when-not (nil? have) (set-prop e :have have))
+          (when-not (nil? finish) (set-prop e :finish finish))
           (ds-put e)
           )
         )

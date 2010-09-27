@@ -1,12 +1,12 @@
 (ns yuruyomi.util.session
   (:use
-     simply
+     simply.core
      twitter
      [yuruyomi.view.book :only [*status-text*]]
      )
   (:require
      keys
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.string :as st]
      )
   )
 
@@ -61,8 +61,8 @@
     (:twitter session)
     (str
       ;"[テスト]"
-      title (when (! su2/blank? author) (str ":" author))
-      " ["(get *status-text* status) "] " comment
+      title (when-not (st/blank? author) (str ":" author))
+      " [" (get *status-text* status) "] " comment
       )
     )
   )
