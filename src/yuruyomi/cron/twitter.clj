@@ -48,7 +48,7 @@
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
 (defn delete-hash-tag [s] (st/replace-re #"[\s　]*#\w+[\s　]*" "" s))
 (defn delete-words [s]
-  (let [ls (st/split s #"[\s　]+")
+  (let [ls (st/split #"[\s　]+" s)
         [n s] (se/find-first #(has-word-all? (second %)) (se/indexed ls))]
     ; 見つかったword以降は全て無視
     (if (and (! nil? n) (! nil? s))
@@ -63,16 +63,16 @@
 ; "hello RT @hoge ddd / o-sa- xxx #tag"
 ; => "ddd / o-sa- hello #tag"
 (defn convert-rt-string [s]
-  (let [[msg & more] (st/split s #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*")]
+  (let [[msg & more] (st/split #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*" s)]
     (cond
       (empty? more) s
-      :else (st/join " " (map #(if (has-word-all? %) msg %) (st/split (last more) #"[\s　]+")))
+      :else (st/join " " (map #(if (has-word-all? %) msg %) (st/split #"[\s　]+" (last more))))
       )
     )
   )
 
 (defn string->book-title-author [s]
-  (let [[title & more] (extended-split s *re-title-author-sep* "\"")]
+  (let [[title & more] (extended-split *re-title-author-sep* "\"" s)]
     [(st/replace-str "\"" "" title)
      (if (empty? more) ""
        ; 著者名の後に余分な文字列が入る場合には先頭だけを抜き出す
@@ -113,7 +113,7 @@
         sorted-tweets (sort #(str< (:created-at %1) (:created-at %2)) tweets-without-words)
         ; もしカンマなどで複数の本がある場合にはここで分けておく
         splitted-tweets (fold (fn [x res]
-                                (concat res (map #(assoc x :text %) (extended-split (:text x) *re-book-sep* "\"")))
+                                (concat res (map #(assoc x :text %) (extended-split *re-book-sep* "\"" (:text x))))
                                 ) () sorted-tweets)
         ]
 

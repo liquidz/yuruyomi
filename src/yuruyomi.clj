@@ -183,6 +183,10 @@
   (GET "/ajax/getimage" {params :params} (ajax-get-book-image (get-param params "id")))
   ; }}}
 
+  ; json {{{
+  (GET "/json/user/:name" {params :params} (json-get-books (get-param params "name")))
+  ; }}}
+
   ; admin {{{
   (GET "/admin/" {params :params} (admin-index-page (get-param params "page")))
   (GET "/admin/del" {params :params} (do (delete-book (get-param params "id")) (rr/redirect "/admin/")))

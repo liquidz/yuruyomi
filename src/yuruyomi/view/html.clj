@@ -11,6 +11,7 @@
   (:require 
      [clojure.contrib.seq :as se]
      [clojure.contrib.string :as st]
+     [clojure.contrib.json :as json]
      )
   )
 
@@ -36,6 +37,14 @@
 (defn ajax-get-book-image [id]
   (let [b (get-a-book id)]
     (get-book-image (:title b) (:author b) :default *no-book-image*)
+    )
+  )
+
+(defn json-get-books [name]
+  (->
+    (get-books :user name :limit 10 :offset 0 :sort "date")
+    (dissoc :id :parent :keyname)
+    json/json-str
     )
   )
 
