@@ -150,6 +150,7 @@
 
 ; =save-book-from-tweet
 (defn save-book-from-tweet [tweet]
+  (println "saving = " tweet)
   (set-default-timezone)
   (let [name (:from-user tweet), title (:title tweet)
         author (:author tweet), status (:status tweet)

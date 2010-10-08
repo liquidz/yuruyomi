@@ -14,7 +14,7 @@
      [yuruyomi.cron.user :only [collect-user]]
      [yuruyomi.view html admin mobile]
      [yuruyomi.view.book :only [*status-text*]]
-     [yuruyomi.util session]
+     [yuruyomi.util session seq]
      [twitter :only [get-twitter-oauth-url get-twitter-oauth-access-token
                      get-twitter-screen-name twitter-logined? twitter-update]]
      ) ; }}}
@@ -184,7 +184,18 @@
   ; }}}
 
   ; json {{{
-  (GET "/json/user/:name" {params :params} (json-get-books (get-param params "name")))
+  (GET "/json/:type/:id" {params :params} 
+    (let [[type id limit offset sort callback]
+          (get-params params "type" "id" "limit" "offset" "sort" "callback")
+          args {:limit limit :offset offset :sort sort :callback callback}
+          conv-args (reduce concat (map-remove (fn [k v] (st/blank? v)) args))
+          ]
+      (case type
+        "user" (apply json-get-books (cons id conv-args))
+        "book" (apply json-get-book-info (cons id conv-args))
+        )
+      )
+    )
   ; }}}
 
   ; admin {{{

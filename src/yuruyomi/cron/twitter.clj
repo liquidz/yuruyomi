@@ -43,7 +43,8 @@
 ; }}}
 
 (defn string->long [s] (Long/parseLong s))
-(defn has-word? [s col] (some #(st/substring? s %) col))
+;(defn has-word? [s col] (some #(st/substring? s %) col))
+(defn has-word? [s col] (println "checking: " (to-euc s)) (some #(not= -1 (.indexOf % s)) col))
 (defn index-of-word [s col] (apply min (map #(.indexOf s %) col)))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
 (defn delete-hash-tag [s] (st/replace-re #"[\s　]*#\w+[\s　]*" "" s))
@@ -101,12 +102,12 @@
                (assoc t :text
                (fold (fn [x res]
                        (let [i (.indexOf res x)]
-                         (if (pos? i) (st/take res (+ i (count x))) res)
+                         (if (pos? i) (st/take (+ i (count x)) res) res)
                          )
                        ) (:text t) (apply concat *words-list*))
                       )
                ) converted-tweets)
-        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
+        [r w f h d] (map (fn [wl] (println "oyo") (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
         ; ステータスを付加
         tweets-with-status (set-statuses r "reading" w "want" f "finish" h "have" d "delete")
         tweets-without-words (map #(assoc % :text (delete-words (:text %))) tweets-with-status)
@@ -116,6 +117,17 @@
                                 (concat res (map #(assoc x :text %) (extended-split *re-book-sep* "\"" (:text x))))
                                 ) () sorted-tweets)
         ]
+
+    (println "tweets-with-original================")
+    (println tweets-with-original)
+    (println "converted-tweets================")
+    (println converted-tweets)
+    (println "tmp-tweets================")
+    (println tmp-tweets)
+    (println "h================")
+    (println h)
+    (println "tweets-with-status================")
+    (println tweets-with-status)
 
     (map (fn [t]
            (let [[title author] (string->book-title-author (:text t))]
@@ -131,6 +143,7 @@
   (let [now-max-id (get-max-id)]
     (loop [save-targets tweets
            local-last-id last-id]
+      (println "looping: local-last-id = " local-last-id)
       (cond
         ; 最後まで記録できたらQueryのmax-idを記録
         (empty? save-targets) (when (and (pos? max-id) (> max-id now-max-id))

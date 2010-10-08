@@ -36,7 +36,7 @@
    ;[:li "max id = " (get-max-id)]
    [:li [:a {:href "/admin/cron/twitter" :class "warn"} "collect twitter data"]]
    [:li [:a {:href "/admin/cron/user"} "collect user data"]]
-   ;[:li [:a {:href "/admin/clear"} "clear max id"]]
+   [:li [:a {:href "/admin/clear" :class "warn"} "clear max id"]]
    [:li [:a {:href "/admin/search_twitter" :class ""} "search twitter test"]]
    [:li [:a {:href "/admin/set_book_id" :class "warn"} "set book id to history"]]
    ]
@@ -124,6 +124,7 @@
       :js ["/js/jquery-1.4.2.min.js" "/js/admin.js"]
       (admin-menu)
       [:hr]
+      [:p "max id = " (get-max-id)]
       [:p "count = " (count-books)]
 
       (table

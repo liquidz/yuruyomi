@@ -44,7 +44,7 @@
      [:div {:class "book_info"}
       [:p {:class "title"} (book-link (:title book))]
       [:p {:class "author"} (book-link (:author book))]
-      [:p {:class "date"} (book-link (first (st/split (:date book) #"\s+")))]
+      [:p {:class "date"} (book-link (first (st/split #"\s+" (:date book))))]
       ]
      ]
     )

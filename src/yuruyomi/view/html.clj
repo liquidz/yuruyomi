@@ -40,11 +40,24 @@
     )
   )
 
-(defn json-get-books [name]
-  (->
-    (get-books :user name :limit 10 :offset 0 :sort "date")
-    (dissoc :id :parent :keyname)
-    json/json-str
+(defn- to-json [coll callback]
+  (let [data (json/json-str coll)]
+    (if (nil? callback) data
+      (str callback "(" data ");")
+      )
+    )
+  )
+
+(defnk json-get-books [name :limit "10" :offset "0" :sort "date" :callback nil]
+  (let [data (->> (get-books :user name :limit (Integer/parseInt limit)
+                             :offset (Integer/parseInt offset) :sort sort)
+                  (map #(dissoc % :parent :keyname)))]
+    (to-json data callback)
+    )
+  )
+(defnk json-get-book-info [id :callback nil]
+  (let [data (dissoc (get-a-book id) :parent :keyname)]
+    (to-json data callback)
     )
   )
 
@@ -106,7 +119,7 @@
   )
 
 ; =history-page {{{
-(defnk history-page [name :page 1 :session {}]
+(defnk history-page [name :page "1" :session {}]
   (let [now-page (if (pos? (Integer/parseInt page)) (Integer/parseInt page) 1)
         histories (find-history :user name :sort "date" :limit *show-history-num* :page now-page)
         pages (.intValue (Math/ceil (/ (count-histories :user name) *show-history-num*)))
@@ -276,7 +289,7 @@
   ) ; }}}
 
 ; =user-page {{{
-(defnk user-page [name :status "all" :page 1 :session {}]
+(defnk user-page [name :status "all" :page "1" :session {}]
   (let [is-all? (= status "all")
         is-finish? (= status "finish")
         now-page (if (pos? (Integer/parseInt page)) (Integer/parseInt page) 1)
