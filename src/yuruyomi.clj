@@ -2,9 +2,6 @@
   (:gen-class :extends javax.servlet.http.HttpServlet)
   ; use {{{
   (:use 
-     ;[simply :only [case delete-html-tag i escape !]]
-     ;[simply :only [case delete-html-tag i escape !]]
-     ;[simply.date :only [set-default-timezone]]
 	 [simply core string date]
      [hiccup.core :only [html]]
      [compojure.core :only [defroutes GET POST wrap!]]
@@ -62,7 +59,7 @@
        (rr/redirect (apply redirect-to-twitter (get-params params "title" "author" "status"))))
   (GET "/search" {session :session, params :params}
        (apply search-page
-              (concat 
+              (concat
                 (get-params params "user" "mode" "keyword" "page" "user_only")
                 (list :session session))))
   (GET "/status" {session :session} (status-page :session session))
@@ -209,7 +206,16 @@
   (GET "/admin/save" {params :params} (do (save-tweet (get-param params "id")) (rr/redirect "/admin/")))
   (GET "/admin/set_book_id" _ (do (admin-set-book-id) "fin"))
 
-  (GET "/admin/cron/twitter" [] (do (collect-tweets) "fin"))
+  (GET "/admin/cron/twitter" []
+       (do
+         (try (collect-tweets)
+           (catch Exception e
+             (log/warn (str "exception from cron/twitter: " (.getMessage e)))
+             )
+           )
+         "fin"
+         )
+       )
   (GET "/admin/cron/user" [] (do (collect-user) "fin"))
   ; }}}
 

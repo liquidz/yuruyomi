@@ -1,8 +1,6 @@
 ; ns {{{
 (ns yuruyomi.model.book
   (:use
-     ;[simply :only [defnk case fold ! url-encode group try-with-boolean]]
-     ;[simply.date :only [set-default-timezone now]]
      [simply core date string]
      [am.ik.clj-gae-ds.core :only [get-prop set-prop ds-put get-id get-key
                                    ds-get create-key map-entity ds-delete]]
@@ -74,10 +72,10 @@
     (if (some #(! nil? %) [user-like title-like author-like date-like])
       (filters
         res
-        (when-not (nil? user-like) #(st/substring? (get-prop % :user) user-like))
-        (when-not (nil? title-like) #(st/substring? (get-prop % :title) title-like))
-        (when-not (nil? author-like) #(st/substring? (get-prop % :author) author-like))
-        (when-not (nil? date-like) #(st/substring? (get-prop % :date) date-like))
+        (when-not (nil? user-like) #(st/substring? user-like (get-prop % :user)))
+        (when-not (nil? title-like) #(st/substring? title-like (get-prop % :title)))
+        (when-not (nil? author-like) #(st/substring? author-like (get-prop % :author)))
+        (when-not (nil? date-like) #(st/substring? date-like (get-prop % :date)))
         )
       res
       )
@@ -89,17 +87,15 @@
 (defn get-books [& args] (map entity->map (apply find-books args)))
 
 (defn get-a-book [id]
-  (->> id (get-entity *book-entity-name*) entity->map)
+  (let [e (get-entity *book-entity-name* id)]
+    (if (nil? e) nil (entity->map e))
+    )
+  ;(->> id (get-entity *book-entity-name*) entity->map)
   )
 
 (defn count-books [& args]
   (apply count-entity (cons *book-entity-name* args))
   )
-
-;(defn history->book [h]
-;  (first (get-books :user (:user h) :title (:title h)
-;                    :author (:author h) :limit 1 :offset 0))
-;  )
 
 ; =save-new-book
 (defnk save-new-book [:user "" :id -1 :title "" :author "" :date (now) :status "" :icon "" :text ""]
@@ -150,7 +146,6 @@
 
 ; =save-book-from-tweet
 (defn save-book-from-tweet [tweet]
-  (println "saving = " tweet)
   (set-default-timezone)
   (let [name (:from-user tweet), title (:title tweet)
         author (:author tweet), status (:status tweet)
@@ -187,13 +182,6 @@
           (change-book-status x status :author author :date date :icon icon
                               :text (:original_text tweet))
           )
-;        (cond
-;          ; 新規登録
-;          (nil? x) (save-new-book :user name :title title :author author :date date
-;                                  :status status :icon icon :text (:original_text tweet))
-;          ; 登録済みのものを更新
-;          :else (change-book-status x status :author author :date date :icon icon :text (:original_text tweet))
-;          )
         )
       ;false
       true

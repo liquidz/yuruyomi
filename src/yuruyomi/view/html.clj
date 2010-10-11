@@ -36,7 +36,9 @@
 
 (defn ajax-get-book-image [id]
   (let [b (get-a-book id)]
-    (get-book-image (:title b) (:author b) :default *no-book-image*)
+    (when-not (nil? b)
+      (get-book-image (:title b) (:author b) :default *no-book-image*)
+      )
     )
   )
 
@@ -56,7 +58,8 @@
     )
   )
 (defnk json-get-book-info [id :callback nil]
-  (let [data (dissoc (get-a-book id) :parent :keyname)]
+  (let [book (get-a-book id)
+        data (if (nil? book) nil (dissoc book :parent :keyname))]
     (to-json data callback)
     )
   )
@@ -163,71 +166,74 @@
 
 ; =book-page {{{
 (defnk book-page [id :session {}]
-  (let [title (:title (get-a-book id))
-        books (get-books :title title)
-        fb (first books)
-        author (:author (se/find-first #(! st/blank? (:author %)) books))
-        img (get-book-image title author :size "large"
-                                 :default *no-book-image*)
-        histories (find-history :title title :sort "date" :limit 10 :offset 0)
-        td (session->twitter-data session)
-        your-book (if (:logined? td) (se/find-first #(= (:user %) (:screen-name td)) books) nil)
-        ]
-    (layout
-      (str *page-title* " - " title)
-      :css ["/css/main.css"]
-      :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
-      (pc-header :session session)
+  (let [book (get-a-book id)]
+    (if (nil? book)
+      (layout "book not found" "book not found")
+      (let [title (:title book)
+            books (get-books :title title)
+            fb (first books)
+            author (:author (se/find-first #(! st/blank? (:author %)) books))
+            img (get-book-image title author :size "large"
+                                :default *no-book-image*)
+            histories (find-history :title title :sort "date" :limit 10 :offset 0)
+            td (session->twitter-data session)
+            your-book (if (:logined? td) (se/find-first #(= (:user %) (:screen-name td)) books) nil)
+            ]
+        (layout
+          (str *page-title* " - " title)
+          :css ["/css/main.css"]
+          :js ["/js/jquery-1.4.2.min.js" "/js/main.js"]
+          (pc-header :session session)
 
-      (if (empty? books)
-        [:div {:id "container"} [:h2 "&quote;" title "&quote; という本は見つかりませんでした"]]
-        [:div {:id "container"} 
-         [:h2 title (when-not (nil? author) (str " - " author "(著)"))]
-         [:div {:id "large_book_image"}
-          [:img {:src img :alt title}]
-          (if-not (:logined? td)
-            (tweet-form title author)
-            (if (nil? your-book)
-              (add-book-form (:id fb))
-              (update-status-form (:id your-book) (:status your-book))
-              )
-            )
-          ]
-         [:h3 "この本を登録している人"]
-         (map (fn [b]
-                [:a {:href (str "/user/" (:user b))}
-                 [:img {:src (:icon b)
-                        :alt (str (:user b) " - " (get *status-text* (:status b)))}]
-                 ]
-                ) books)
-         [:h4 "この本に関する履歴"]
-         (table
-           (map
-             #(list
-                [:a {:href (str "/user/" (:user %))} (:user %)] (:date %)
-                (str (get *status-text* (:before %)) " &raquo; " (get *status-text* (:after %)))
-                (:text %)
+          (if (empty? books)
+            [:div {:id "container"} [:h2 "&quote;" title "&quote; という本は見つかりませんでした"]]
+            [:div {:id "container"} 
+             [:h2 title (when-not (nil? author) (str " - " author "(著)"))]
+             [:div {:id "large_book_image"}
+              [:img {:src img :alt title}]
+              (if-not (:logined? td)
+                (tweet-form title author)
+                (if (nil? your-book)
+                  (add-book-form (:id fb))
+                  (update-status-form (:id your-book) (:status your-book))
+                  )
                 )
-             histories)
-           :header ["ユーザ" "日付" "ステータス" "つぶやき"]
-           :attr {:id "book_info_history_table"}
-           :footer? false
-           )
-         ]
+              ]
+             [:h3 "この本を登録している人"]
+             (map (fn [b]
+                    [:a {:href (str "/user/" (:user b))}
+                     [:img {:src (:icon b)
+                            :alt (str (:user b) " - " (get *status-text* (:status b)))}]
+                     ]
+                    ) books)
+             [:h4 "この本に関する履歴"]
+             (table
+               (map
+                 #(list
+                    [:a {:href (str "/user/" (:user %))} (:user %)] (:date %)
+                    (str (get *status-text* (:before %)) " &raquo; " (get *status-text* (:after %)))
+                    (:text %)
+                    )
+                 histories)
+               :header ["ユーザ" "日付" "ステータス" "つぶやき"]
+               :attr {:id "book_info_history_table"}
+               :footer? false
+               )
+             ]
+            )
+          pc-footer
+          )
         )
-      pc-footer
       )
     )
   ) ; }}}
 
 ; =first-user-page {{{
-;(def *test-tweet* (str "http://twitter.com/home?status=" (url-encode "本のタイトル これ読んでる！ #yuruyomi")))
 (defn first-user-page [name]
   [:div {:id "exp"}
    [:h2 name "さんはまだ本を登録していません"]
    [:p [:span {:class "reading"} "読んでいる本"] "、" [:span {:class "want"} "読みたい本"] "をつぶやいてみよう！"]
    [:div {:id "sample"}
-    ;[:p [:a {:href *test-tweet*} "つぶやいてみる"]]
     [:p [:a {:href (make-tweet "本のタイトル" :custom "これ読んでる！")} "つぶやいてみる"]]
     [:img {:src "/img/sample.png"}]
     ]
@@ -247,8 +253,8 @@
   (let [pn (Integer/parseInt (if (st/blank? page) "1" page))
         now-page (if (and (! nil? page) (pos? pn)) pn 1)
         key (case mode
-              ["title" "author"] (keyword (str mode "-like"))
-              :else :title-like
+              ("title" "author") (keyword (str mode "-like"))
+              :title-like
               )
         books (if-not (st/blank? text)
                 (apply get-books (concat (list key text :limit 1000 :offset 0)

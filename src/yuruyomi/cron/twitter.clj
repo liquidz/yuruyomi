@@ -1,7 +1,5 @@
 (ns yuruyomi.cron.twitter
   (:use
-     ;[simply :only [defnk ! fold delete-html-tag str<]]
-     ;[simply.date :only [now set-default-timezone]]
      [simply core string date]
      [twitter :only [show-twitter-status twitter-search-all]]
      [yuruyomi.util seq cache]
@@ -43,8 +41,7 @@
 ; }}}
 
 (defn string->long [s] (Long/parseLong s))
-;(defn has-word? [s col] (some #(st/substring? s %) col))
-(defn has-word? [s col] (println "checking: " (to-euc s)) (some #(not= -1 (.indexOf % s)) col))
+(defn has-word? [s col] (some #(not= -1 (.indexOf s %)) col))
 (defn index-of-word [s col] (apply min (map #(.indexOf s %) col)))
 (defn has-word-all? [s] (some #(has-word? s %) *words-list*))
 (defn delete-hash-tag [s] (st/replace-re #"[\s　]*#\w+[\s　]*" "" s))
@@ -107,7 +104,7 @@
                        ) (:text t) (apply concat *words-list*))
                       )
                ) converted-tweets)
-        [r w f h d] (map (fn [wl] (println "oyo") (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
+        [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
         ; ステータスを付加
         tweets-with-status (set-statuses r "reading" w "want" f "finish" h "have" d "delete")
         tweets-without-words (map #(assoc % :text (delete-words (:text %))) tweets-with-status)
@@ -117,17 +114,6 @@
                                 (concat res (map #(assoc x :text %) (extended-split *re-book-sep* "\"" (:text x))))
                                 ) () sorted-tweets)
         ]
-
-    (println "tweets-with-original================")
-    (println tweets-with-original)
-    (println "converted-tweets================")
-    (println converted-tweets)
-    (println "tmp-tweets================")
-    (println tmp-tweets)
-    (println "h================")
-    (println h)
-    (println "tweets-with-status================")
-    (println tweets-with-status)
 
     (map (fn [t]
            (let [[title author] (string->book-title-author (:text t))]
@@ -139,24 +125,23 @@
     )
   )
 
-(defnk update-tweets [tweets last-id :max-id -1]
-  (let [now-max-id (get-max-id)]
+(defnk update-tweets [tweets last-id :max-id -1 :now-max-id nil]
+  (let [_now-max-id (if (nil? now-max-id) (get-max-id) now-max-id)]
     (loop [save-targets tweets
            local-last-id last-id]
-      (println "looping: local-last-id = " local-last-id)
       (cond
         ; 最後まで記録できたらQueryのmax-idを記録
-        (empty? save-targets) (when (and (pos? max-id) (> max-id now-max-id))
+        (empty? save-targets) (when (and (pos? max-id) (> max-id _now-max-id))
                                 (log/info (str "update max id to " max-id))
                                 (update-max-id max-id))
         :else (let [target (first save-targets)]
-                (log/info (str "try to save: " (:title target) " (" (:from-user target) "/" (:id target) ")"))
+                ;(log/info (str "try to save: " (:title target) " (" (:from-user target) "/" (:id target) ")"))
                 (if (try (save-book-from-tweet target)
                       (catch Exception e
                         (log/warn (str "save book fail: " (.getMessage e))) false))
                   (recur (rest save-targets) (:id target))
                   ; 途中で失敗した場合には次回途中から検索するようにIDを記録
-                  (when (and (pos? local-last-id) (> local-last-id now-max-id))
+                  (when (and (pos? local-last-id) (> local-last-id _now-max-id))
                     (log/info (str "update max id to " local-last-id " (local)"))
                     (update-max-id local-last-id))
                   )
@@ -197,8 +182,17 @@
                 ))
         ]
     (when (and (! nil? res) (! empty? (:tweets res)))
-      (update-tweets (->> res :tweets tweets->books (sort #(< (:id %1) (:id %2))))
-                     last-id :max-id (:max-id res))
+      (try
+        (update-tweets (->> res :tweets tweets->books (sort #(< (:id %1) (:id %2))))
+                       last-id :max-id (:max-id res) :now-max-id last-id)
+        (catch Exception e
+          (log/warn (str
+                      "exception from update-tweets: "
+                      "tweets count = " (count (:tweets res))
+                      ", msg = " (.getMessage e)
+                      ))
+          )
+        )
       )
     )
   )

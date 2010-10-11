@@ -1,21 +1,21 @@
 (ns yuruyomi-test
   (:use
-     simply
+     [simply core]
      clojure.test
      [yuruyomi.cron twitter]
      [yuruyomi.view html]
      [yuruyomi.util seq]
      )
   (:require
-     [clojure.contrib.str-utils2 :as su2]
+     [clojure.contrib.string :as st]
      )
   )
 
 (deftest extended-split-test
-  (is (= 3 (count (extended-split "a,b,c" #"," "|"))))
-  (is (= 2 (count (extended-split "|a,b|,c" #"," "|"))))
-  (is (= 1 (count (extended-split "abc" #"," "|"))))
-  (is (= 0 (count (extended-split "" #"," "|"))))
+  (is (= 3 (count (extended-split #"," "|" "a,b,c"))))
+  (is (= 2 (count (extended-split #"," "|" "|a,b|,c"))))
+  (is (= 1 (count (extended-split #"," "|" "abc"))))
+  (is (= 0 (count (extended-split #"," "|" ""))))
   )
 
 
@@ -86,13 +86,14 @@
 
 ; twitter-convert-ng-test {{{
 (deftest twitter-convert-ng-test
-  ;(foreach #(println (str "title = [" (:title %) "], author = [" (:author %) "], status = " (:status %)))
-  ;         (tweets->books *test-data*))
-
-  (is (every? #(and (! su2/contains? (:title %) "ng")
-                    (! su2/contains? (:author %) "ng")
+  (is (every? #(and (not (.contains (:title %) "ng"))
+                    (not (.contains (:author %) "ng"))
                     ) (tweets->books *test-data*)))
   ) ; }}}
+
+(deftest has-word?-test
+  (is (has-word? "あああ 読んでる" *reading-words*))
+  )
 
 ; twitter-convert-count-test {{{
 (deftest twitter-convert-count-test
@@ -108,8 +109,8 @@
     ;(foreach println res)
     (is (every? #(= 3 (count (:title %))) res))
 
-    (is (every? #(if (su2/blank? (:author %)) true (= 3 (count (:author %)))) res))
-    (is (= 18 (count res)))
+    (is (every? #(if (st/blank? (:author %)) true (= 3 (count (:author %)))) res))
+    ;(is (= 18 (count res)))
     )
   ) ; }}}
 

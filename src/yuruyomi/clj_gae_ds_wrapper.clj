@@ -12,7 +12,7 @@
 
 ; =entity->map
 (defn entity->map [e]
-  (assoc 
+  (assoc
     (fold
       (fn [x res] (assoc res (-> x first keyword) (second x)))
       {} (-> e entity-map seq)
@@ -74,7 +74,7 @@
       #(when-not (= "" (% op))
          (let [key (-> % name str)]
            (cond
-             (.endsWith key "-not") (add-filter q (st/take key (- (count key) 4)) not= (% op))
+             (.endsWith key "-not") (add-filter q (st/take (- (count key) 4) key) not= (% op))
              :else (add-filter q key = (% op))
              )
            )

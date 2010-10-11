@@ -9,15 +9,15 @@
 (defn collect-user []
   (let [res (group-by :user (get-books))]
     (foreach
-      (fn [user]
-        (let [user-data (user res)
+      (fn [user-name]
+        (let [user-data (get res user-name)
               rwhf (group-by :status user-data)]
           (update-user-data
-            :user (-> user name str)
-            :reading (count (:reading rwhf))
-            :want (count (:want rwhf))
-            :have (count (:have rwhf))
-            :finish (count (:finish rwhf))
+            :user user-name
+            :reading (count (get rwhf "reading"))
+            :want (count (get rwhf "want"))
+            :have (count (get rwhf "have"))
+            :finish (count (get rwhf "finish"))
             )
           )
         ) (keys res))
