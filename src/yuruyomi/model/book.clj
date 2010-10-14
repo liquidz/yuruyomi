@@ -158,13 +158,13 @@
       (let [books (group-by #(get-prop % :status) (find-books :user name))
             update-target (case status
                             ; reading <= want or have
-                            "reading" (concat (:want books) (:have books) (:delete books))
-                            "want" (:delete books)
+                            "reading" (concat (get books "want") (get books "have") (get books "delete"))
+                            "want" (get books "delete")
                             ; fin <= ing, wnt or has
-                            "finish" (concat (:reading books) (:wwnt books) (:have books) (:delete books))
+                            "finish" (concat (get books "reading") (get books "wwnt") (get books "have") (get books "delete"))
                             ; has <= wnt
-                            "have" (concat (:reading books) (:want books) (:delete books))
-                            "delete" (concat (:reading books) (:want books) (:finish books) (:have books))
+                            "have" (concat (get books "reading") (get books "want") (get books "delete"))
+                            "delete" (concat (get books "reading") (get books "want") (get books "finish") (get books "have"))
                             )
             x (se/find-first #(and (= title (get-prop % :title))
                                    (if (and (! st/blank? author) (! st/blank? (get-prop % :author)))
