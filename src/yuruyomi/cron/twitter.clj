@@ -57,17 +57,18 @@
   )
 (defn delete-html-symbol [s] (st/replace-re #"&#\d+;" "" s))
 (defn except-dones [f col] (remove #(st/substring? (f %) *yuruyomi-done-tag*) col))
+(defn except-reply [f col] (remove #(! nil? (re-seq #"@\w+" (f %))) col))
 
 ; "hello RT @hoge ddd / o-sa- xxx #tag"
 ; => "ddd / o-sa- hello #tag"
-(defn convert-rt-string [s]
-  (let [[msg & more] (st/split #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*" s)]
-    (cond
-      (empty? more) s
-      :else (st/join " " (map #(if (has-word-all? %) msg %) (st/split #"[\s　]+" (last more))))
-      )
-    )
-  )
+;(defn convert-rt-string [s]
+;  (let [[msg & more] (st/split #"[\s　]*(RT|Rt|rT|rt)[\s　]*@\w+:?[\s　]*" s)]
+;    (cond
+;      (empty? more) s
+;      :else (st/join " " (map #(if (has-word-all? %) msg %) (st/split #"[\s　]+" (last more))))
+;      )
+;    )
+;  )
 
 (defn string->book-title-author [s]
   (let [[title & more] (extended-split *re-title-author-sep* "\"" s)]
@@ -92,7 +93,8 @@
   (let [delete-texts (comp delete-hash-tag delete-html-symbol delete-html-tag)
         tweets-without-done (except-dones :text tweets)
         tweets-with-original (map #(assoc % :original_text (delete-texts (:text %))) tweets-without-done)
-        converted-tweets (map (fn [t] (assoc t :text (convert-rt-string (:original_text t)))) tweets-with-original)
+        tweets-without-reply (except-reply :text tweets-with-original)
+        ;converted-tweets (map (fn [t] (assoc t :text (convert-rt-string (:original_text t)))) tweets-with-original)
         ; 各ワードに対して見つかったらそれ以降の文字列を削除する
         ;  →最終的に一番最初にあるワードが残る（それでステータスを判別する）
         tmp-tweets (map (fn [t]
@@ -103,7 +105,7 @@
                          )
                        ) (:text t) (apply concat *words-list*))
                       )
-               ) converted-tweets)
+               ) tweets-without-reply)
         [r w f h d] (map (fn [wl] (filter #(has-word? (:text %) wl) tmp-tweets)) *words-list*)
         ; ステータスを付加
         tweets-with-status (set-statuses r "reading" w "want" f "finish" h "have" d "delete")
